@@ -398,6 +398,12 @@ public class LayoutSetLocalServiceImpl extends LayoutSetLocalServiceBaseImpl {
 		}
 		else {
 			try {
+				if (Validator.isNotNull(layoutSet.getVirtualHostname())) {
+					virtualHostLocalService.updateVirtualHost(
+						layoutSet.getCompanyId(), layoutSet.getLayoutSetId(),
+						"");
+				}
+
 				virtualHostPersistence.removeByC_L(
 					layoutSet.getCompanyId(), layoutSet.getLayoutSetId());
 			}
