@@ -23,6 +23,7 @@ import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLinkLocalService;
 import com.liferay.dynamic.data.mapping.util.DefaultDDMStructureHelper;
 import com.liferay.journal.internal.upgrade.v0_0_2.UpgradeClassNames;
+import com.liferay.journal.internal.upgrade.v0_0_2.UpgradeIndexes;
 import com.liferay.journal.internal.upgrade.v0_0_3.UpgradeJournalArticleType;
 import com.liferay.journal.internal.upgrade.v0_0_4.UpgradeSchema;
 import com.liferay.journal.internal.upgrade.v0_0_5.UpgradeCompanyId;
@@ -67,7 +68,8 @@ public class JournalServiceUpgrade implements UpgradeStepRegistrator {
 	public void register(Registry registry) {
 		registry.register(
 			"com.liferay.journal.service", "0.0.1", "0.0.2",
-			new UpgradeClassNames());
+			new UpgradeClassNames(),
+			new UpgradeIndexes());
 
 		registry.register(
 			"com.liferay.journal.service", "0.0.2", "0.0.3",

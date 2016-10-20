@@ -20,6 +20,7 @@ import com.liferay.document.library.kernel.service.DLFileVersionLocalService;
 import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeCompanyId;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeDynamicDataMapping;
+import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeIndexes;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeKernelPackage;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeLastPublishDate;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeSchema;
@@ -61,7 +62,8 @@ public class DDMServiceUpgrade implements UpgradeStepRegistrator {
 	public void register(Registry registry) {
 		registry.register(
 			"com.liferay.dynamic.data.mapping.service", "0.0.1", "0.0.2",
-			new UpgradeSchema());
+			new UpgradeSchema(),
+			new UpgradeIndexes());
 
 		registry.register(
 			"com.liferay.dynamic.data.mapping.service", "0.0.2", "0.0.3",
