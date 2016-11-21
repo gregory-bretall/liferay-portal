@@ -1486,6 +1486,9 @@ public class LocalProcessExecutorTest {
 			arguments.add("-Djvm.debug=true");
 		}
 
+		arguments.add("-Dliferay.mode=test");
+		arguments.add("-Dsun.zip.disableMemoryMapping=true");
+
 		String whipAgentLine = System.getProperty("whip.agent");
 
 		if (Validator.isNotNull(whipAgentLine)) {
@@ -1968,7 +1971,7 @@ public class LocalProcessExecutorTest {
 
 			byte[] serializedData = unsyncByteArrayOutputStream.toByteArray();
 
-			serializedData[5] = (byte) (serializedData[5] + 1);
+			serializedData[5] = (byte)(serializedData[5] + 1);
 
 			_brokenPipingData = serializedData;
 		}

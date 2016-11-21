@@ -3,7 +3,7 @@
 ;
 [subrepo]
 	cmdver = liferay
-	commit = a2f3f2bd4c9b28eadfa4679410a21903e98b1ad2
+	commit = 0424cd786fa685f8840aab1dc1ffe23ce80067c9
 	mode = push
-	parent = c8496b85acaf43319b2f6e382b17fc2442365344
+	parent = bd9e1d951bb9fa825d667233a3fcc7a455011bc1
 	remote = git@github.com:liferay/com-liferay-image-uploader.git
