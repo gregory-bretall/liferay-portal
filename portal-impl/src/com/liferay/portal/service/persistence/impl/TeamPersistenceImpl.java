@@ -2649,7 +2649,7 @@ public class TeamPersistenceImpl extends BasePersistenceImpl<Team>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((TeamModelImpl)team, true);
+		clearUniqueFindersCache((TeamModelImpl)team);
 	}
 
 	@Override
@@ -2661,42 +2661,68 @@ public class TeamPersistenceImpl extends BasePersistenceImpl<Team>
 			entityCache.removeResult(TeamModelImpl.ENTITY_CACHE_ENABLED,
 				TeamImpl.class, team.getPrimaryKey());
 
-			clearUniqueFindersCache((TeamModelImpl)team, true);
+			clearUniqueFindersCache((TeamModelImpl)team);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(TeamModelImpl teamModelImpl) {
-		Object[] args = new Object[] {
-				teamModelImpl.getUuid(), teamModelImpl.getGroupId()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args, teamModelImpl,
-			false);
-
-		args = new Object[] { teamModelImpl.getGroupId(), teamModelImpl.getName() };
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_G_N, args, Long.valueOf(1),
-			false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_G_N, args, teamModelImpl,
-			false);
-	}
-
-	protected void clearUniqueFindersCache(TeamModelImpl teamModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
+	protected void cacheUniqueFindersCache(TeamModelImpl teamModelImpl,
+		boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 					teamModelImpl.getUuid(), teamModelImpl.getGroupId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+				teamModelImpl);
+
+			args = new Object[] {
+					teamModelImpl.getGroupId(), teamModelImpl.getName()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_G_N, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_G_N, args, teamModelImpl);
 		}
+		else {
+			if ((teamModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						teamModelImpl.getUuid(), teamModelImpl.getGroupId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+					teamModelImpl);
+			}
+
+			if ((teamModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_G_N.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						teamModelImpl.getGroupId(), teamModelImpl.getName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_G_N, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_G_N, args,
+					teamModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(TeamModelImpl teamModelImpl) {
+		Object[] args = new Object[] {
+				teamModelImpl.getUuid(), teamModelImpl.getGroupId()
+			};
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 
 		if ((teamModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					teamModelImpl.getOriginalUuid(),
 					teamModelImpl.getOriginalGroupId()
 				};
@@ -2705,18 +2731,14 @@ public class TeamPersistenceImpl extends BasePersistenceImpl<Team>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					teamModelImpl.getGroupId(), teamModelImpl.getName()
-				};
+		args = new Object[] { teamModelImpl.getGroupId(), teamModelImpl.getName() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_N, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_N, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_G_N, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_G_N, args);
 
 		if ((teamModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_G_N.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					teamModelImpl.getOriginalGroupId(),
 					teamModelImpl.getOriginalName()
 				};
@@ -2951,8 +2973,8 @@ public class TeamPersistenceImpl extends BasePersistenceImpl<Team>
 		entityCache.putResult(TeamModelImpl.ENTITY_CACHE_ENABLED,
 			TeamImpl.class, team.getPrimaryKey(), team, false);
 
-		clearUniqueFindersCache(teamModelImpl, false);
-		cacheUniqueFindersCache(teamModelImpl);
+		clearUniqueFindersCache(teamModelImpl);
+		cacheUniqueFindersCache(teamModelImpl, isNew);
 
 		team.resetOriginalValues();
 

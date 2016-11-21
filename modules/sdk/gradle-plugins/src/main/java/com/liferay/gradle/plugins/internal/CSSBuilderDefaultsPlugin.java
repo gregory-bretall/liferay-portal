@@ -23,7 +23,6 @@ import com.liferay.gradle.util.Validator;
 import java.io.File;
 
 import org.gradle.api.Action;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskContainer;
 
@@ -32,9 +31,6 @@ import org.gradle.api.tasks.TaskContainer;
  */
 public class CSSBuilderDefaultsPlugin
 	extends BasePortalToolDefaultsPlugin<CSSBuilderPlugin> {
-
-	public static final Plugin<Project> INSTANCE =
-		new CSSBuilderDefaultsPlugin();
 
 	@Override
 	protected void configureDefaults(
@@ -46,28 +42,10 @@ public class CSSBuilderDefaultsPlugin
 			project, CSSBuilderPlugin.PORTAL_COMMON_CSS_CONFIGURATION_NAME,
 			_FRONTEND_COMMON_CSS_NAME);
 
-		_configureTasksBuildCSS(project);
+		configureTasksBuildCSS(project);
 	}
 
-	@Override
-	protected Class<CSSBuilderPlugin> getPluginClass() {
-		return CSSBuilderPlugin.class;
-	}
-
-	@Override
-	protected String getPortalToolConfigurationName() {
-		return CSSBuilderPlugin.CSS_BUILDER_CONFIGURATION_NAME;
-	}
-
-	@Override
-	protected String getPortalToolName() {
-		return _PORTAL_TOOL_NAME;
-	}
-
-	private CSSBuilderDefaultsPlugin() {
-	}
-
-	private void _configureTaskBuildCSS(BuildCSSTask buildCSSTask) {
+	protected void configureTaskBuildCSS(BuildCSSTask buildCSSTask) {
 		Project project = buildCSSTask.getProject();
 
 		File docrootDir = project.file("docroot");
@@ -97,7 +75,7 @@ public class CSSBuilderDefaultsPlugin
 		buildCSSTask.setSassCompilerClassName(sassCompilerClassName);
 	}
 
-	private void _configureTasksBuildCSS(Project project) {
+	protected void configureTasksBuildCSS(Project project) {
 		TaskContainer taskContainer = project.getTasks();
 
 		taskContainer.withType(
@@ -106,10 +84,25 @@ public class CSSBuilderDefaultsPlugin
 
 				@Override
 				public void execute(BuildCSSTask buildCSSTask) {
-					_configureTaskBuildCSS(buildCSSTask);
+					configureTaskBuildCSS(buildCSSTask);
 				}
 
 			});
+	}
+
+	@Override
+	protected Class<CSSBuilderPlugin> getPluginClass() {
+		return CSSBuilderPlugin.class;
+	}
+
+	@Override
+	protected String getPortalToolConfigurationName() {
+		return CSSBuilderPlugin.CSS_BUILDER_CONFIGURATION_NAME;
+	}
+
+	@Override
+	protected String getPortalToolName() {
+		return _PORTAL_TOOL_NAME;
 	}
 
 	private static final String _FRONTEND_COMMON_CSS_NAME =

@@ -71,22 +71,11 @@ AUI.add(
 
 					content: {
 						getter: function(val) {
-							var content = val;
-
 							if (val) {
-								content = LString.escapeHTML(val);
+								val = LString.escapeHTML(val);
 							}
 
-							return content;
-						},
-						setter: function(val) {
-							var content = val;
-
-							if (val) {
-								content = LString.unescapeHTML(val);
-							}
-
-							return content;
+							return val;
 						}
 					},
 
@@ -149,11 +138,6 @@ AUI.add(
 						value: STR_BLANK
 					},
 
-					recurringCalendarBookingId: {
-						setter: toInt,
-						value: 0
-					},
-
 					reminder: {
 						getter: function() {
 							var instance = this;
@@ -187,7 +171,7 @@ AUI.add(
 
 				NAME: 'scheduler-event',
 
-				PROPAGATE_ATTRS: A.SchedulerEvent.PROPAGATE_ATTRS.concat(['calendarBookingId', 'calendarId', 'calendarResourceId', 'parentCalendarBookingId', 'recurrence', 'recurringCalendarBookingId', 'status']),
+				PROPAGATE_ATTRS: A.SchedulerEvent.PROPAGATE_ATTRS.concat(['calendarBookingId', 'calendarId', 'calendarResourceId', 'parentCalendarBookingId', 'recurrence', 'status']),
 
 				prototype: {
 					eventModel: Liferay.SchedulerEvent,
@@ -221,7 +205,7 @@ AUI.add(
 					isRecurring: function() {
 						var instance = this;
 
-						return (instance.get('recurrence') !== STR_BLANK) || (instance.get('calendarBookingId') != instance.get('recurringCalendarBookingId'));
+						return instance.get('recurrence') !== STR_BLANK;
 					},
 
 					syncNodeColorUI: function() {
@@ -422,7 +406,7 @@ AUI.add(
 
 							var remoteServices = scheduler.get('remoteServices');
 
-							remoteServices.updateCalendarColor(calendarId, color);
+							remoteServices.updateCalendarColor(calendarId, parseInt(color.substr(1), 16));
 						}
 						else {
 							Liferay.Store('com.liferay.calendar.web_calendar' + calendarId + 'Color', color);

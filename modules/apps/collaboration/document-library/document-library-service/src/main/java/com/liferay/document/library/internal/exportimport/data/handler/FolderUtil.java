@@ -16,8 +16,7 @@ package com.liferay.document.library.internal.exportimport.data.handler;
 
 import com.liferay.document.library.kernel.exception.NoSuchFolderException;
 import com.liferay.document.library.kernel.model.DLFolder;
-import com.liferay.document.library.kernel.service.DLFolderLocalServiceUtil;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.document.library.kernel.service.persistence.DLFolderUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFolder;
 import com.liferay.portlet.documentlibrary.util.RepositoryModelUtil;
@@ -32,7 +31,7 @@ public class FolderUtil {
 	public static Folder fetchByR_P_N(
 		long groupId, long parentFolderId, String name) {
 
-		DLFolder dlFolder = DLFolderLocalServiceUtil.fetchFolder(
+		DLFolder dlFolder = DLFolderUtil.fetchByG_P_N(
 			groupId, parentFolderId, name);
 
 		if (dlFolder == null) {
@@ -43,8 +42,7 @@ public class FolderUtil {
 	}
 
 	public static Folder fetchByUUID_R(String uuid, long repositoryId) {
-		DLFolder dlFolder = DLFolderLocalServiceUtil.fetchFolder(
-			uuid, repositoryId);
+		DLFolder dlFolder = DLFolderUtil.fetchByUUID_G(uuid, repositoryId);
 
 		if (dlFolder == null) {
 			return null;
@@ -56,7 +54,7 @@ public class FolderUtil {
 	public static Folder findByPrimaryKey(long folderId)
 		throws NoSuchFolderException {
 
-		DLFolder dlFolder = DLFolderLocalServiceUtil.fetchFolder(folderId);
+		DLFolder dlFolder = DLFolderUtil.findByPrimaryKey(folderId);
 
 		return new LiferayFolder(dlFolder);
 	}
@@ -68,8 +66,8 @@ public class FolderUtil {
 	public static List<Folder> findByR_P(
 		long repositoryId, long parentFolderId) {
 
-		List<DLFolder> dlFolders = DLFolderLocalServiceUtil.getFolders(
-			repositoryId, parentFolderId, true);
+		List<DLFolder> dlFolders = DLFolderUtil.findByG_P(
+			repositoryId, parentFolderId);
 
 		return RepositoryModelUtil.toFolders(dlFolders);
 	}
@@ -79,9 +77,7 @@ public class FolderUtil {
 	 */
 	@Deprecated
 	public static List<Folder> findByRepositoryId(long repositoryId) {
-		List<DLFolder> dlFolders =
-			DLFolderLocalServiceUtil.getRepositoryFolders(
-				repositoryId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+		List<DLFolder> dlFolders = DLFolderUtil.findByGroupId(repositoryId);
 
 		return RepositoryModelUtil.toFolders(dlFolders);
 	}

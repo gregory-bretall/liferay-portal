@@ -5,12 +5,8 @@ AUI.add(
 		};
 
 		FieldEvaluationSupport.ATTRS = {
-			evaluable: {
-				value: false
-			},
-
-			evaluationTriggerEvents: {
-				value: ['valueChange']
+			enableEvaluations: {
+				value: true
 			},
 
 			evaluator: {
@@ -22,10 +18,8 @@ AUI.add(
 			initializer: function() {
 				var instance = this;
 
-				var evaluationTriggerEvents = instance.get('evaluationTriggerEvents');
-
 				instance._eventHandlers.push(
-					instance.after(evaluationTriggerEvents, instance.evaluate)
+					instance.after('valueChanged', instance._afterValueChanged)
 				);
 			},
 
@@ -34,7 +28,7 @@ AUI.add(
 
 				var evaluator = instance.get('evaluator');
 
-				if (evaluator && instance.get('rendered') && instance.get('evaluable')) {
+				if (evaluator) {
 					evaluator.evaluate(instance);
 				}
 			},
@@ -43,6 +37,12 @@ AUI.add(
 				var instance = this;
 
 				return context;
+			},
+
+			_afterValueChanged: function() {
+				var instance = this;
+
+				instance.evaluate();
 			},
 
 			_getEvaluator: function() {

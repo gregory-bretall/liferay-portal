@@ -21,7 +21,6 @@ import com.liferay.gradle.plugins.source.formatter.SourceFormatterPlugin;
 import com.liferay.gradle.util.Validator;
 
 import org.gradle.api.Action;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskContainer;
 
@@ -32,37 +31,16 @@ import org.gradle.api.tasks.TaskContainer;
 public class SourceFormatterDefaultsPlugin
 	extends BasePortalToolDefaultsPlugin<SourceFormatterPlugin> {
 
-	public static final Plugin<Project> INSTANCE =
-		new SourceFormatterDefaultsPlugin();
-
 	@Override
 	protected void configureDefaults(
 		Project project, SourceFormatterPlugin sourceFormatterPlugin) {
 
 		super.configureDefaults(project, sourceFormatterPlugin);
 
-		_configureTasksFormatSource(project);
+		configureTasksFormatSource(project);
 	}
 
-	@Override
-	protected Class<SourceFormatterPlugin> getPluginClass() {
-		return SourceFormatterPlugin.class;
-	}
-
-	@Override
-	protected String getPortalToolConfigurationName() {
-		return SourceFormatterPlugin.CONFIGURATION_NAME;
-	}
-
-	@Override
-	protected String getPortalToolName() {
-		return _PORTAL_TOOL_NAME;
-	}
-
-	private SourceFormatterDefaultsPlugin() {
-	}
-
-	private void _configureTasksFormatSource(
+	protected void configureTasksFormatSource(
 		FormatSourceTask formatSourceTask) {
 
 		String gitWorkingBranchName = GradleUtil.getProperty(
@@ -100,7 +78,7 @@ public class SourceFormatterDefaultsPlugin
 		}
 	}
 
-	private void _configureTasksFormatSource(Project project) {
+	protected void configureTasksFormatSource(Project project) {
 		TaskContainer taskContainer = project.getTasks();
 
 		taskContainer.withType(
@@ -109,10 +87,25 @@ public class SourceFormatterDefaultsPlugin
 
 				@Override
 				public void execute(FormatSourceTask formatSourceTask) {
-					_configureTasksFormatSource(formatSourceTask);
+					configureTasksFormatSource(formatSourceTask);
 				}
 
 			});
+	}
+
+	@Override
+	protected Class<SourceFormatterPlugin> getPluginClass() {
+		return SourceFormatterPlugin.class;
+	}
+
+	@Override
+	protected String getPortalToolConfigurationName() {
+		return SourceFormatterPlugin.CONFIGURATION_NAME;
+	}
+
+	@Override
+	protected String getPortalToolName() {
+		return _PORTAL_TOOL_NAME;
 	}
 
 	private static final String _PORTAL_TOOL_NAME =

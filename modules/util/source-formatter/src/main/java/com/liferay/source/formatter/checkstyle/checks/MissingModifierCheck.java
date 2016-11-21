@@ -29,9 +29,8 @@ public class MissingModifierCheck extends AbstractCheck {
 	@Override
 	public int[] getDefaultTokens() {
 		return new int[] {
-			TokenTypes.CLASS_DEF, TokenTypes.CTOR_DEF, TokenTypes.ENUM_DEF,
-			TokenTypes.INTERFACE_DEF, TokenTypes.METHOD_DEF,
-			TokenTypes.VARIABLE_DEF
+			TokenTypes.CTOR_DEF, TokenTypes.INTERFACE_DEF,
+			TokenTypes.METHOD_DEF, TokenTypes.VARIABLE_DEF
 		};
 	}
 

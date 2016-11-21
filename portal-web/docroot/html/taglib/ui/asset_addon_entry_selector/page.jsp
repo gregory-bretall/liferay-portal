@@ -25,13 +25,13 @@
 		for (AssetAddonEntry assetAddonEntry : selectedAssetAddonEntries) {
 		%>
 
-			<li class="list-entry" data-key="<%= assetAddonEntry.getKey() %>" data-label="<%= assetAddonEntry.getLabel(locale) %>">
-				<span class="label label-default">
+			<li class="list-entry" data-key="<%= assetAddonEntry.getKey() %>">
+				<span class="label label-circle label-entry">
 					<%= assetAddonEntry.getLabel(locale) %>
 
-					<aui:a cssClass="remove-button" href="javascript:;">
-						<aui:icon image="times" markupView="lexicon" />
-					</aui:a>
+					<button class="remove-button" type="button">
+						<i class="icon-remove"></i>
+					</button>
 				</span>
 			</li>
 

@@ -1770,8 +1770,7 @@ public class DDMStructureLayoutPersistenceImpl extends BasePersistenceImpl<DDMSt
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((DDMStructureLayoutModelImpl)ddmStructureLayout,
-			true);
+		clearUniqueFindersCache((DDMStructureLayoutModelImpl)ddmStructureLayout);
 	}
 
 	@Override
@@ -1783,47 +1782,73 @@ public class DDMStructureLayoutPersistenceImpl extends BasePersistenceImpl<DDMSt
 			entityCache.removeResult(DDMStructureLayoutModelImpl.ENTITY_CACHE_ENABLED,
 				DDMStructureLayoutImpl.class, ddmStructureLayout.getPrimaryKey());
 
-			clearUniqueFindersCache((DDMStructureLayoutModelImpl)ddmStructureLayout,
-				true);
+			clearUniqueFindersCache((DDMStructureLayoutModelImpl)ddmStructureLayout);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		DDMStructureLayoutModelImpl ddmStructureLayoutModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					ddmStructureLayoutModelImpl.getUuid(),
+					ddmStructureLayoutModelImpl.getGroupId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+				ddmStructureLayoutModelImpl);
+
+			args = new Object[] {
+					ddmStructureLayoutModelImpl.getStructureVersionId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID,
+				args, Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_STRUCTUREVERSIONID,
+				args, ddmStructureLayoutModelImpl);
+		}
+		else {
+			if ((ddmStructureLayoutModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						ddmStructureLayoutModelImpl.getUuid(),
+						ddmStructureLayoutModelImpl.getGroupId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+					ddmStructureLayoutModelImpl);
+			}
+
+			if ((ddmStructureLayoutModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_STRUCTUREVERSIONID.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						ddmStructureLayoutModelImpl.getStructureVersionId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID,
+					args, Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_STRUCTUREVERSIONID,
+					args, ddmStructureLayoutModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		DDMStructureLayoutModelImpl ddmStructureLayoutModelImpl) {
 		Object[] args = new Object[] {
 				ddmStructureLayoutModelImpl.getUuid(),
 				ddmStructureLayoutModelImpl.getGroupId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-			ddmStructureLayoutModelImpl, false);
-
-		args = new Object[] { ddmStructureLayoutModelImpl.getStructureVersionId() };
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_STRUCTUREVERSIONID, args,
-			ddmStructureLayoutModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		DDMStructureLayoutModelImpl ddmStructureLayoutModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					ddmStructureLayoutModelImpl.getUuid(),
-					ddmStructureLayoutModelImpl.getGroupId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 
 		if ((ddmStructureLayoutModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					ddmStructureLayoutModelImpl.getOriginalUuid(),
 					ddmStructureLayoutModelImpl.getOriginalGroupId()
 				};
@@ -1832,20 +1857,14 @@ public class DDMStructureLayoutPersistenceImpl extends BasePersistenceImpl<DDMSt
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					ddmStructureLayoutModelImpl.getStructureVersionId()
-				};
+		args = new Object[] { ddmStructureLayoutModelImpl.getStructureVersionId() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID,
-				args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_STRUCTUREVERSIONID,
-				args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_STRUCTUREVERSIONID, args);
 
 		if ((ddmStructureLayoutModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_STRUCTUREVERSIONID.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					ddmStructureLayoutModelImpl.getOriginalStructureVersionId()
 				};
 
@@ -2073,8 +2092,8 @@ public class DDMStructureLayoutPersistenceImpl extends BasePersistenceImpl<DDMSt
 			DDMStructureLayoutImpl.class, ddmStructureLayout.getPrimaryKey(),
 			ddmStructureLayout, false);
 
-		clearUniqueFindersCache(ddmStructureLayoutModelImpl, false);
-		cacheUniqueFindersCache(ddmStructureLayoutModelImpl);
+		clearUniqueFindersCache(ddmStructureLayoutModelImpl);
+		cacheUniqueFindersCache(ddmStructureLayoutModelImpl, isNew);
 
 		ddmStructureLayout.resetOriginalValues();
 

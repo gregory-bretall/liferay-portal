@@ -110,9 +110,6 @@ public interface LiferaySelenium {
 	public void assertPartialText(String locator, String pattern)
 		throws Exception;
 
-	public void assertPartialTextAceEditor(String locator, String pattern)
-		throws Exception;
-
 	public void assertSelectedLabel(String selectLocator, String pattern)
 		throws Exception;
 
@@ -357,8 +354,6 @@ public interface LiferaySelenium {
 
 	public boolean isNotPartialText(String locator, String value);
 
-	public boolean isNotPartialTextAceEditor(String locator, String value);
-
 	public boolean isNotSelectedLabel(String selectLocator, String pattern);
 
 	public boolean isNotText(String locator, String value) throws Exception;
@@ -370,8 +365,6 @@ public interface LiferaySelenium {
 	public boolean isOrdered(String locator1, String locator2);
 
 	public boolean isPartialText(String locator, String value);
-
-	public boolean isPartialTextAceEditor(String locator, String value);
 
 	public boolean isPromptPresent();
 
@@ -650,9 +643,6 @@ public interface LiferaySelenium {
 	public void waitForPageToLoad(String timeout);
 
 	public void waitForPartialText(String locator, String value)
-		throws Exception;
-
-	public void waitForPartialTextAceEditor(String locator, String value)
 		throws Exception;
 
 	public void waitForPopUp(String windowID, String timeout);

@@ -750,13 +750,6 @@ public class AssetPublisherExportImportTest
 
 		Map<String, String[]> preferenceMap = new HashMap<>();
 
-		long dlFileEntryClassNameId = PortalUtil.getClassNameId(
-			DLFileEntry.class);
-
-		preferenceMap.put(
-			"anyAssetType",
-			new String[] {String.valueOf(dlFileEntryClassNameId)});
-
 		preferenceMap.put(
 			"anyClassTypeDLFileEntryAssetRendererFactory",
 			new String[] {String.valueOf(Boolean.FALSE)});
@@ -805,13 +798,6 @@ public class AssetPublisherExportImportTest
 			serviceContext);
 
 		Map<String, String[]> preferenceMap = new HashMap<>();
-
-		long journalArticleClassNameId = PortalUtil.getClassNameId(
-			JournalArticle.class);
-
-		preferenceMap.put(
-			"anyAssetType",
-			new String[] {String.valueOf(journalArticleClassNameId)});
 
 		preferenceMap.put(
 			"anyClassTypeJournalArticleAssetRendererFactory",

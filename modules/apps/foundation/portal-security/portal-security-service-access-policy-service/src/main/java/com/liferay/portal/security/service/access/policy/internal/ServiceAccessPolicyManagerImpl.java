@@ -84,13 +84,6 @@ public class ServiceAccessPolicyManagerImpl
 				_sapEntryService.getSAPEntry(companyId, name));
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			return null;
 		}
 	}

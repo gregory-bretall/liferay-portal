@@ -38,7 +38,6 @@ import com.liferay.dynamic.data.mapping.validator.DDMFormValidationException.Mus
 import com.liferay.dynamic.data.mapping.validator.DDMFormValidator;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -141,8 +140,8 @@ public class DDMFormValidatorImpl implements DDMFormValidator {
 			return;
 		}
 
-		String dataSourceType = GetterUtil.getString(
-			ddmFormField.getProperty("dataSourceType"), "manual");
+		String dataSourceType = (String)ddmFormField.getProperty(
+			"dataSourceType");
 
 		if (!Objects.equals(dataSourceType, "manual")) {
 			return;

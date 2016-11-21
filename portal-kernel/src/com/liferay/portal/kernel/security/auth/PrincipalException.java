@@ -152,11 +152,10 @@ public class PrincipalException extends PortalException {
 					"User %s must have permission to perform action %s", userId,
 					StringUtil.merge(actionIds, ",")));
 
+			this.actionId = actionIds;
+			this.resourceId = 0;
+			this.resourceName = null;
 			this.userId = userId;
-
-			actionId = actionIds;
-			resourceId = 0;
-			resourceName = null;
 		}
 
 		public MustHavePermission(
@@ -169,11 +168,10 @@ public class PrincipalException extends PortalException {
 					StringUtil.merge(actionIds, ","), resourceName,
 					resourceId));
 
-			this.userId = userId;
+			this.actionId = actionIds;
 			this.resourceName = resourceName;
 			this.resourceId = resourceId;
-
-			actionId = actionIds;
+			this.userId = userId;
 		}
 
 		public MustHavePermission(

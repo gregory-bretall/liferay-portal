@@ -14,10 +14,12 @@
 
 package com.liferay.portal.kernel.util;
 
-import com.liferay.portal.kernel.concurrent.NoticeableFuture;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.process.ProcessUtil;
+import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayOutputStream;
+
+import java.io.InputStream;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 
 import java.util.Date;
 import java.util.Map;
@@ -65,36 +67,54 @@ public class ThreadUtil {
 	}
 
 	private static String _getThreadDumpFromJstack() {
-		String vendorURL = System.getProperty("java.vendor.url");
-
-		if ((!vendorURL.equals("http://java.oracle.com/") &&
-			 !vendorURL.equals("http://java.sun.com/")) ||
-			!HeapUtil.isSupported()) {
-
-			return StringPool.BLANK;
-		}
+		UnsyncByteArrayOutputStream outputStream =
+			new UnsyncByteArrayOutputStream();
 
 		try {
-			NoticeableFuture<ObjectValuePair<byte[], byte[]>> noticeableFuture =
-				ProcessUtil.execute(
-					ProcessUtil.COLLECTOR_OUTPUT_PROCESSOR, "jstack", "-l",
-					String.valueOf(HeapUtil.getProcessId()));
+			String vendorURL = System.getProperty("java.vendor.url");
 
-			ObjectValuePair<byte[], byte[]> objectValuePair =
-				noticeableFuture.get();
+			if (!vendorURL.equals("http://java.oracle.com/") &&
+				!vendorURL.equals("http://java.sun.com/")) {
 
-			return new String(objectValuePair.getKey());
-		}
-		catch (Exception e) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Unable to use jstack to get thread dump for process " +
-						HeapUtil.getProcessId(),
-					e);
+				return StringPool.BLANK;
 			}
 
-			return StringPool.BLANK;
+			RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+
+			String name = runtimeMXBean.getName();
+
+			if (Validator.isNull(name)) {
+				return StringPool.BLANK;
+			}
+
+			int pos = name.indexOf(CharPool.AT);
+
+			if (pos == -1) {
+				return StringPool.BLANK;
+			}
+
+			String pidString = name.substring(0, pos);
+
+			if (!Validator.isNumber(pidString)) {
+				return StringPool.BLANK;
+			}
+
+			Runtime runtime = Runtime.getRuntime();
+
+			int pid = GetterUtil.getInteger(pidString);
+
+			String[] cmd = new String[] {"jstack", String.valueOf(pid)};
+
+			Process process = runtime.exec(cmd);
+
+			InputStream inputStream = process.getInputStream();
+
+			StreamUtil.transfer(inputStream, outputStream);
 		}
+		catch (Exception e) {
+		}
+
+		return outputStream.toString();
 	}
 
 	private static String _getThreadDumpFromStackTrace() {
@@ -145,7 +165,5 @@ public class ThreadUtil {
 
 		return sb.toString();
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(ThreadUtil.class);
 
 }

@@ -14,8 +14,6 @@
 
 package com.liferay.staging.taglib.servlet.taglib;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.staging.taglib.internal.servlet.ServletContextUtil;
 import com.liferay.taglib.util.IncludeTag;
@@ -26,7 +24,6 @@ import javax.servlet.jsp.PageContext;
 /**
  * @author Levente Hudák
  */
-@ProviderType
 public class ConfigurationHeaderTag extends IncludeTag {
 
 	public void setExportImportConfiguration(

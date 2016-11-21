@@ -46,12 +46,9 @@ public class CSSSourceProcessor extends BaseSourceProcessor {
 
 		String newContent = trimContent(content, false);
 
-		newContent = StringUtil.replace(
-			newContent, StringPool.DOUBLE_SPACE, StringPool.SPACE);
-
 		newContent = sortProperties(newContent);
 
-		newContent = formatComments(newContent);
+		newContent = fixComments(newContent);
 
 		return fixHexColors(newContent);
 	}
@@ -69,37 +66,11 @@ public class CSSSourceProcessor extends BaseSourceProcessor {
 		return getFileNames(excludes, getIncludes());
 	}
 
-	protected String fixHexColors(String content) {
-		Matcher matcher = _hexColorPattern.matcher(content);
+	protected String fixComments(String content) {
+		Matcher matcher = _commentPattern.matcher(content);
 
 		while (matcher.find()) {
-			String hexColor = matcher.group(1);
-
-			if (Validator.isNumber(hexColor) || (hexColor.length() < 3)) {
-				continue;
-			}
-
-			content = StringUtil.replace(
-				content, hexColor, StringUtil.toUpperCase(hexColor));
-		}
-
-		return content;
-	}
-
-	protected String formatComments(String content) {
-		Matcher commentMatcher = _commentPattern.matcher(content);
-
-		while (commentMatcher.find()) {
-			Matcher commentFormatMatcher = _commentFormatPattern.matcher(
-				commentMatcher.group(1));
-
-			if (!commentFormatMatcher.find()) {
-				continue;
-			}
-
-			String comment = commentFormatMatcher.group(1);
-
-			String[] words = StringUtil.split(comment, CharPool.SPACE);
+			String[] words = StringUtil.split(matcher.group(1), CharPool.SPACE);
 
 			for (int i = 1; i < words.length; i++) {
 				String previousWord = words[i - 1];
@@ -116,14 +87,28 @@ public class CSSSourceProcessor extends BaseSourceProcessor {
 					Character.isUpperCase(word.charAt(0)) &&
 					StringUtil.isLowerCase(word.substring(1))) {
 
-					comment = StringUtil.replaceFirst(
-						comment, word, StringUtil.toLowerCase(word));
+					content = StringUtil.replaceFirst(
+						content, word, StringUtil.toLowerCase(word),
+						matcher.start());
 				}
 			}
+		}
 
-			content = StringUtil.replaceFirst(
-				content, commentMatcher.group(),
-				"/* ---------- " + comment + " ---------- */");
+		return content;
+	}
+
+	protected String fixHexColors(String content) {
+		Matcher matcher = _hexColorPattern.matcher(content);
+
+		while (matcher.find()) {
+			String hexColor = matcher.group(1);
+
+			if (Validator.isNumber(hexColor) || (hexColor.length() < 3)) {
+				continue;
+			}
+
+			content = StringUtil.replace(
+				content, hexColor, StringUtil.toUpperCase(hexColor));
 		}
 
 		return content;
@@ -167,10 +152,8 @@ public class CSSSourceProcessor extends BaseSourceProcessor {
 
 	private static final String[] _INCLUDES = {"**/*.css", "**/*.scss"};
 
-	private final Pattern _commentFormatPattern = Pattern.compile(
-		"^-* ?(\\S.*?\\S) ?-*$");
-	private final Pattern _commentPattern = Pattern.compile(
-		"/\\*[\n ](.*)[\n ]\\*/");
+	private final Pattern _commentPattern =
+		Pattern.compile("/\\* -+(.+)-+ \\*/");
 	private final Pattern _hexColorPattern = Pattern.compile(
 		"#([0-9a-f]+)[\\( ;,]");
 	private final Pattern _propertiesPattern = Pattern.compile(

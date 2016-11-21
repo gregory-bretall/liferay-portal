@@ -274,13 +274,6 @@ public class S3Store extends BaseStore {
 			return true;
 		}
 		catch (NoSuchFileException nsfe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsfe, nsfe);
-			}
-
 			return false;
 		}
 		finally {

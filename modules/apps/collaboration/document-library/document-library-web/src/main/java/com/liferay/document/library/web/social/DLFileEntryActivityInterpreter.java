@@ -21,12 +21,11 @@ import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.web.constants.DLPortletKeys;
+import com.liferay.document.library.web.internal.util.DLResourceBundleLoader;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
-import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -123,30 +122,7 @@ public class DLFileEntryActivityInterpreter
 
 	@Override
 	protected ResourceBundleLoader getResourceBundleLoader() {
-		return _resourceBundleLoader;
-	}
-
-	@Override
-	protected Object[] getTitleArguments(
-			String groupName, SocialActivity activity, String link,
-			String title, ServiceContext serviceContext)
-		throws Exception {
-
-		if (activity.getType() == SocialActivityConstants.TYPE_ADD_COMMENT) {
-			String creatorUserName = getUserName(
-				activity.getUserId(), serviceContext);
-			String receiverUserName = getUserName(
-				activity.getReceiverUserId(), serviceContext);
-
-			return new Object[] {
-				groupName, creatorUserName, receiverUserName,
-				wrapLink(link, title)
-			};
-		}
-		else {
-			return super.getTitleArguments(
-				groupName, activity, link, title, serviceContext);
-		}
+		return DLResourceBundleLoader.INSTANCE;
 	}
 
 	@Override
@@ -169,14 +145,6 @@ public class DLFileEntryActivityInterpreter
 			}
 			else {
 				return "activity-document-library-file-update-file-in";
-			}
-		}
-		else if (activityType == SocialActivityConstants.TYPE_ADD_COMMENT) {
-			if (Validator.isNull(groupName)) {
-				return "activity-document-library-file-add-comment";
-			}
-			else {
-				return "activity-document-library-file-add-comment-in";
 			}
 		}
 		else if (activityType == SocialActivityConstants.TYPE_MOVE_TO_TRASH) {
@@ -216,21 +184,8 @@ public class DLFileEntryActivityInterpreter
 		_dlAppLocalService = dlAppLocalService;
 	}
 
-	@Reference(
-		target = "(bundle.symbolic.name=com.liferay.document.library.web)",
-		unbind = "-"
-	)
-	protected void setResourceBundleLoader(
-		ResourceBundleLoader resourceBundleLoader) {
-
-		_resourceBundleLoader = new AggregateResourceBundleLoader(
-			resourceBundleLoader,
-			ResourceBundleLoaderUtil.getPortalResourceBundleLoader());
-	}
-
 	private static final String[] _CLASS_NAMES = {DLFileEntry.class.getName()};
 
 	private DLAppLocalService _dlAppLocalService;
-	private ResourceBundleLoader _resourceBundleLoader;
 
 }

@@ -432,9 +432,8 @@ public class PoshiRunnerContext {
 
 			if (propertyNames.length != propertyValues.length) {
 				throw new Exception(
-					"'test.batch.property.names'" +
-						"/'test.batch.property.values' must have matching " +
-							"amounts of entries!");
+					"'test.batch.property.names'/'test.batch.property.values'" +
+						" must have matching amounts of entries!");
 			}
 
 			StringBuilder sb = new StringBuilder();
@@ -504,22 +503,16 @@ public class PoshiRunnerContext {
 		Multimap<Properties, String> multimap = HashMultimap.create();
 
 		for (String classCommandName : classCommandNames) {
-			Properties properties = new Properties();
+			Properties properties = _classCommandNamePropertiesMap.get(
+				classCommandName);
 
-			properties.putAll(
-				_classCommandNamePropertiesMap.get(classCommandName));
+			Set<String> propertyNames = properties.stringPropertyNames();
 
-			if (Validator.isNotNull(
-					PropsValues.TEST_BATCH_GROUP_IGNORE_REGEX)) {
+			for (String propertyName : propertyNames) {
+				if (propertyName.matches(
+						PropsValues.TEST_BATCH_GROUP_IGNORE_REGEX)) {
 
-				Set<String> propertyNames = properties.stringPropertyNames();
-
-				for (String propertyName : propertyNames) {
-					if (propertyName.matches(
-							PropsValues.TEST_BATCH_GROUP_IGNORE_REGEX)) {
-
-						properties.remove(propertyName);
-					}
+					properties.remove(propertyName);
 				}
 			}
 
@@ -760,10 +753,10 @@ public class PoshiRunnerContext {
 	private static boolean _isIgnorableCommandNames(
 		Element rootElement, Element commandElement, String commandName) {
 
-		if (commandElement.attributeValue("ignore") != null) {
-			String ignore = commandElement.attributeValue("ignore");
+		if (commandElement.attributeValue("disabled") != null) {
+			String disabled = commandElement.attributeValue("disabled");
 
-			if (ignore.equals("true")) {
+			if (disabled.equals("true")) {
 				return true;
 			}
 		}

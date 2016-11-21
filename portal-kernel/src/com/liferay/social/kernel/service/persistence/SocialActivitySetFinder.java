@@ -22,8 +22,6 @@ import aQute.bnd.annotation.ProviderType;
  */
 @ProviderType
 public interface SocialActivitySetFinder {
-	public int countByOrganizationId(long organizationId);
-
 	public int countByRelation(long userId);
 
 	public int countByRelationType(long userId, int type);

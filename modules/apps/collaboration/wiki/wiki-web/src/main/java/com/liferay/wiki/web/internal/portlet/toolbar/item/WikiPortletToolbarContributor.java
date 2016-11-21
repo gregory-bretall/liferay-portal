@@ -117,13 +117,6 @@ public class WikiPortletToolbarContributor
 				permissionChecker, groupId, nodeId, actionId);
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			return false;
 		}
 
@@ -196,8 +189,7 @@ public class WikiPortletToolbarContributor
 		catch (ConfigurationException ce) {
 			_log.error(
 				"Unable to get initial node name for group " +
-					themeDisplay.getScopeGroupId(),
-				ce);
+					themeDisplay.getScopeGroupId());
 		}
 
 		String name = BeanParamUtil.getString(

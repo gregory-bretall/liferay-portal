@@ -71,8 +71,7 @@ import org.osgi.service.component.annotations.Reference;
 	configurationPid = "com.liferay.portal.security.sso.opensso.configuration.OpenSSOConfiguration",
 	immediate = true,
 	property = {
-		"before-filter=Auto Login Filter", "dispatcher=FORWARD",
-		"dispatcher=REQUEST", "servlet-context-name=",
+		"dispatcher=FORWARD", "dispatcher=REQUEST", "servlet-context-name=",
 		"servlet-filter-name=SSO Open SSO Filter",
 		"url-pattern=/c/portal/login", "url-pattern=/c/portal/logout"
 	},

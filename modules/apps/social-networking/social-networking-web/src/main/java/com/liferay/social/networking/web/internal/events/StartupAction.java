@@ -22,8 +22,6 @@ import com.liferay.expando.kernel.service.ExpandoColumnLocalService;
 import com.liferay.expando.kernel.service.ExpandoTableLocalService;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.SimpleAction;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
@@ -112,13 +110,6 @@ public class StartupAction extends SimpleAction {
 				companyId, User.class.getName(), "SN");
 		}
 		catch (DuplicateTableNameException dtne) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(dtne, dtne);
-			}
-
 			table = _expandoTableLocalService.getTable(
 				companyId, User.class.getName(), "SN");
 		}
@@ -128,16 +119,8 @@ public class StartupAction extends SimpleAction {
 				table.getTableId(), "aboutMe", ExpandoColumnConstants.STRING);
 		}
 		catch (DuplicateColumnNameException dcne) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(dcne, dcne);
-			}
 		}
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(StartupAction.class);
 
 	private CompanyLocalService _companyLocalService;
 	private ExpandoColumnLocalService _expandoColumnLocalService;

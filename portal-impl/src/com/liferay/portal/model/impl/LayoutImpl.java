@@ -716,12 +716,6 @@ public class LayoutImpl extends LayoutBaseImpl {
 				getCompanyId(), getPlid());
 		}
 		catch (NoSuchGroupException nsge) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsge, nsge);
-			}
 		}
 
 		return group;

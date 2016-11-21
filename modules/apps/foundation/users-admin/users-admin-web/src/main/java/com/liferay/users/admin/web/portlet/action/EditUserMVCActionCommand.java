@@ -50,7 +50,6 @@ import com.liferay.portal.kernel.model.Contact;
 import com.liferay.portal.kernel.model.EmailAddress;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.ListType;
 import com.liferay.portal.kernel.model.ListTypeConstants;
 import com.liferay.portal.kernel.model.Phone;
@@ -319,8 +318,8 @@ public class EditUserMVCActionCommand extends BaseMVCActionCommand {
 					actionRequest, actionResponse);
 
 				user = (User)returnValue[0];
-				oldScreenName = (String)returnValue[1];
-				updateLanguageId = (Boolean)returnValue[2];
+				oldScreenName = ((String)returnValue[1]);
+				updateLanguageId = ((Boolean)returnValue[2]);
 			}
 			else if (cmd.equals("unlock")) {
 				user = updateLockout(actionRequest);
@@ -715,8 +714,8 @@ public class EditUserMVCActionCommand extends BaseMVCActionCommand {
 
 			// Reset the locale
 
-			HttpServletRequest request = PortalUtil.getOriginalServletRequest(
-				PortalUtil.getHttpServletRequest(actionRequest));
+			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+				actionRequest);
 			HttpServletResponse response = PortalUtil.getHttpServletResponse(
 				actionResponse);
 			HttpSession session = request.getSession();
@@ -751,12 +750,12 @@ public class EditUserMVCActionCommand extends BaseMVCActionCommand {
 			PortalMyAccountApplicationType.MyAccount.CLASS_NAME,
 			PortletProvider.Action.VIEW);
 
-		Group group = user.getGroup();
+		if (!portletId.equals(myAccountPortletId)) {
+			Group group = user.getGroup();
 
-		if (!portletId.equals(myAccountPortletId) &&
-			GroupPermissionUtil.contains(
+			boolean hasGroupUpdatePermission = GroupPermissionUtil.contains(
 				themeDisplay.getPermissionChecker(), group.getGroupId(),
-				ActionKeys.UPDATE)) {
+				ActionKeys.UPDATE);
 
 			long publicLayoutSetPrototypeId = ParamUtil.getLong(
 				actionRequest, "publicLayoutSetPrototypeId");
@@ -767,15 +766,9 @@ public class EditUserMVCActionCommand extends BaseMVCActionCommand {
 			boolean privateLayoutSetPrototypeLinkEnabled = ParamUtil.getBoolean(
 				actionRequest, "privateLayoutSetPrototypeLinkEnabled");
 
-			LayoutSet publicLayoutSet = group.getPublicLayoutSet();
-			LayoutSet privateLayoutSet = group.getPrivateLayoutSet();
-
-			if ((publicLayoutSetPrototypeId > 0) ||
-				(privateLayoutSetPrototypeId > 0) ||
-				(publicLayoutSetPrototypeLinkEnabled !=
-					publicLayoutSet.isLayoutSetPrototypeLinkEnabled()) ||
-				(privateLayoutSetPrototypeLinkEnabled !=
-					privateLayoutSet.isLayoutSetPrototypeLinkEnabled())) {
+			if (hasGroupUpdatePermission &&
+				((publicLayoutSetPrototypeId > 0) ||
+				 (privateLayoutSetPrototypeId > 0))) {
 
 				SitesUtil.updateLayoutSetPrototypesLinks(
 					group, publicLayoutSetPrototypeId,

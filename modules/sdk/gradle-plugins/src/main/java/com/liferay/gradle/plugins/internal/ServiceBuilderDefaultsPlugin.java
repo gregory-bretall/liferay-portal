@@ -28,7 +28,6 @@ import java.util.concurrent.Callable;
 import org.dm.gradle.plugins.bundle.BundlePlugin;
 
 import org.gradle.api.Action;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.FileCollection;
@@ -43,64 +42,7 @@ public class ServiceBuilderDefaultsPlugin
 
 	public static final String BUILD_DB_TASK_NAME = "buildDB";
 
-	public static final Plugin<Project> INSTANCE =
-		new ServiceBuilderDefaultsPlugin();
-
-	@Override
-	protected void configureDefaults(
-		final Project project, ServiceBuilderPlugin serviceBuilderPlugin) {
-
-		super.configureDefaults(project, serviceBuilderPlugin);
-
-		_addTaskBuildDB(project);
-
-		GradleUtil.withPlugin(
-			project, LiferayBasePlugin.class,
-			new Action<LiferayBasePlugin>() {
-
-				@Override
-				public void execute(LiferayBasePlugin liferayBasePlugin) {
-					Configuration portalConfiguration =
-						GradleUtil.getConfiguration(
-							project,
-							LiferayBasePlugin.PORTAL_CONFIGURATION_NAME);
-
-					_configureTasksBuildDB(project, portalConfiguration);
-				}
-
-			});
-
-		GradleUtil.withPlugin(
-			project, BundlePlugin.class,
-			new Action<BundlePlugin>() {
-
-				@Override
-				public void execute(BundlePlugin bundlePlugin) {
-					_configureTasksBuildServiceForBundlePlugin(project);
-				}
-
-			});
-	}
-
-	@Override
-	protected Class<ServiceBuilderPlugin> getPluginClass() {
-		return ServiceBuilderPlugin.class;
-	}
-
-	@Override
-	protected String getPortalToolConfigurationName() {
-		return ServiceBuilderPlugin.CONFIGURATION_NAME;
-	}
-
-	@Override
-	protected String getPortalToolName() {
-		return _PORTAL_TOOL_NAME;
-	}
-
-	private ServiceBuilderDefaultsPlugin() {
-	}
-
-	private BuildDBTask _addTaskBuildDB(final Project project) {
+	protected BuildDBTask addTaskBuildDB(final Project project) {
 		BuildDBTask buildDBTask = GradleUtil.addTask(
 			project, BUILD_DB_TASK_NAME, BuildDBTask.class);
 
@@ -128,19 +70,55 @@ public class ServiceBuilderDefaultsPlugin
 		return buildDBTask;
 	}
 
-	private void _configureTaskBuildDBClasspath(
+	@Override
+	protected void configureDefaults(
+		final Project project, ServiceBuilderPlugin serviceBuilderPlugin) {
+
+		super.configureDefaults(project, serviceBuilderPlugin);
+
+		addTaskBuildDB(project);
+
+		GradleUtil.withPlugin(
+			project, LiferayBasePlugin.class,
+			new Action<LiferayBasePlugin>() {
+
+				@Override
+				public void execute(LiferayBasePlugin liferayBasePlugin) {
+					Configuration portalConfiguration =
+						GradleUtil.getConfiguration(
+							project,
+							LiferayBasePlugin.PORTAL_CONFIGURATION_NAME);
+
+					configureTasksBuildDB(project, portalConfiguration);
+				}
+
+			});
+
+		GradleUtil.withPlugin(
+			project, BundlePlugin.class,
+			new Action<BundlePlugin>() {
+
+				@Override
+				public void execute(BundlePlugin bundlePlugin) {
+					configureTasksBuildServiceForBundlePlugin(project);
+				}
+
+			});
+	}
+
+	protected void configureTaskBuildDBClasspath(
 		BuildDBTask buildDBTask, FileCollection fileCollection) {
 
 		buildDBTask.setClasspath(fileCollection);
 	}
 
-	private void _configureTaskBuildServiceForBundlePlugin(
+	protected void configureTaskBuildServiceForBundlePlugin(
 		BuildServiceTask buildServiceTask) {
 
 		buildServiceTask.setOsgiModule(true);
 	}
 
-	private void _configureTasksBuildDB(
+	protected void configureTasksBuildDB(
 		Project project, final FileCollection classpath) {
 
 		TaskContainer taskContainer = project.getTasks();
@@ -151,13 +129,13 @@ public class ServiceBuilderDefaultsPlugin
 
 				@Override
 				public void execute(BuildDBTask buildDBTask) {
-					_configureTaskBuildDBClasspath(buildDBTask, classpath);
+					configureTaskBuildDBClasspath(buildDBTask, classpath);
 				}
 
 			});
 	}
 
-	private void _configureTasksBuildServiceForBundlePlugin(Project project) {
+	protected void configureTasksBuildServiceForBundlePlugin(Project project) {
 		TaskContainer taskContainer = project.getTasks();
 
 		taskContainer.withType(
@@ -166,10 +144,25 @@ public class ServiceBuilderDefaultsPlugin
 
 				@Override
 				public void execute(BuildServiceTask buildServiceTask) {
-					_configureTaskBuildServiceForBundlePlugin(buildServiceTask);
+					configureTaskBuildServiceForBundlePlugin(buildServiceTask);
 				}
 
 			});
+	}
+
+	@Override
+	protected Class<ServiceBuilderPlugin> getPluginClass() {
+		return ServiceBuilderPlugin.class;
+	}
+
+	@Override
+	protected String getPortalToolConfigurationName() {
+		return ServiceBuilderPlugin.CONFIGURATION_NAME;
+	}
+
+	@Override
+	protected String getPortalToolName() {
+		return _PORTAL_TOOL_NAME;
 	}
 
 	private static final String _PORTAL_TOOL_NAME =

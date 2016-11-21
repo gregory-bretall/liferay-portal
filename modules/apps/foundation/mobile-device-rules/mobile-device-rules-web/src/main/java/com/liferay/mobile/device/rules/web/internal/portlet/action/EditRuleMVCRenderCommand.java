@@ -23,8 +23,6 @@ import com.liferay.mobile.device.rules.web.internal.constants.MDRWebKeys;
 import com.liferay.portal.kernel.bean.BeanParamUtil;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.util.ParamUtil;
 
@@ -80,13 +78,6 @@ public class EditRuleMVCRenderCommand implements MVCRenderCommand {
 			return "/edit_rule.jsp";
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			return "/error.jsp";
 		}
 	}
@@ -102,9 +93,6 @@ public class EditRuleMVCRenderCommand implements MVCRenderCommand {
 	protected void setMDRRuleService(MDRRuleService mdrRuleService) {
 		_mdrRuleService = mdrRuleService;
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		EditRuleMVCRenderCommand.class);
 
 	private MDRRuleGroupService _mdrRuleGroupService;
 	private MDRRuleService _mdrRuleService;

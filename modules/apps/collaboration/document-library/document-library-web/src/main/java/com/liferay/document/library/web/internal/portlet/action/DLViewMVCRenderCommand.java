@@ -59,9 +59,9 @@ public class DLViewMVCRenderCommand extends GetFolderMVCRenderCommand {
 			pingFolderRepository(renderRequest);
 		}
 		catch (Exception e) {
-			SessionErrors.add(renderRequest, "repositoryPingFailed", e);
+			SessionErrors.add(renderRequest, e.getClass(), e);
 
-			return "/document_library/error.jsp";
+			return getPath();
 		}
 
 		return super.render(renderRequest, renderResponse);

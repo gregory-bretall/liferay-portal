@@ -72,7 +72,6 @@ import java.util.concurrent.Future;
 
 import javax.naming.Context;
 
-import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.Result;
@@ -94,8 +93,6 @@ public class PACLAggregateTest extends AutoBalanceTestCase {
 
 		try {
 			List<Class<?>> classes = scanTestClasses();
-
-			Assume.assumeFalse("No PACL tests available", classes.isEmpty());
 
 			ProcessChannel<Result> processChannel =
 				localProcessExecutor.execute(
@@ -124,30 +121,13 @@ public class PACLAggregateTest extends AutoBalanceTestCase {
 
 		arguments.add("-Djava.security.policy==" + url.getFile());
 
+		arguments.add("-Dliferay.mode=test");
+
 		boolean junitDebug = Boolean.getBoolean("jvm.debug");
 
 		if (junitDebug) {
 			arguments.add(_JPDA_OPTIONS);
 			arguments.add("-Djvm.debug=true");
-		}
-
-		arguments.add("-Dliferay.mode=test");
-		arguments.add("-Dsun.zip.disableMemoryMapping=true");
-
-		String aspectjAgent = System.getProperty("aspectj.agent");
-
-		if (aspectjAgent != null) {
-			arguments.add(aspectjAgent);
-			arguments.add("-Daspectj.agent=" + aspectjAgent);
-
-			String aspectjConfiguration = System.getProperty(
-				"org.aspectj.weaver.loadtime.configuration");
-
-			if (aspectjConfiguration != null) {
-				arguments.add(
-					"-Dorg.aspectj.weaver.loadtime.configuration=" +
-						aspectjConfiguration);
-			}
 		}
 
 		arguments.add(

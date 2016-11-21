@@ -67,43 +67,7 @@ import org.osgi.service.component.annotations.Reference;
 public class SearchPortlet extends BaseKBPortlet {
 
 	@Override
-	protected void doDispatch(
-			RenderRequest renderRequest, RenderResponse renderResponse)
-		throws IOException, PortletException {
-
-		String mvcPath = ParamUtil.getString(
-			renderRequest, "mvcPath", viewTemplate);
-
-		long assetCategoryId = ParamUtil.getLong(renderRequest, "categoryId");
-		String assetTagName = ParamUtil.getString(renderRequest, "tag");
-
-		if ((mvcPath.equals(viewTemplate) && (assetCategoryId > 0)) ||
-			(mvcPath.equals(viewTemplate) &&
-			 Validator.isNotNull(assetTagName))) {
-
-			String path = templatePath + "view_prp_articles.jsp";
-
-			include(path, renderRequest, renderResponse);
-		}
-		else if (SessionErrors.contains(
-					renderRequest, NoSuchArticleException.class.getName()) ||
-				 SessionErrors.contains(
-					 renderRequest, NoSuchCommentException.class.getName()) ||
-				 SessionErrors.contains(
-					 renderRequest,
-					 NoSuchSubscriptionException.class.getName()) ||
-				 SessionErrors.contains(
-					 renderRequest, PrincipalException.getNestedClasses())) {
-
-			include(templatePath + "error.jsp", renderRequest, renderResponse);
-		}
-		else {
-			super.doDispatch(renderRequest, renderResponse);
-		}
-	}
-
-	@Override
-	protected void doRender(
+	public void render(
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws IOException, PortletException {
 
@@ -138,6 +102,44 @@ public class SearchPortlet extends BaseKBPortlet {
 			else {
 				throw new PortletException(e);
 			}
+		}
+
+		super.render(renderRequest, renderResponse);
+	}
+
+	@Override
+	protected void doDispatch(
+			RenderRequest renderRequest, RenderResponse renderResponse)
+		throws IOException, PortletException {
+
+		String mvcPath = ParamUtil.getString(
+			renderRequest, "mvcPath", viewTemplate);
+
+		long assetCategoryId = ParamUtil.getLong(renderRequest, "categoryId");
+		String assetTagName = ParamUtil.getString(renderRequest, "tag");
+
+		if ((mvcPath.equals(viewTemplate) && (assetCategoryId > 0)) ||
+			(mvcPath.equals(viewTemplate) &&
+			 Validator.isNotNull(assetTagName))) {
+
+			String path = templatePath + "view_prp_articles.jsp";
+
+			include(path, renderRequest, renderResponse);
+		}
+		else if (SessionErrors.contains(
+					renderRequest, NoSuchArticleException.class.getName()) ||
+				 SessionErrors.contains(
+					 renderRequest, NoSuchCommentException.class.getName()) ||
+				 SessionErrors.contains(
+					 renderRequest,
+					 NoSuchSubscriptionException.class.getName()) ||
+				 SessionErrors.contains(
+					 renderRequest, PrincipalException.getNestedClasses())) {
+
+			include(templatePath + "error.jsp", renderRequest, renderResponse);
+		}
+		else {
+			super.doDispatch(renderRequest, renderResponse);
 		}
 	}
 

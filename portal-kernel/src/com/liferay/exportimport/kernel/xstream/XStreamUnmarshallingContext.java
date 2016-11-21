@@ -14,12 +14,9 @@
 
 package com.liferay.exportimport.kernel.xstream;
 
-import aQute.bnd.annotation.ProviderType;
-
 /**
  * @author Daniel Kocsis
  */
-@ProviderType
 public interface XStreamUnmarshallingContext {
 
 	public void addCompletionCallback(Runnable runnable, int i);

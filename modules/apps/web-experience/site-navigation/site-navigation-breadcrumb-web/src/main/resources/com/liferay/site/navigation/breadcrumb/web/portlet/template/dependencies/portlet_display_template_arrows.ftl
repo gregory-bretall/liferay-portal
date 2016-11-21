@@ -55,29 +55,14 @@
 	</@>
 
 	<div class="breadcrumb breadcrumb-arrows">
-		<#assign cssClass = "" />
-
 		<#list entries as entry>
-			<#if entry?is_last>
-				<#assign cssClass = "active" />
+			<a
+
+			<#if entry.isBrowsable()>
+				href="${entry.getURL()!""}"
 			</#if>
 
-			<li class="${cssClass}">
-				<#if entry?has_next>
-					<a
-
-					<#if entry.isBrowsable()>
-						href="${entry.getURL()!""}"
-					</#if>
-
-					>
-				</#if>
-
-				${htmlUtil.escape(entry.getTitle())}
-
-				<#if entry?has_next>
-					</a>
-				</#if>
+			>${htmlUtil.escape(entry.getTitle())}</a>
 		</#list>
 	</div>
 </#if>

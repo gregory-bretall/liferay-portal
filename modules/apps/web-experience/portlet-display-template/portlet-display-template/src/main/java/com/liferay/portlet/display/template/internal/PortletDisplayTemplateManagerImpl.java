@@ -17,8 +17,6 @@ package com.liferay.portlet.display.template.internal;
 import com.liferay.dynamic.data.mapping.kernel.DDMTemplate;
 import com.liferay.dynamic.data.mapping.kernel.DDMTemplateManager;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateManager;
 import com.liferay.portal.kernel.template.TemplateVariableGroup;
 import com.liferay.portlet.display.template.PortletDisplayTemplate;
@@ -56,12 +54,6 @@ public class PortletDisplayTemplateManagerImpl
 			return _ddmTemplateManager.getTemplate(ddmTemplate.getTemplateId());
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
 		}
 
 		return null;
@@ -103,9 +95,6 @@ public class PortletDisplayTemplateManagerImpl
 
 		_portletDisplayTemplate = portletDisplayTemplate;
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		PortletDisplayTemplateManagerImpl.class);
 
 	private DDMTemplateManager _ddmTemplateManager;
 	private PortletDisplayTemplate _portletDisplayTemplate;

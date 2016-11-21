@@ -189,7 +189,7 @@ AUI.add(
 						return contains;
 					},
 
-					createField: function(fieldType, config) {
+					createField: function(fieldType) {
 						var instance = this;
 
 						var fieldClass = FormBuilderUtil.getFieldClass(fieldType.get('name'));
@@ -204,8 +204,7 @@ AUI.add(
 									getFieldTypeSettingFormContextURL: instance.get('getFieldTypeSettingFormContextURL'),
 									portletNamespace: instance.get('portletNamespace'),
 									readOnly: true
-								},
-								config
+								}
 							)
 						);
 					},
@@ -214,24 +213,6 @@ AUI.add(
 						var instance = this;
 
 						field.destroy();
-					},
-
-					duplicateField: function(field) {
-						var instance = this;
-
-						var fieldCopy = field.copy();
-
-						fieldCopy.render();
-
-						var fieldList = field.get('container').ancestor('.col').getData('layout-col').get('value');
-
-						fieldList.addField(fieldCopy, fieldList.get('fields').length);
-
-						var activeLayout = instance.getActiveLayout();
-
-						var row = instance.getFieldRow(field);
-
-						activeLayout.normalizeColsHeight(new A.NodeList(row));
 					},
 
 					eachFields: function(callback) {
@@ -252,7 +233,7 @@ AUI.add(
 						instance.showFieldSettingsPanel(field);
 					},
 
-					findField: function(fieldName, ignoreCase) {
+					findField: function(name) {
 						var instance = this;
 
 						var field;
@@ -262,12 +243,7 @@ AUI.add(
 						visitor.set(
 							'fieldHandler',
 							function(currentField) {
-								var currentFieldName = currentField.get('context.fieldName');
-
-								if (currentFieldName === fieldName) {
-									field = currentField;
-								}
-								else if (ignoreCase && currentFieldName.toLowerCase() === fieldName.toLowerCase()) {
+								if (currentField.get('context.fieldName') === name) {
 									field = currentField;
 								}
 							}

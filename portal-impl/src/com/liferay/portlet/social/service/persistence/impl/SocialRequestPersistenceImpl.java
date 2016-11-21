@@ -6348,7 +6348,7 @@ public class SocialRequestPersistenceImpl extends BasePersistenceImpl<SocialRequ
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((SocialRequestModelImpl)socialRequest, true);
+		clearUniqueFindersCache((SocialRequestModelImpl)socialRequest);
 	}
 
 	@Override
@@ -6360,21 +6360,88 @@ public class SocialRequestPersistenceImpl extends BasePersistenceImpl<SocialRequ
 			entityCache.removeResult(SocialRequestModelImpl.ENTITY_CACHE_ENABLED,
 				SocialRequestImpl.class, socialRequest.getPrimaryKey());
 
-			clearUniqueFindersCache((SocialRequestModelImpl)socialRequest, true);
+			clearUniqueFindersCache((SocialRequestModelImpl)socialRequest);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		SocialRequestModelImpl socialRequestModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					socialRequestModelImpl.getUuid(),
+					socialRequestModelImpl.getGroupId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+				socialRequestModelImpl);
+
+			args = new Object[] {
+					socialRequestModelImpl.getUserId(),
+					socialRequestModelImpl.getClassNameId(),
+					socialRequestModelImpl.getClassPK(),
+					socialRequestModelImpl.getType(),
+					socialRequestModelImpl.getReceiverUserId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_U_C_C_T_R, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_U_C_C_T_R, args,
+				socialRequestModelImpl);
+		}
+		else {
+			if ((socialRequestModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						socialRequestModelImpl.getUuid(),
+						socialRequestModelImpl.getGroupId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+					socialRequestModelImpl);
+			}
+
+			if ((socialRequestModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_U_C_C_T_R.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						socialRequestModelImpl.getUserId(),
+						socialRequestModelImpl.getClassNameId(),
+						socialRequestModelImpl.getClassPK(),
+						socialRequestModelImpl.getType(),
+						socialRequestModelImpl.getReceiverUserId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_U_C_C_T_R, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_U_C_C_T_R, args,
+					socialRequestModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		SocialRequestModelImpl socialRequestModelImpl) {
 		Object[] args = new Object[] {
 				socialRequestModelImpl.getUuid(),
 				socialRequestModelImpl.getGroupId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-			socialRequestModelImpl, false);
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+
+		if ((socialRequestModelImpl.getColumnBitmask() &
+				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+			args = new Object[] {
+					socialRequestModelImpl.getOriginalUuid(),
+					socialRequestModelImpl.getOriginalGroupId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+		}
 
 		args = new Object[] {
 				socialRequestModelImpl.getUserId(),
@@ -6384,51 +6451,12 @@ public class SocialRequestPersistenceImpl extends BasePersistenceImpl<SocialRequ
 				socialRequestModelImpl.getReceiverUserId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_U_C_C_T_R, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_U_C_C_T_R, args,
-			socialRequestModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		SocialRequestModelImpl socialRequestModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					socialRequestModelImpl.getUuid(),
-					socialRequestModelImpl.getGroupId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
-		}
-
-		if ((socialRequestModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
-					socialRequestModelImpl.getOriginalUuid(),
-					socialRequestModelImpl.getOriginalGroupId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
-		}
-
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					socialRequestModelImpl.getUserId(),
-					socialRequestModelImpl.getClassNameId(),
-					socialRequestModelImpl.getClassPK(),
-					socialRequestModelImpl.getType(),
-					socialRequestModelImpl.getReceiverUserId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_C_C_T_R, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_U_C_C_T_R, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_U_C_C_T_R, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_U_C_C_T_R, args);
 
 		if ((socialRequestModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_U_C_C_T_R.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					socialRequestModelImpl.getOriginalUserId(),
 					socialRequestModelImpl.getOriginalClassNameId(),
 					socialRequestModelImpl.getOriginalClassPK(),
@@ -6802,8 +6830,8 @@ public class SocialRequestPersistenceImpl extends BasePersistenceImpl<SocialRequ
 			SocialRequestImpl.class, socialRequest.getPrimaryKey(),
 			socialRequest, false);
 
-		clearUniqueFindersCache(socialRequestModelImpl, false);
-		cacheUniqueFindersCache(socialRequestModelImpl);
+		clearUniqueFindersCache(socialRequestModelImpl);
+		cacheUniqueFindersCache(socialRequestModelImpl, isNew);
 
 		socialRequest.resetOriginalValues();
 

@@ -23,8 +23,6 @@ import com.liferay.portal.kernel.exception.LayoutTypeException;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
@@ -176,13 +174,6 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 			return priority;
 		}
 		catch (NoSuchLayoutException nsle) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsle, nsle);
-			}
-
 			return 0;
 		}
 	}
@@ -364,7 +355,7 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 		LayoutImpl.validateFriendlyURLKeyword(friendlyURL);
 
 		if (friendlyURL.contains(Portal.FRIENDLY_URL_SEPARATOR) ||
-			friendlyURL.endsWith(_FRIENDLY_URL_SEPARATOR_HEAD)) {
+			friendlyURL.endsWith("/-")) {
 
 			LayoutFriendlyURLException lfurle = new LayoutFriendlyURLException(
 				LayoutFriendlyURLException.KEYWORD_CONFLICT);
@@ -588,13 +579,6 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 	@BeanReference(type = ResourcePermissionLocalService.class)
 	protected ResourcePermissionLocalService resourcePermissionLocalService;
 
-	private static final String _FRIENDLY_URL_SEPARATOR_HEAD =
-		Portal.FRIENDLY_URL_SEPARATOR.substring(
-			0, Portal.FRIENDLY_URL_SEPARATOR.length() - 1);
-
 	private static final int _PRIORITY_BUFFER = 1000000;
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutLocalServiceHelper.class);
 
 }

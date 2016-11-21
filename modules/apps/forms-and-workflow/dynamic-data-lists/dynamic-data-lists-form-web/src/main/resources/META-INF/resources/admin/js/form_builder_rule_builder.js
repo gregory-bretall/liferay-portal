@@ -1,7 +1,7 @@
 AUI.add(
 	'liferay-ddl-form-builder-rule-builder',
 	function(A) {
-		var SoyTemplateUtil = Liferay.DDL.SoyTemplateUtil;
+		var ddl = window.ddl;
 
 		var FormBuilderRuleBuilder = A.Component.create(
 			{
@@ -16,14 +16,10 @@ AUI.add(
 
 					strings: {
 						value: {
-							contains: Liferay.Language.get('contains'),
 							delete: Liferay.Language.get('delete'),
 							edit: Liferay.Language.get('edit'),
 							emptyListText: Liferay.Language.get('there-are-no-rules-yet-click-on-plus-icon-bellow-to-add-the-first'),
-							'equals-to': Liferay.Language.get('is-equal-to'),
-							'not-contains': Liferay.Language.get('does-not-contain'),
-							'not-equals-to': Liferay.Language.get('is-not-equal-to'),
-							ruleBuilder: Liferay.Language.get('rule-builder')
+							showHide: Liferay.Language.get('show-hide')
 						}
 					}
 				},
@@ -31,6 +27,18 @@ AUI.add(
 				NAME: 'liferay-ddl-form-builder-rule-builder',
 
 				prototype: {
+					initializer: function() {
+						var instance = this;
+
+						instance._ruleTypeInstances = {};
+					},
+
+					renderUI: function() {
+						var instance = this;
+
+						instance._renderPopover();
+					},
+
 					bindUI: function() {
 						var instance = this;
 
@@ -41,49 +49,23 @@ AUI.add(
 						instance.on('*:cancelRule', A.bind(instance._handleCancelRule, instance));
 
 						instance._eventHandlers = [
-							boundingBox.delegate('click', A.bind(instance._handleAddRuleClick, instance), '.form-builder-rule-builder-add-rule-button-icon'),
-							boundingBox.delegate('click', A.bind(instance._handleEditCardClick, instance), '.rule-card-edit'),
-							boundingBox.delegate('click', A.bind(instance._handleDeleteCardClick, instance), '.rule-card-delete')
+							boundingBox.delegate('click', A.bind(instance._handleDeleteCardClick, instance), '.rule-card-delete'),
+							boundingBox.delegate('click', A.bind(instance._handleEditCardClick, instance), '.rule-card-edit')
 						];
 					},
 
 					syncUI: function() {
 						var instance = this;
 
-						var ruleBuilderTemplateRenderer = SoyTemplateUtil.getTemplateRenderer('ddl.rule_builder');
-
-						var rulesBuilder = ruleBuilderTemplateRenderer(
+						var rulesBuilder = ddl.rule_builder(
 							{
-								plusIcon: Liferay.Util.getLexiconIconTpl('plus', 'icon-monospaced'),
-								strings: instance.get('strings')
+								plusIcon: Liferay.Util.getLexiconIconTpl('plus', 'icon-monospaced')
 							}
 						);
 
-						instance.get('contentBox').setHTML(rulesBuilder);
+						instance.get('boundingBox').setHTML(rulesBuilder);
 
-						var rules = instance.get('rules');
-
-						rules.forEach(
-							function(rule) {
-								rule.conditions.forEach(
-									function(condition) {
-										condition.operands.forEach(
-											function(operand) {
-												operand.label = instance._getFieldLabel(operand.value);
-											}
-										);
-									}
-								);
-
-								rule.actions.forEach(
-									function(action) {
-										action.label = instance._getFieldLabel(action.target);
-									}
-								);
-							}
-						);
-
-						instance._renderCards(rules);
+						instance._renderCards(instance.get('rules'));
 					},
 
 					destructor: function() {
@@ -95,71 +77,47 @@ AUI.add(
 					getFields: function() {
 						var instance = this;
 
-						var fields = [];
+						if (!instance._fields) {
+							var fields = [];
 
-						instance.get('formBuilder').eachFields(
-							function(field) {
-								fields.push(
-									{
-										label: field.get('label') || field.get('fieldName'),
-										options: field.get('options'),
-										type: field.get('type'),
-										value: field.get('fieldName')
-									}
-								);
-							}
-						);
+							instance.get('formBuilder').eachFields(
+								function(field) {
+									fields.push(
+										{
+											label: field.get('label'),
+											options: field.get('options'),
+											value: field.get('fieldName')
+										}
+									);
+								}
+							);
 
-						return fields;
+							instance._fields = fields;
+						}
+
+						return instance._fields;
 					},
 
-					hide: function() {
+					getRuleType: function(type) {
 						var instance = this;
 
-						FormBuilderRuleBuilder.superclass.hide.apply(instance, arguments);
+						var ruleType = type.toLowerCase();
 
-						instance.syncUI();
-					},
+						var ruleTypeInstance = instance._ruleTypeInstances[ruleType];
 
-					renderRule: function(rule) {
-						var instance = this;
-
-						if (!instance._ruleClasses) {
-							instance._ruleClasses = new Liferay.DDL.FormBuilderRule(
+						if (!ruleTypeInstance) {
+							ruleTypeInstance = new Liferay.DDL.Rules[ruleType](
 								{
 									boundingBox: instance.get('boundingBox'),
 									bubbleTargets: [instance],
-									contentBox: instance.get('contentBox'),
 									fields: instance.getFields()
 								}
 							);
+
+							instance._ruleTypeInstances[ruleType] = ruleTypeInstance;
 						}
 
-						instance._ruleClasses.set('fields', instance.getFields());
-
-						instance._ruleClasses.render(rule);
-					},
-
-					_getFieldLabel: function(fieldValue) {
-						var instance = this;
-
-						var fields = instance.getFields();
-
-						var fieldLabel;
-
-						for (var index in fields) {
-							if (fields[index].value === fieldValue) {
-								fieldLabel = fields[index].label;
-							}
-						}
-
-						return fieldLabel;
-					},
-
-					_handleAddRuleClick: function() {
-						var instance = this;
-
-						instance.renderRule();
+						return ruleTypeInstance;
 					},
 
 					_handleCancelRule: function() {
@@ -187,7 +145,13 @@ AUI.add(
 
 						instance._currentRuleId = ruleId;
 
-						instance.renderRule(instance.get('rules')[ruleId]);
+						instance._renderRuleSettings(instance.get('rules')[ruleId]);
+					},
+
+					_handlePopoverClick: function(event) {
+						var instance = this;
+
+						instance.getRuleType(event.currentTarget.getData('rule-type')).render();
 					},
 
 					_handleSaveRule: function(event) {
@@ -198,7 +162,7 @@ AUI.add(
 						var rule = {
 							actions: event.actions,
 							conditions: event.condition,
-							'logical-operator': event['logical-operator']
+							type: event.type
 						};
 
 						if (instance._currentRuleId) {
@@ -222,12 +186,10 @@ AUI.add(
 					_renderCards: function(rules) {
 						var instance = this;
 
-						var rulesList = instance.get('boundingBox').one('.liferay-ddl-form-rule-rules-list-container');
-
-						var ruleListTemplateRenderer = SoyTemplateUtil.getTemplateRenderer('ddl.rule_list');
+						var rulesList = instance.get('boundingBox').one('.form-builder-rule-builder-rules-list');
 
 						rulesList.setHTML(
-							ruleListTemplateRenderer(
+							ddl.rule_list(
 								{
 									kebab: Liferay.Util.getLexiconIconTpl('ellipsis-v', 'icon-monospaced'),
 									rules: rules,
@@ -235,6 +197,42 @@ AUI.add(
 								}
 							)
 						);
+					},
+
+					_renderPopover: function() {
+						var instance = this;
+
+						new A.Popover(
+							{
+								align: {
+									node: '.form-builder-rule-builder-add-rule-button'
+								},
+								animated: true,
+								bodyContent: ddl.rule_types(
+									{
+										strings: instance.get('strings')
+									}
+								),
+								constrain: true,
+								cssClass: 'form-builder-rulles-builder-popover',
+								duration: 0.25,
+								hideOn: [
+									{
+										eventName: 'click',
+										node: A.one(document)
+									}
+								],
+								position: 'top',
+								visible: false,
+								zIndex: Liferay.zIndex.TOOLTIP
+							}
+						).render();
+					},
+
+					_renderRuleSettings: function(rule) {
+						var instance = this;
+
+						instance.getRuleType(rule.type).render(rule);
 					}
 				}
 			}

@@ -384,7 +384,7 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((ClassNameModelImpl)className, true);
+		clearUniqueFindersCache((ClassNameModelImpl)className);
 	}
 
 	@Override
@@ -396,32 +396,43 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 			entityCache.removeResult(ClassNameModelImpl.ENTITY_CACHE_ENABLED,
 				ClassNameImpl.class, className.getPrimaryKey());
 
-			clearUniqueFindersCache((ClassNameModelImpl)className, true);
+			clearUniqueFindersCache((ClassNameModelImpl)className);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		ClassNameModelImpl classNameModelImpl) {
-		Object[] args = new Object[] { classNameModelImpl.getValue() };
+		ClassNameModelImpl classNameModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] { classNameModelImpl.getValue() };
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_VALUE, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_VALUE, args,
-			classNameModelImpl, false);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_VALUE, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_VALUE, args,
+				classNameModelImpl);
+		}
+		else {
+			if ((classNameModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_VALUE.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] { classNameModelImpl.getValue() };
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_VALUE, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_VALUE, args,
+					classNameModelImpl);
+			}
+		}
 	}
 
 	protected void clearUniqueFindersCache(
-		ClassNameModelImpl classNameModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] { classNameModelImpl.getValue() };
+		ClassNameModelImpl classNameModelImpl) {
+		Object[] args = new Object[] { classNameModelImpl.getValue() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_VALUE, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_VALUE, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_VALUE, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_VALUE, args);
 
 		if ((classNameModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_VALUE.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] { classNameModelImpl.getOriginalValue() };
+			args = new Object[] { classNameModelImpl.getOriginalValue() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_VALUE, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_VALUE, args);
@@ -566,8 +577,8 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 		entityCache.putResult(ClassNameModelImpl.ENTITY_CACHE_ENABLED,
 			ClassNameImpl.class, className.getPrimaryKey(), className, false);
 
-		clearUniqueFindersCache(classNameModelImpl, false);
-		cacheUniqueFindersCache(classNameModelImpl);
+		clearUniqueFindersCache(classNameModelImpl);
+		cacheUniqueFindersCache(classNameModelImpl, isNew);
 
 		className.resetOriginalValues();
 

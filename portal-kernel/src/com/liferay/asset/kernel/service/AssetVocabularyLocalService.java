@@ -144,10 +144,6 @@ public interface AssetVocabularyLocalService extends BaseLocalService,
 	public AssetVocabulary fetchAssetVocabularyByUuidAndGroupId(
 		java.lang.String uuid, long groupId);
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public AssetVocabulary fetchGroupVocabulary(long groupId,
-		java.lang.String name) throws PortalException;
-
 	/**
 	* Returns the asset vocabulary with the primary key.
 	*

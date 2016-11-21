@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Stack;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -137,7 +136,7 @@ public class DDMFormRulesToDDLFormRulesConverter {
 				functionCallExpression.getFunctionName());
 
 			List<Expression> parameters =
-				functionCallExpression.getParameterExpressions();
+				functionCallExpression.getParameters();
 
 			String target = doVisit(parameters.get(0));
 
@@ -190,16 +189,16 @@ public class DDMFormRulesToDDLFormRulesConverter {
 		@Override
 		public Object visit(ComparisonExpression comparisonExpression) {
 			DDLFormRuleCondition.Operand leftOperand = doVisit(
-				comparisonExpression.getLeftOperandExpression());
+				comparisonExpression.getLeftOperand());
 			DDLFormRuleCondition.Operand rightOperand = doVisit(
-				comparisonExpression.getRightOperandExpression());
+				comparisonExpression.getRightOperand());
 
 			DDLFormRuleCondition ddlFormRuleCondition =
 				new DDLFormRuleCondition(
 					_operatorMap.get(comparisonExpression.getOperator()),
 					Arrays.asList(leftOperand, rightOperand));
 
-			_conditions.push(ddlFormRuleCondition);
+			_conditions.add(ddlFormRuleCondition);
 
 			return _conditions;
 		}
@@ -208,12 +207,12 @@ public class DDMFormRulesToDDLFormRulesConverter {
 		public Object visit(FunctionCallExpression functionCallExpression) {
 			String functionName = functionCallExpression.getFunctionName();
 
-			List<Expression> parameterExpressions =
-				functionCallExpression.getParameterExpressions();
+			List<Expression> parameters =
+				functionCallExpression.getParameters();
 
 			if (Objects.equals(functionName, "getValue")) {
 				DDLFormRuleCondition.Operand operand = doVisit(
-					parameterExpressions.get(0));
+					parameters.get(0));
 
 				return new DDLFormRuleCondition.Operand(
 					"field", operand.getValue());
@@ -221,7 +220,7 @@ public class DDMFormRulesToDDLFormRulesConverter {
 
 			List<DDLFormRuleCondition.Operand> operands = new ArrayList<>();
 
-			for (Expression parameterExpression : parameterExpressions) {
+			for (Expression parameterExpression : parameters) {
 				operands.add(
 					(DDLFormRuleCondition.Operand)doVisit(parameterExpression));
 			}
@@ -230,22 +229,21 @@ public class DDMFormRulesToDDLFormRulesConverter {
 				new DDLFormRuleCondition(
 					_functionNameOperatorMap.get(functionName), operands);
 
-			_conditions.push(ddlFormRuleCondition);
+			_conditions.add(ddlFormRuleCondition);
 
 			return _conditions;
 		}
 
 		@Override
 		public Object visit(NotExpression notExpression) {
-			doVisit(notExpression.getOperandExpression());
-
-			DDLFormRuleCondition condition = _conditions.peek();
+			DDLFormRuleCondition condition = doVisit(
+				notExpression.getOperand());
 
 			String operator = condition.getOperator();
 
 			condition.setOperator("not-" + operator);
 
-			return _conditions;
+			return condition;
 		}
 
 		@Override
@@ -268,15 +266,15 @@ public class DDMFormRulesToDDLFormRulesConverter {
 		protected List<DDLFormRuleCondition> doVisitLogicalExpression(
 			BinaryExpression binaryExpression) {
 
-			Object o1 = doVisit(binaryExpression.getLeftOperandExpression());
-			Object o2 = doVisit(binaryExpression.getRightOperandExpression());
+			Object o1 = doVisit(binaryExpression.getLeftOperand());
+			Object o2 = doVisit(binaryExpression.getRightOperand());
 
 			if (o1 instanceof DDLFormRuleCondition) {
-				_conditions.push((DDLFormRuleCondition)o1);
+				_conditions.add((DDLFormRuleCondition)o1);
 			}
 
 			if (o2 instanceof DDLFormRuleCondition) {
-				_conditions.push((DDLFormRuleCondition)o2);
+				_conditions.add((DDLFormRuleCondition)o2);
 			}
 
 			return _conditions;
@@ -297,7 +295,8 @@ public class DDMFormRulesToDDLFormRulesConverter {
 		}
 
 		private boolean _andOperator = true;
-		private final Stack<DDLFormRuleCondition> _conditions = new Stack<>();
+		private final List<DDLFormRuleCondition> _conditions =
+			new ArrayList<>();
 
 	}
 

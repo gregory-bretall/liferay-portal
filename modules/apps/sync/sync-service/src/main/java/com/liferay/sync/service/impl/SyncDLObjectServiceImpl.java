@@ -527,9 +527,9 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 					SyncConstants.SYNC_OAUTH_CONSUMER_SECRET);
 
 				syncContext.setOAuthConsumerSecret(oAuthConsumerSecret);
-
-				syncContext.setOAuthEnabled(true);
 			}
+
+			syncContext.setOAuthEnabled(oAuthEnabled);
 
 			syncContext.setPortletPreferencesMap(getPortletPreferencesMap());
 
@@ -538,32 +538,6 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 			syncContext.setPluginVersion(String.valueOf(bundle.getVersion()));
 
 			if (!user.isDefaultUser()) {
-				boolean lanEnabled = PrefsPropsUtil.getBoolean(
-					user.getCompanyId(),
-					SyncServiceConfigurationKeys.SYNC_LAN_ENABLED,
-					SyncServiceConfigurationValues.SYNC_LAN_ENABLED);
-
-				if (lanEnabled) {
-					String lanCertificate = PrefsPropsUtil.getString(
-						user.getCompanyId(),
-						SyncConstants.SYNC_LAN_CERTIFICATE);
-
-					syncContext.setLanCertificate(lanCertificate);
-
-					syncContext.setLanEnabled(true);
-
-					String lanKey = PrefsPropsUtil.getString(
-						user.getCompanyId(), SyncConstants.SYNC_LAN_KEY);
-
-					syncContext.setLanKey(lanKey);
-
-					String lanServerUuid = PrefsPropsUtil.getString(
-						user.getCompanyId(),
-						SyncConstants.SYNC_LAN_SERVER_UUID);
-
-					syncContext.setLanServerUuid(lanServerUuid);
-				}
-
 				syncContext.setPortalBuildNumber(ReleaseInfo.getBuildNumber());
 				syncContext.setUser(user);
 
@@ -1412,14 +1386,7 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 
 		SyncDLObject syncDLObject = SyncUtil.toSyncDLObject(fileEntry, event);
 
-		checkModifiedTime(syncDLObject, fileEntry.getFileEntryId());
-
-		String lanTokenKey = SyncUtil.getLanTokenKey(
-			syncDLObject.getModifiedTime(), fileEntry.getFileEntryId(), true);
-
-		syncDLObject.setLanTokenKey(lanTokenKey);
-
-		return syncDLObject;
+		return checkModifiedTime(syncDLObject, fileEntry.getFileEntryId());
 	}
 
 	protected SyncDLObject toSyncDLObject(Folder folder, String event)

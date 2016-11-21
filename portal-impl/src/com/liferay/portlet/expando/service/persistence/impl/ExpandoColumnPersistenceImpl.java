@@ -1788,7 +1788,7 @@ public class ExpandoColumnPersistenceImpl extends BasePersistenceImpl<ExpandoCol
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((ExpandoColumnModelImpl)expandoColumn, true);
+		clearUniqueFindersCache((ExpandoColumnModelImpl)expandoColumn);
 	}
 
 	@Override
@@ -1800,38 +1800,52 @@ public class ExpandoColumnPersistenceImpl extends BasePersistenceImpl<ExpandoCol
 			entityCache.removeResult(ExpandoColumnModelImpl.ENTITY_CACHE_ENABLED,
 				ExpandoColumnImpl.class, expandoColumn.getPrimaryKey());
 
-			clearUniqueFindersCache((ExpandoColumnModelImpl)expandoColumn, true);
+			clearUniqueFindersCache((ExpandoColumnModelImpl)expandoColumn);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		ExpandoColumnModelImpl expandoColumnModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					expandoColumnModelImpl.getTableId(),
+					expandoColumnModelImpl.getName()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_T_N, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_T_N, args,
+				expandoColumnModelImpl);
+		}
+		else {
+			if ((expandoColumnModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_T_N.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						expandoColumnModelImpl.getTableId(),
+						expandoColumnModelImpl.getName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_T_N, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_T_N, args,
+					expandoColumnModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		ExpandoColumnModelImpl expandoColumnModelImpl) {
 		Object[] args = new Object[] {
 				expandoColumnModelImpl.getTableId(),
 				expandoColumnModelImpl.getName()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_T_N, args, Long.valueOf(1),
-			false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_T_N, args,
-			expandoColumnModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		ExpandoColumnModelImpl expandoColumnModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					expandoColumnModelImpl.getTableId(),
-					expandoColumnModelImpl.getName()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_T_N, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_T_N, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_T_N, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_T_N, args);
 
 		if ((expandoColumnModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_T_N.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					expandoColumnModelImpl.getOriginalTableId(),
 					expandoColumnModelImpl.getOriginalName()
 				};
@@ -2022,8 +2036,8 @@ public class ExpandoColumnPersistenceImpl extends BasePersistenceImpl<ExpandoCol
 			ExpandoColumnImpl.class, expandoColumn.getPrimaryKey(),
 			expandoColumn, false);
 
-		clearUniqueFindersCache(expandoColumnModelImpl, false);
-		cacheUniqueFindersCache(expandoColumnModelImpl);
+		clearUniqueFindersCache(expandoColumnModelImpl);
+		cacheUniqueFindersCache(expandoColumnModelImpl, isNew);
 
 		expandoColumn.resetOriginalValues();
 

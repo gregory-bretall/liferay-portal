@@ -19,8 +19,8 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
-import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
@@ -32,8 +32,8 @@ import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.InputStream;
 
-import javax.portlet.ResourceRequest;
-import javax.portlet.ResourceResponse;
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -45,23 +45,23 @@ import org.osgi.service.component.annotations.Component;
 		"javax.portlet.name=" + PortletKeys.WORKFLOW_DEFINITION,
 		"mvc.command.name=uploadWorkflowDefinitionFile"
 	},
-	service = MVCResourceCommand.class
+	service = MVCActionCommand.class
 )
 public class UploadWorkflowDefinitionFileMVCActionCommand
-	extends BaseMVCResourceCommand {
+	extends BaseMVCActionCommand {
 
 	public static final String TEMP_FOLDER_NAME =
 		UploadWorkflowDefinitionFileMVCActionCommand.class.getName();
 
 	@Override
-	protected void doServeResource(
-			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
+	protected void doProcessAction(
+			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
 		UploadPortletRequest uploadPortletRequest =
-			PortalUtil.getUploadPortletRequest(resourceRequest);
+			PortalUtil.getUploadPortletRequest(actionRequest);
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
 		String sourceFileName = uploadPortletRequest.getFileName("file");
@@ -87,7 +87,7 @@ public class UploadWorkflowDefinitionFileMVCActionCommand
 			jsonObject.put("uuid", fileEntry.getUuid());
 
 			JSONPortletResponseUtil.writeJSON(
-				resourceRequest, resourceResponse, jsonObject);
+				actionRequest, actionResponse, jsonObject);
 		}
 		catch (Exception e) {
 			_log.error(e);

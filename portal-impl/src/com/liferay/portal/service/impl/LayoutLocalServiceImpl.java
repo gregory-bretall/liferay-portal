@@ -56,7 +56,6 @@ import com.liferay.portal.kernel.systemevent.SystemEventHierarchyEntryThreadLoca
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -333,7 +332,10 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		layoutSetLocalService.updatePageCount(groupId, privateLayout);
 
-		layout.setLayoutSet(null);
+		LayoutSet layoutSet = layoutSetPersistence.findByG_P(
+			groupId, privateLayout);
+
+		layout.setLayoutSet(layoutSet);
 
 		// Asset
 
@@ -621,12 +623,6 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 				layoutLocalService.deleteLayout(layout, false, serviceContext);
 			}
 			catch (NoSuchLayoutException nsle) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsle, nsle);
-				}
 			}
 		}
 
@@ -970,13 +966,6 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	}
 
 	@Override
-	public Layout fetchLayout(
-		String uuid, long groupId, boolean privateLayout) {
-
-		return layoutPersistence.fetchByUUID_G_P(uuid, groupId, privateLayout);
-	}
-
-	@Override
 	public Layout fetchLayoutByFriendlyURL(
 		long groupId, boolean privateLayout, String friendlyURL) {
 
@@ -1090,8 +1079,6 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			throw new NoSuchLayoutException(sb.toString());
 		}
 
-		friendlyURL = HttpUtil.decodeURL(friendlyURL);
-
 		friendlyURL = layoutLocalServiceHelper.getFriendlyURL(friendlyURL);
 
 		Layout layout = null;
@@ -1180,11 +1167,6 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		throws PortalException {
 
 		return layoutPersistence.findByIconImageId(iconImageId);
-	}
-
-	@Override
-	public List<Layout> getLayouts(long companyId) {
-		return layoutPersistence.findByCompanyId(companyId);
 	}
 
 	/**

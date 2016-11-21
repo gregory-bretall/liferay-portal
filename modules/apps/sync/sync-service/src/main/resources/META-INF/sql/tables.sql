@@ -29,7 +29,6 @@ create table SyncDLObject (
 	size_ LONG,
 	checksum VARCHAR(75) null,
 	event VARCHAR(75) null,
-	lanTokenKey VARCHAR(75) null,
 	lastPermissionChangeDate DATE null,
 	lockExpirationDate DATE null,
 	lockUserId LONG,

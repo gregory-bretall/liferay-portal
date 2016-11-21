@@ -45,8 +45,6 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -648,11 +646,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	}
 
 	protected void checkResourceUtil(
-		String line, String fileName, String absolutePath, int lineCount) {
+		String line, String fileName, int lineCount) {
 
-		if (!portalSource || fileName.endsWith("ResourceBundleUtil.java") ||
-			isExcludedPath(getRunOutsidePortalExcludes(), absolutePath)) {
-
+		if (!portalSource || fileName.endsWith("ResourceBundleUtil.java")) {
 			return;
 		}
 
@@ -1110,9 +1106,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		fileName = StringUtil.replace(
 			fileName, CharPool.BACK_SLASH, CharPool.SLASH);
 
-		String absolutePath = getAbsolutePath(fileName);
+		File file = new File(fileName);
 
-		File file = new File(absolutePath);
+		String absolutePath = getAbsolutePath(file);
 
 		String content = FileUtil.read(file);
 
@@ -1311,18 +1307,10 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	}
 
 	protected String formatEmptyArray(String line) {
-		Matcher matcher = emptyArrayPattern.matcher(line);
+		int pos = line.indexOf("[] {}");
 
-		while (matcher.find()) {
-			if (ToolsUtil.isInsideQuotes(line, matcher.end(1))) {
-				continue;
-			}
-
-			String replacement = StringUtil.replace(
-				matcher.group(1), "[]", "[0]");
-
-			return StringUtil.replaceFirst(
-				line, matcher.group(), replacement, matcher.start());
+		if ((pos != -1) && !ToolsUtil.isInsideQuotes(line, pos)) {
+			return StringUtil.replaceFirst(line, "[] {}", "[0]", pos - 1);
 		}
 
 		return line;
@@ -1519,8 +1507,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 		linePart = formatIncorrectSyntax(linePart, "catch(", "catch (", true);
 		linePart = formatIncorrectSyntax(linePart, "else{", "else {", true);
-		linePart = formatIncorrectSyntax(
-			linePart, "else if(", "else if (", true);
 		linePart = formatIncorrectSyntax(linePart, "for(", "for (", true);
 		linePart = formatIncorrectSyntax(linePart, "if(", "if (", true);
 		linePart = formatIncorrectSyntax(linePart, "while(", "while (", true);
@@ -1656,15 +1642,13 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			line, StringPool.SPACE + StringPool.TAB, StringPool.TAB, false);
 	}
 
-	protected String getAbsolutePath(String fileName) {
-		Path filePath = Paths.get(fileName);
+	protected String getAbsolutePath(File file) throws Exception {
+		String absolutePath = file.getCanonicalPath();
 
-		filePath = filePath.toAbsolutePath();
+		absolutePath = StringUtil.replace(
+			absolutePath, CharPool.BACK_SLASH, CharPool.SLASH);
 
-		filePath = filePath.normalize();
-
-		return StringUtil.replace(
-			filePath.toString(), CharPool.BACK_SLASH, CharPool.SLASH);
+		return StringUtil.replace(absolutePath, "/./", StringPool.SLASH);
 	}
 
 	protected Set<String> getAnnotationsExclusions() {
@@ -2383,7 +2367,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			pluginBuildFileName = StringUtil.replace(
 				pluginBuildFileName, StringPool.BACK_SLASH, StringPool.SLASH);
 
-			String absolutePath = getAbsolutePath(pluginBuildFileName);
+			File file = new File(pluginBuildFileName);
+
+			String absolutePath = getAbsolutePath(file);
 
 			int x = absolutePath.indexOf("/modules/apps/");
 
@@ -2897,18 +2883,31 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 		line = StringUtil.trimTrailing(line);
 
-		if (allowLeadingSpaces || line.startsWith(" *")) {
+		if (allowLeadingSpaces || !line.startsWith(StringPool.SPACE) ||
+			line.startsWith(" *")) {
+
 			return line;
 		}
 
-		while (line.matches("^\t*    .*")) {
-			line = StringUtil.replaceFirst(
-				line, StringPool.FOUR_SPACES, StringPool.TAB);
+		if (!line.startsWith(StringPool.FOUR_SPACES)) {
+			while (line.startsWith(StringPool.SPACE)) {
+				line = StringUtil.replaceFirst(
+					line, StringPool.SPACE, StringPool.BLANK);
+			}
 		}
+		else {
+			int pos = 0;
 
-		while (line.startsWith(StringPool.SPACE)) {
-			line = StringUtil.replaceFirst(
-				line, StringPool.SPACE, StringPool.BLANK);
+			String temp = line;
+
+			while (temp.startsWith(StringPool.FOUR_SPACES)) {
+				line = StringUtil.replaceFirst(
+					line, StringPool.FOUR_SPACES, StringPool.TAB);
+
+				pos++;
+
+				temp = line.substring(pos);
+			}
 		}
 
 		return line;
@@ -2923,8 +2922,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		"\\scontent=(.*?)(,\\\\|\n|$)");
 	protected static Pattern bndReleaseVersionPattern = Pattern.compile(
 		"Bundle-Version: (.*)\n");
-	protected static Pattern emptyArrayPattern = Pattern.compile(
-		"((\\[\\])+) \\{\\}");
 	protected static Pattern emptyCollectionPattern = Pattern.compile(
 		"Collections\\.EMPTY_(LIST|MAP|SET)");
 	protected static Pattern getterUtilGetPattern = Pattern.compile(

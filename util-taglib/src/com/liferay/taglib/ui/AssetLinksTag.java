@@ -17,8 +17,6 @@ package com.liferay.taglib.ui;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.taglib.util.IncludeTag;
 
@@ -89,12 +87,6 @@ public class AssetLinksTag extends IncludeTag {
 				}
 			}
 			catch (SystemException se) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(se, se);
-				}
 			}
 		}
 
@@ -106,8 +98,6 @@ public class AssetLinksTag extends IncludeTag {
 	}
 
 	private static final String _PAGE = "/html/taglib/ui/asset_links/page.jsp";
-
-	private static final Log _log = LogFactoryUtil.getLog(AssetLinksTag.class);
 
 	private long _assetEntryId;
 	private String _className = StringPool.BLANK;

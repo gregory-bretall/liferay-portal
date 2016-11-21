@@ -68,9 +68,7 @@
 		<![CDATA[
 			SELECT
 				DISTINCT MBCategory.categoryId AS modelId,
-				[$NULL_DATE$] AS modifiedDate,
 				0 AS priority,
-				MBCategory.name AS name,
 				0 AS modelCategory
 			FROM
 				MBCategory
@@ -83,9 +81,7 @@
 		<![CDATA[
 			SELECT
 				DISTINCT MBCategory.categoryId AS modelId,
-				[$NULL_DATE$] AS modifiedDate,
 				0 AS priority,
-				MBCategory.name AS name,
 				0 AS modelCategory
 			FROM
 				MBCategory
@@ -118,9 +114,7 @@
 		<![CDATA[
 			SELECT
 				DISTINCT MBThread.threadId AS modelId,
-				MBThread.modifiedDate AS modifiedDate,
 				MBThread.priority AS priority,
-				'' AS name,
 				1 AS modelCategory
 			FROM
 				MBThread
@@ -133,9 +127,7 @@
 		<![CDATA[
 			SELECT
 				DISTINCT MBThread.threadId AS modelId,
-				MBThread.modifiedDate AS modifiedDate,
 				MBThread.priority AS priority,
-				'' AS name,
 				1 AS modelCategory
 			FROM
 				MBThread

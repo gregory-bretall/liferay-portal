@@ -14,7 +14,8 @@
 
 package com.liferay.gradle.plugins.workspace;
 
-import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.workspace.configurators.ProjectConfigurator;
+import com.liferay.gradle.plugins.workspace.util.GradleUtil;
 
 import groovy.lang.Closure;
 
@@ -44,7 +45,7 @@ public class WorkspacePlugin implements Plugin<Settings> {
 	public void apply(Settings settings) {
 		Gradle gradle = settings.getGradle();
 
-		final WorkspaceExtension workspaceExtension = _addWorkspaceExtension(
+		final WorkspaceExtension workspaceExtension = addWorkspaceExtension(
 			settings);
 
 		for (ProjectConfigurator projectConfigurator :
@@ -89,7 +90,7 @@ public class WorkspacePlugin implements Plugin<Settings> {
 			});
 	}
 
-	private WorkspaceExtension _addWorkspaceExtension(Settings settings) {
+	protected WorkspaceExtension addWorkspaceExtension(Settings settings) {
 		ExtensionAware extensionAware = (ExtensionAware)settings.getGradle();
 
 		ExtensionContainer extensionContainer = extensionAware.getExtensions();

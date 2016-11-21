@@ -53,7 +53,9 @@ renderResponse.setTitle(LanguageUtil.get(request, "templates"));
 		<aui:form action="<%= searchURL %>" method="get" name="fm2">
 			<liferay-portlet:renderURLParams varImpl="searchURL" />
 
-			<liferay-ui:input-search markupView="lexicon" />
+			<aui:nav-bar-search>
+				<liferay-ui:input-search markupView="lexicon" />
+			</aui:nav-bar-search>
 		</aui:form>
 	</aui:nav-bar-search>
 </aui:nav-bar>

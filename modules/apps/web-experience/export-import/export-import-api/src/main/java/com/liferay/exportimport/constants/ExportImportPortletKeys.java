@@ -14,12 +14,9 @@
 
 package com.liferay.exportimport.constants;
 
-import aQute.bnd.annotation.ProviderType;
-
 /**
  * @author Daniel Kocsis
  */
-@ProviderType
 public class ExportImportPortletKeys {
 
 	public static final String EXPORT =

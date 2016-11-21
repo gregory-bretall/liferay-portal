@@ -43,9 +43,7 @@ public class WorkflowTaskPermissionChecker {
 		PermissionChecker permissionChecker) {
 
 		if (permissionChecker.isOmniadmin() ||
-			permissionChecker.isCompanyAdmin() ||
-			(workflowTask.isCompleted() &&
-			 hasAssetViewPermission(workflowTask, permissionChecker))) {
+			permissionChecker.isCompanyAdmin()) {
 
 			return true;
 		}

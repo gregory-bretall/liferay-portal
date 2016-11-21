@@ -15,7 +15,6 @@
 package com.liferay.message.boards.parser.bbcode.internal;
 
 import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.util.HtmlImpl;
 
 import org.junit.Assert;
@@ -73,15 +72,14 @@ public class HtmlBBCodeTranslatorImplTest {
 
 	@Test
 	public void testCode() {
-		StringBundler sb = new StringBundler(4);
+		String expected =
+			"<div class=\"lfr-code\"><table><tbody><tr>" +
+				"<td class=\"line-numbers\" data-line-number=\"1\"></td>" +
+					"<td class=\"lines\"><div class=\"line\">:)</div>" +
+						"</td></tr></tbody></table></div>";
+		String actual = _htmlBBCodeTranslator.parse("[code]:)[/code]");
 
-		sb.append("<div class=\"lfr-code\"><table><tbody><tr>");
-		sb.append("<td class=\"line-numbers\" data-line-number=\"1\"></td>");
-		sb.append("<td class=\"lines\"><div class=\"line\">:)</div>");
-		sb.append("</td></tr></tbody></table></div>");
-
-		Assert.assertEquals(
-			sb.toString(), _htmlBBCodeTranslator.parse("[code]:)[/code]"));
+		Assert.assertEquals(expected, actual);
 	}
 
 	@Test

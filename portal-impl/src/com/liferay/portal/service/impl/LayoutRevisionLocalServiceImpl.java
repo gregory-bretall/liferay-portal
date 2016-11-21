@@ -19,8 +19,6 @@ import com.liferay.exportimport.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.exception.NoSuchLayoutRevisionException;
 import com.liferay.portal.kernel.exception.NoSuchPortletPreferencesException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutRevision;
@@ -169,12 +167,6 @@ public class LayoutRevisionLocalServiceImpl
 					portletPreferences.getPortletPreferencesId());
 			}
 			catch (NoSuchPortletPreferencesException nsppe) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsppe, nsppe);
-				}
 			}
 		}
 
@@ -244,13 +236,6 @@ public class LayoutRevisionLocalServiceImpl
 				head, plid, new LayoutRevisionCreateDateComparator(true));
 		}
 		catch (NoSuchLayoutRevisionException nslre) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nslre, nslre);
-			}
-
 			return null;
 		}
 	}
@@ -682,9 +667,6 @@ public class LayoutRevisionLocalServiceImpl
 
 		return layoutRevision;
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutRevisionLocalServiceImpl.class);
 
 	private static final ThreadLocal<Long> _layoutRevisionId =
 		new AutoResetThreadLocal<>(

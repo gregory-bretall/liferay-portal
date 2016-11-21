@@ -16,11 +16,10 @@ package com.liferay.document.library.web.social;
 
 import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.web.constants.DLPortletKeys;
+import com.liferay.document.library.web.internal.util.DLResourceBundleLoader;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
-import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
 import com.liferay.social.kernel.model.BaseSocialActivityInterpreter;
@@ -29,7 +28,6 @@ import com.liferay.social.kernel.model.SocialActivityConstants;
 import com.liferay.social.kernel.model.SocialActivityInterpreter;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Zsolt Berentey
@@ -55,7 +53,7 @@ public class DLFolderActivityInterpreter extends BaseSocialActivityInterpreter {
 
 	@Override
 	protected ResourceBundleLoader getResourceBundleLoader() {
-		return _resourceBundleLoader;
+		return DLResourceBundleLoader.INSTANCE;
 	}
 
 	@Override
@@ -97,20 +95,6 @@ public class DLFolderActivityInterpreter extends BaseSocialActivityInterpreter {
 			actionId);
 	}
 
-	@Reference(
-		target = "(bundle.symbolic.name=com.liferay.document.library.web)",
-		unbind = "-"
-	)
-	protected void setResourceBundleLoader(
-		ResourceBundleLoader resourceBundleLoader) {
-
-		_resourceBundleLoader = new AggregateResourceBundleLoader(
-			resourceBundleLoader,
-			ResourceBundleLoaderUtil.getPortalResourceBundleLoader());
-	}
-
 	private static final String[] _CLASS_NAMES = {DLFolder.class.getName()};
-
-	private ResourceBundleLoader _resourceBundleLoader;
 
 }

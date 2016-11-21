@@ -69,13 +69,15 @@ dlSearchContainer.setResults(foldersAndFileEntriesAndFileShortcuts);
 						</liferay-portlet:renderURL>
 
 						<%
-						if (curFolder.isMountPoint()) {
-							try {
-								DLAppServiceUtil.getFoldersCount(curFolder.getRepositoryId(), curFolder.getFolderId());
-							}
-							catch (PortalException pe) {
-								rowURL = null;
-							}
+						try{
+							DLAppServiceUtil.getFoldersFileEntriesCount(curFolder.getRepositoryId(), Arrays.asList(curFolder.getFolderId()), WorkflowConstants.STATUS_APPROVED);
+							DLAppServiceUtil.getFoldersCount(curFolder.getRepositoryId(), curFolder.getFolderId());
+						}
+						catch (com.liferay.portal.kernel.repository.RepositoryException re) {
+							rowURL = null;
+						}
+						catch (com.liferay.portal.kernel.security.auth.PrincipalException pe) {
+							rowURL = null;
 						}
 						%>
 

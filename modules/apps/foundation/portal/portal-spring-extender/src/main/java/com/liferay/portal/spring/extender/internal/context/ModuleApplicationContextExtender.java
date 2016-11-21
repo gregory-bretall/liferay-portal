@@ -167,11 +167,8 @@ public class ModuleApplicationContextExtender extends AbstractExtender {
 			URL resource = _bundle.getResource("/META-INF/sql/" + templateName);
 
 			if (resource == null) {
-				_logger.log(
-					Logger.LOG_DEBUG,
+				throw new UpgradeException(
 					"Unable to locate SQL template " + templateName);
-
-				return null;
 			}
 
 			try (InputStream inputStream = resource.openStream()) {
@@ -266,36 +263,25 @@ public class ModuleApplicationContextExtender extends AbstractExtender {
 					}
 
 					@Override
-					public void upgrade(DBProcessContext dbProcessContext)
-						throws UpgradeException {
-
+					public void upgrade(DBProcessContext dbProcessContext) {
 						DBContext dbContext = dbProcessContext.getDBContext();
 
 						DBManager dbManager = dbContext.getDBManager();
 
 						DB db = dbManager.getDB();
 
-						String tablesSQL = getSQLTemplateString("tables.sql");
-						String sequencesSQL = getSQLTemplateString(
-							"sequences.sql");
-						String indexesSQL = getSQLTemplateString("indexes.sql");
-
 						try {
-							if (tablesSQL != null) {
-								db.runSQLTemplateString(tablesSQL, true, true);
-							}
-
-							if (sequencesSQL != null) {
-								db.runSQLTemplateString(
-									sequencesSQL, true, true);
-							}
-
-							if (indexesSQL != null) {
-								db.runSQLTemplateString(indexesSQL, true, true);
-							}
+							db.runSQLTemplateString(
+								getSQLTemplateString("tables.sql"), true, true);
+							db.runSQLTemplateString(
+								getSQLTemplateString("sequences.sql"), true,
+								true);
+							db.runSQLTemplateString(
+								getSQLTemplateString("indexes.sql"), true,
+								true);
 						}
 						catch (Exception e) {
-							throw new UpgradeException(e);
+							new UpgradeException(e);
 						}
 					}
 

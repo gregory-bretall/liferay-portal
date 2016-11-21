@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.UncheckedIOException;
 
 /**
  * @author Andrea Di Giorgi
@@ -38,13 +38,13 @@ public class LiferayPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		Class<? extends Plugin<Project>> clazz;
 
-		if (_isAnt(project)) {
+		if (isAnt(project)) {
 			clazz = getAntPluginClass();
 		}
-		else if (_isOSGi(project)) {
+		else if (isOSGi(project)) {
 			clazz = getOSGiPluginClass();
 		}
-		else if (_isTheme(project)) {
+		else if (isTheme(project)) {
 			clazz = getThemePluginClass();
 		}
 		else {
@@ -70,7 +70,7 @@ public class LiferayPlugin implements Plugin<Project> {
 		return LiferayThemePlugin.class;
 	}
 
-	private boolean _isAnt(Project project) {
+	protected boolean isAnt(Project project) {
 		if (FileUtil.exists(project, "build.xml")) {
 			return true;
 		}
@@ -78,7 +78,7 @@ public class LiferayPlugin implements Plugin<Project> {
 		return false;
 	}
 
-	private boolean _isOSGi(Project project) {
+	protected boolean isOSGi(Project project) {
 		if (FileUtil.exists(project, "bnd.bnd")) {
 			return true;
 		}
@@ -86,7 +86,7 @@ public class LiferayPlugin implements Plugin<Project> {
 		return false;
 	}
 
-	private boolean _isTheme(Project project) {
+	protected boolean isTheme(Project project) {
 		File gulpFile = project.file("gulpfile.js");
 
 		if (!gulpFile.exists()) {
@@ -100,7 +100,7 @@ public class LiferayPlugin implements Plugin<Project> {
 				Files.readAllBytes(gulpFile.toPath()), StandardCharsets.UTF_8);
 		}
 		catch (IOException ioe) {
-			throw new UncheckedIOException(ioe);
+			throw new GradleException("Unable to read " + gulpFile, ioe);
 		}
 
 		if (gulpFileContent.contains("require('liferay-theme-tasks')")) {

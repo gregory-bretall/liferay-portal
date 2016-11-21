@@ -74,7 +74,9 @@ public class WSRPServiceUpgrade implements UpgradeStepRegistrator {
 			"com.liferay.wsrp.web", "0.0.4", "1.0.0", new UpgradeWSRP());
 	}
 
-	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED)
-	private ModuleServiceLifecycle _moduleServiceLifecycle;
+	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
+	protected void setModuleServiceLifecycle(
+		ModuleServiceLifecycle moduleServiceLifecycle) {
+	}
 
 }

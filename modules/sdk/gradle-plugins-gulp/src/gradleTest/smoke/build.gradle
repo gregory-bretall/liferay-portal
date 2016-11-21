@@ -14,3 +14,7 @@ runGradleTest {
 		assert generatedFile.text == "Hello World"
 	}
 }
+
+tasks.withType(ExecuteGulpTask) {
+	dependsOn npmInstall
+}

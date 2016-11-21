@@ -65,12 +65,6 @@ public class JSONUtil {
 		objectWriter.writeValue(file, object);
 	}
 
-	public static byte[] writeValueAsBytes(Object object) throws IOException {
-		ObjectWriter objectWriter = getObjectWriter();
-
-		return objectWriter.writeValueAsBytes(object);
-	}
-
 	public static String writeValueAsString(Object object) throws IOException {
 		ObjectWriter objectWriter = getObjectWriter();
 

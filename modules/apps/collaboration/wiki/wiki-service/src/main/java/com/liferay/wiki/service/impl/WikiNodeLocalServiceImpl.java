@@ -82,7 +82,7 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 
 		// Node
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		long groupId = serviceContext.getScopeGroupId();
 
 		validate(groupId, name);
@@ -484,7 +484,7 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 
 		// Node
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		node.setStatus(status);
 		node.setStatusByUserId(userId);
@@ -506,7 +506,7 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 	protected List<WikiNode> addDefaultNode(long groupId)
 		throws PortalException {
 
-		Group group = groupLocalService.getGroup(groupId);
+		Group group = groupPersistence.findByPrimaryKey(groupId);
 
 		long defaultUserId = userLocalService.getDefaultUserId(
 			group.getCompanyId());

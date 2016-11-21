@@ -66,7 +66,7 @@ public class PortletDisplayTemplatePortlet extends DDMPortlet {
 	@Modified
 	@Override
 	protected void activate(Map<String, Object> properties) {
-		ddmWebConfiguration = ConfigurableUtil.createConfigurable(
+		this.ddmWebConfiguration = ConfigurableUtil.createConfigurable(
 			DDMWebConfiguration.class, properties);
 	}
 

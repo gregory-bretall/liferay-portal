@@ -14,8 +14,6 @@
 
 package com.liferay.portal.kernel.portlet;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.portal.kernel.util.StringParser;
 
 import java.util.Map;
@@ -31,7 +29,6 @@ import java.util.Set;
  * @see    com.liferay.portlet.RouteImpl
  * @see    StringParser
  */
-@ProviderType
 public interface Route {
 
 	/**
@@ -187,8 +184,6 @@ public interface Route {
 	 * @see    #addOverriddenParameter(String, String)
 	 */
 	public Map<String, String> getOverriddenParameters();
-
-	public String getPattern();
 
 	/**
 	 * Generates a URL from the parameter map if this route is appropriate.

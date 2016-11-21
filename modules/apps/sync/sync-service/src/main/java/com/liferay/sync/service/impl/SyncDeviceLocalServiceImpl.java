@@ -40,7 +40,7 @@ public class SyncDeviceLocalServiceImpl extends SyncDeviceLocalServiceBaseImpl {
 			int featureSet)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		Date now = new Date();
 
 		long syncDeviceId = counterLocalService.increment();

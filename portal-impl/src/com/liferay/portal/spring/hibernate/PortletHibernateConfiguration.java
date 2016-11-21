@@ -33,6 +33,7 @@ public class PortletHibernateConfiguration
 		_classLoader = classLoader;
 
 		setDataSource(dataSource);
+		setMvccEnabled(false);
 	}
 
 	@Override

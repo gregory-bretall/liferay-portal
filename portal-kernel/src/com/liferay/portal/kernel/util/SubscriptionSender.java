@@ -162,8 +162,8 @@ public class SubscriptionSender implements Serializable {
 
 				if (_log.isDebugEnabled()) {
 					_log.debug(
-						"Add " + toAddress + " to the list of users who have " +
-							"received an email");
+						"Add " + toAddress + " to the list of users who " +
+							"have received an email");
 				}
 
 				_sentEmailAddresses.add(toAddress);
@@ -225,7 +225,7 @@ public class SubscriptionSender implements Serializable {
 	}
 
 	public String getMailId() {
-		return mailId;
+		return this.mailId;
 	}
 
 	/**
@@ -333,7 +333,7 @@ public class SubscriptionSender implements Serializable {
 	}
 
 	public void setEntryTitle(String entryTitle) {
-		_entryTitle = entryTitle;
+		this._entryTitle = entryTitle;
 	}
 
 	public void setEntryURL(String entryURL) {
@@ -771,7 +771,7 @@ public class SubscriptionSender implements Serializable {
 			}
 		}
 		else {
-			processedSubject = subject;
+			processedSubject = this.subject;
 		}
 
 		String processedBody = null;
@@ -789,7 +789,7 @@ public class SubscriptionSender implements Serializable {
 			}
 		}
 		else {
-			processedBody = body;
+			processedBody = this.body;
 		}
 
 		MailMessage mailMessage = new MailMessage(

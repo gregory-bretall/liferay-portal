@@ -24,10 +24,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Shinn Lok
  */
-@Component(
-	immediate = true,
-	service = {SyncWebUpgrade.class, UpgradeStepRegistrator.class}
-)
+@Component(immediate = true, service = UpgradeStepRegistrator.class)
 public class SyncWebUpgrade implements UpgradeStepRegistrator {
 
 	@Override

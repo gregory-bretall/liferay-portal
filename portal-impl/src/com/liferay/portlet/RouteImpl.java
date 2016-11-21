@@ -35,8 +35,6 @@ import java.util.Set;
 public class RouteImpl implements Route {
 
 	public RouteImpl(String pattern) {
-		_pattern = pattern;
-
 		_stringParser = StringParser.create(pattern);
 
 		_stringParser.setStringEncoder(_urlEncoder);
@@ -114,11 +112,6 @@ public class RouteImpl implements Route {
 		}
 
 		return _overriddenParameters;
-	}
-
-	@Override
-	public String getPattern() {
-		return _pattern;
 	}
 
 	@Override
@@ -223,7 +216,6 @@ public class RouteImpl implements Route {
 	private Set<String> _ignoredParameters;
 	private Map<String, String> _implicitParameters;
 	private Map<String, String> _overriddenParameters;
-	private final String _pattern;
 	private final StringParser _stringParser;
 
 }

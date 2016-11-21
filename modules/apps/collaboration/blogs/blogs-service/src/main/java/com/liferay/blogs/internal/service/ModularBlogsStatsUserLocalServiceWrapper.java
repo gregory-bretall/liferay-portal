@@ -17,7 +17,6 @@ package com.liferay.blogs.internal.service;
 import com.liferay.blogs.kernel.model.BlogsStatsUser;
 import com.liferay.blogs.kernel.service.BlogsStatsUserLocalService;
 import com.liferay.blogs.kernel.service.BlogsStatsUserLocalServiceWrapper;
-import com.liferay.petra.model.adapter.util.ModelAdapterUtil;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
@@ -54,57 +53,36 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 
 	@Override
 	public BlogsStatsUser addBlogsStatsUser(BlogsStatsUser blogsStatsUser) {
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.addBlogsStatsUser(
-				ModelAdapterUtil.adapt(
-					com.liferay.blogs.model.BlogsStatsUser.class,
-					blogsStatsUser)));
+		return super.addBlogsStatsUser(blogsStatsUser);
 	}
 
 	@Override
 	public BlogsStatsUser createBlogsStatsUser(long statsUserId) {
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.createBlogsStatsUser(statsUserId));
+		return super.createBlogsStatsUser(statsUserId);
 	}
 
 	@Override
 	public BlogsStatsUser deleteBlogsStatsUser(BlogsStatsUser blogsStatsUser) {
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.deleteBlogsStatsUser(
-				ModelAdapterUtil.adapt(
-					com.liferay.blogs.model.BlogsStatsUser.class,
-					blogsStatsUser)));
+		return super.deleteBlogsStatsUser(blogsStatsUser);
 	}
 
 	@Override
 	public BlogsStatsUser deleteBlogsStatsUser(long statsUserId)
 		throws PortalException {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.deleteBlogsStatsUser(statsUserId));
+		return super.deleteBlogsStatsUser(statsUserId);
 	}
 
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.deletePersistedModel(
-				ModelAdapterUtil.adapt(
-					com.liferay.blogs.model.BlogsStatsUser.class,
-					persistedModel)));
+		return super.deletePersistedModel(persistedModel);
 	}
 
 	@Override
 	public void deleteStatsUser(BlogsStatsUser statsUsers) {
-		_blogsStatsUserLocalService.deleteStatsUser(
-			ModelAdapterUtil.adapt(
-				com.liferay.blogs.model.BlogsStatsUser.class, statsUsers));
+		_blogsStatsUserLocalService.deleteStatsUser(statsUsers);
 	}
 
 	@Override
@@ -124,20 +102,19 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 
 	@Override
 	public DynamicQuery dynamicQuery() {
-		return _blogsStatsUserLocalService.dynamicQuery();
+		return super.dynamicQuery();
 	}
 
 	@Override
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
-		return _blogsStatsUserLocalService.dynamicQuery(dynamicQuery);
+		return super.dynamicQuery(dynamicQuery);
 	}
 
 	@Override
 	public <T> List<T> dynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end) {
 
-		return _blogsStatsUserLocalService.dynamicQuery(
-			dynamicQuery, start, end);
+		return super.dynamicQuery(dynamicQuery, start, end);
 	}
 
 	@Override
@@ -145,64 +122,54 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 		DynamicQuery dynamicQuery, int start, int end,
 		OrderByComparator<T> orderByComparator) {
 
-		return _blogsStatsUserLocalService.dynamicQuery(
-			dynamicQuery, start, end, orderByComparator);
+		return super.dynamicQuery(dynamicQuery, start, end, orderByComparator);
 	}
 
 	@Override
 	public long dynamicQueryCount(DynamicQuery dynamicQuery) {
-		return _blogsStatsUserLocalService.dynamicQueryCount(dynamicQuery);
+		return super.dynamicQueryCount(dynamicQuery);
 	}
 
 	@Override
 	public long dynamicQueryCount(
 		DynamicQuery dynamicQuery, Projection projection) {
 
-		return _blogsStatsUserLocalService.dynamicQueryCount(
-			dynamicQuery, projection);
+		return super.dynamicQueryCount(dynamicQuery, projection);
 	}
 
 	@Override
 	public BlogsStatsUser fetchBlogsStatsUser(long statsUserId) {
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.fetchBlogsStatsUser(statsUserId));
+		return super.fetchBlogsStatsUser(statsUserId);
 	}
 
 	@Override
 	public ActionableDynamicQuery getActionableDynamicQuery() {
-		return _blogsStatsUserLocalService.getActionableDynamicQuery();
+		return super.getActionableDynamicQuery();
 	}
 
 	@Override
 	public BlogsStatsUser getBlogsStatsUser(long statsUserId)
 		throws PortalException {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getBlogsStatsUser(statsUserId));
+		return super.getBlogsStatsUser(statsUserId);
 	}
 
 	@Override
 	public List<BlogsStatsUser> getBlogsStatsUsers(int start, int end) {
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getBlogsStatsUsers(start, end));
+		return super.getBlogsStatsUsers(start, end);
 	}
 
 	@Override
 	public int getBlogsStatsUsersCount() {
-		return _blogsStatsUserLocalService.getBlogsStatsUsersCount();
+		return super.getBlogsStatsUsersCount();
 	}
 
 	@Override
 	public List<BlogsStatsUser> getCompanyStatsUsers(
 		long companyId, int start, int end) {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getCompanyStatsUsers(
-				companyId, start, end));
+		return _blogsStatsUserLocalService.getCompanyStatsUsers(
+			companyId, start, end);
 	}
 
 	@Override
@@ -210,11 +177,8 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 		long companyId, int start, int end,
 		OrderByComparator<BlogsStatsUser> obc) {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getCompanyStatsUsers(
-				companyId, start, end,
-				ModelAdapterUtil.adapt(BlogsStatsUser.class, obc)));
+		return _blogsStatsUserLocalService.getCompanyStatsUsers(
+			companyId, start, end, obc);
 	}
 
 	@Override
@@ -226,20 +190,16 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 	public List<BlogsStatsUser> getGroupsStatsUsers(
 		long companyId, long groupId, int start, int end) {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getGroupsStatsUsers(
-				companyId, groupId, start, end));
+		return _blogsStatsUserLocalService.getGroupsStatsUsers(
+			companyId, groupId, start, end);
 	}
 
 	@Override
 	public List<BlogsStatsUser> getGroupStatsUsers(
 		long groupId, int start, int end) {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getGroupStatsUsers(
-				groupId, start, end));
+		return _blogsStatsUserLocalService.getGroupStatsUsers(
+			groupId, start, end);
 	}
 
 	@Override
@@ -247,11 +207,8 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 		long groupId, int start, int end,
 		OrderByComparator<BlogsStatsUser> obc) {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getGroupStatsUsers(
-				groupId, start, end,
-				ModelAdapterUtil.adapt(BlogsStatsUser.class, obc)));
+		return _blogsStatsUserLocalService.getGroupStatsUsers(
+			groupId, start, end, obc);
 	}
 
 	@Override
@@ -263,17 +220,15 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 	public IndexableActionableDynamicQuery
 		getIndexableActionableDynamicQuery() {
 
-		return _blogsStatsUserLocalService.getIndexableActionableDynamicQuery();
+		return super.getIndexableActionableDynamicQuery();
 	}
 
 	@Override
 	public List<BlogsStatsUser> getOrganizationStatsUsers(
 		long organizationId, int start, int end) {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getOrganizationStatsUsers(
-				organizationId, start, end));
+		return _blogsStatsUserLocalService.getOrganizationStatsUsers(
+			organizationId, start, end);
 	}
 
 	@Override
@@ -281,11 +236,8 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 		long organizationId, int start, int end,
 		OrderByComparator<BlogsStatsUser> obc) {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getOrganizationStatsUsers(
-				organizationId, start, end,
-				ModelAdapterUtil.adapt(BlogsStatsUser.class, obc)));
+		return _blogsStatsUserLocalService.getOrganizationStatsUsers(
+			organizationId, start, end, obc);
 	}
 
 	@Override
@@ -303,18 +255,14 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
 		throws PortalException {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getPersistedModel(primaryKeyObj));
+		return super.getPersistedModel(primaryKeyObj);
 	}
 
 	@Override
 	public BlogsStatsUser getStatsUser(long groupId, long userId)
 		throws PortalException {
 
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.getStatsUser(groupId, userId));
+		return _blogsStatsUserLocalService.getStatsUser(groupId, userId);
 	}
 
 	@Override
@@ -331,12 +279,7 @@ public class ModularBlogsStatsUserLocalServiceWrapper
 
 	@Override
 	public BlogsStatsUser updateBlogsStatsUser(BlogsStatsUser blogsStatsUser) {
-		return ModelAdapterUtil.adapt(
-			BlogsStatsUser.class,
-			_blogsStatsUserLocalService.updateBlogsStatsUser(
-				ModelAdapterUtil.adapt(
-					com.liferay.blogs.model.BlogsStatsUser.class,
-					blogsStatsUser)));
+		return super.updateBlogsStatsUser(blogsStatsUser);
 	}
 
 	@Override

@@ -39,7 +39,6 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -287,7 +286,7 @@ public class CalendarUtil {
 		java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
 			calendarBooking.getStartTime(), timeZone);
 
-		if (Validator.isNotNull(calendarBooking.getRecurrence())) {
+		if (calendarBooking.isRecurring()) {
 			Recurrence recurrenceObj = RecurrenceUtil.inTimeZone(
 				calendarBooking.getRecurrenceObj(), startTimeJCalendar,
 				timeZone);
@@ -297,9 +296,6 @@ public class CalendarUtil {
 
 		jsonObject.put("recurrence", recurrence);
 
-		jsonObject.put(
-			"recurringCalendarBookingId",
-			calendarBooking.getRecurringCalendarBookingId());
 		jsonObject.put("secondReminder", calendarBooking.getSecondReminder());
 		jsonObject.put(
 			"secondReminderType", calendarBooking.getSecondReminder());

@@ -52,7 +52,7 @@ public class MessageLocalServiceImpl extends MessageLocalServiceBaseImpl {
 
 		// Message
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		Folder folder = folderPersistence.findByPrimaryKey(folderId);
 		Date now = new Date();
 

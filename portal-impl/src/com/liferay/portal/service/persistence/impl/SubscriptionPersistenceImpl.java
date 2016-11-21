@@ -2965,7 +2965,7 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((SubscriptionModelImpl)subscription, true);
+		clearUniqueFindersCache((SubscriptionModelImpl)subscription);
 	}
 
 	@Override
@@ -2977,11 +2977,44 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 			entityCache.removeResult(SubscriptionModelImpl.ENTITY_CACHE_ENABLED,
 				SubscriptionImpl.class, subscription.getPrimaryKey());
 
-			clearUniqueFindersCache((SubscriptionModelImpl)subscription, true);
+			clearUniqueFindersCache((SubscriptionModelImpl)subscription);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		SubscriptionModelImpl subscriptionModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					subscriptionModelImpl.getCompanyId(),
+					subscriptionModelImpl.getUserId(),
+					subscriptionModelImpl.getClassNameId(),
+					subscriptionModelImpl.getClassPK()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_C_U_C_C, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_C_U_C_C, args,
+				subscriptionModelImpl);
+		}
+		else {
+			if ((subscriptionModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_C_U_C_C.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						subscriptionModelImpl.getCompanyId(),
+						subscriptionModelImpl.getUserId(),
+						subscriptionModelImpl.getClassNameId(),
+						subscriptionModelImpl.getClassPK()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_C_U_C_C, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_C_U_C_C, args,
+					subscriptionModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		SubscriptionModelImpl subscriptionModelImpl) {
 		Object[] args = new Object[] {
 				subscriptionModelImpl.getCompanyId(),
@@ -2990,29 +3023,12 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 				subscriptionModelImpl.getClassPK()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_C_U_C_C, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_C_U_C_C, args,
-			subscriptionModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		SubscriptionModelImpl subscriptionModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					subscriptionModelImpl.getCompanyId(),
-					subscriptionModelImpl.getUserId(),
-					subscriptionModelImpl.getClassNameId(),
-					subscriptionModelImpl.getClassPK()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_U_C_C, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_U_C_C, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_U_C_C, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_U_C_C, args);
 
 		if ((subscriptionModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_U_C_C.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					subscriptionModelImpl.getOriginalCompanyId(),
 					subscriptionModelImpl.getOriginalUserId(),
 					subscriptionModelImpl.getOriginalClassNameId(),
@@ -3297,8 +3313,8 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 			SubscriptionImpl.class, subscription.getPrimaryKey(), subscription,
 			false);
 
-		clearUniqueFindersCache(subscriptionModelImpl, false);
-		cacheUniqueFindersCache(subscriptionModelImpl);
+		clearUniqueFindersCache(subscriptionModelImpl);
+		cacheUniqueFindersCache(subscriptionModelImpl, isNew);
 
 		subscription.resetOriginalValues();
 

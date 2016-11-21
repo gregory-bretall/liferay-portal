@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.site.model.adapter.StagedGroup;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
@@ -82,6 +83,7 @@ public class StagedGroupStagedModelRepository
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public List<StagedModel> fetchChildrenStagedModels(
 		PortletDataContext portletDataContext, StagedGroup stagedGroup) {
 
@@ -101,11 +103,20 @@ public class StagedGroupStagedModelRepository
 			_log.error(
 				"Unable to fetch Layout Set with groupId " +
 					stagedGroup.getGroupId() + " and private layout " +
-						portletDataContext.isPrivateLayout(),
-				pe);
+						portletDataContext.isPrivateLayout());
 		}
 
 		return childrenStagedModels;
+	}
+
+	@Override
+	public List<StagedModel> fetchDependencyStagedModels(
+		PortletDataContext portletDataContext, StagedGroup stagedGroup) {
+
+		// Group has no real dependencies, only the company or parent group,
+		// but these are not supported in staging
+
+		return Collections.emptyList();
 	}
 
 	public Group fetchExistingGroup(

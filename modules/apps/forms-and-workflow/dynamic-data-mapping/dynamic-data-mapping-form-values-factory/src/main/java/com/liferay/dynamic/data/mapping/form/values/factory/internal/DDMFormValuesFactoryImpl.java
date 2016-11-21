@@ -287,7 +287,7 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 		}
 
 		if (availableLocales.isEmpty()) {
-			availableLocales.add(LocaleThreadLocal.getSiteDefaultLocale());
+			availableLocales.add(LocaleThreadLocal.getThemeDisplayLocale());
 		}
 
 		return availableLocales;
@@ -437,7 +437,7 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 			httpServletRequest, "defaultLanguageId");
 
 		if (Validator.isNull(defaultLanguageId)) {
-			return LocaleThreadLocal.getSiteDefaultLocale();
+			return LocaleThreadLocal.getThemeDisplayLocale();
 		}
 
 		return LocaleUtil.fromLanguageId(defaultLanguageId);

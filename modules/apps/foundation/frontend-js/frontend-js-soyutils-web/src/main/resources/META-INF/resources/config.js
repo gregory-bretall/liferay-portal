@@ -16,7 +16,7 @@
 		}
 	);
 
-	Liferay.Loader.addModule(
+	Loader.addModule(
 		{
 			dependencies: [],
 			exports: 'soy',

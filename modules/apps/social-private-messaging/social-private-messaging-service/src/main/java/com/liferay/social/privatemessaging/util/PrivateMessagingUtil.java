@@ -23,8 +23,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -113,12 +111,6 @@ public class PrivateMessagingUtil {
 			}
 		}
 		catch (NoSuchRoleException nsre) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsre, nsre);
-			}
 		}
 
 		List<User> users = new ArrayList<>();
@@ -304,21 +296,11 @@ public class PrivateMessagingUtil {
 						"PrivateMessagingConfiguration"));
 		}
 		catch (ConfigurationException ce) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(ce, ce);
-			}
-
 			return null;
 		}
 	}
 
 	private static final boolean _USERS_SEARCH_WITH_INDEX =
 		GetterUtil.getBoolean(PropsUtil.get(PropsKeys.USERS_SEARCH_WITH_INDEX));
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		PrivateMessagingUtil.class);
 
 }

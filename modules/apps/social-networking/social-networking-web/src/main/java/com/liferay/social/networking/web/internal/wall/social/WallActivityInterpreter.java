@@ -18,9 +18,8 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
+import com.liferay.portal.kernel.util.ClassResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
-import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.social.kernel.model.BaseSocialActivityInterpreter;
 import com.liferay.social.kernel.model.SocialActivity;
@@ -139,18 +138,6 @@ public class WallActivityInterpreter extends BaseSocialActivityInterpreter {
 		return true;
 	}
 
-	@Reference(
-		target = "(bundle.symbolic.name=com.liferay.social.networking.web)",
-		unbind = "-"
-	)
-	protected void setResourceBundleLoader(
-		ResourceBundleLoader resourceBundleLoader) {
-
-		_resourceBundleLoader = new AggregateResourceBundleLoader(
-			resourceBundleLoader,
-			ResourceBundleLoaderUtil.getPortalResourceBundleLoader());
-	}
-
 	@Reference(unbind = "-")
 	protected void setSocialRelationLocalService(
 		SocialRelationLocalService socialRelationLocalService) {
@@ -172,7 +159,9 @@ public class WallActivityInterpreter extends BaseSocialActivityInterpreter {
 
 	private static final String[] _CLASS_NAMES = {WallEntry.class.getName()};
 
-	private ResourceBundleLoader _resourceBundleLoader;
+	private final ResourceBundleLoader _resourceBundleLoader =
+		new ClassResourceBundleLoader(
+			"content.Language", WallActivityInterpreter.class);
 	private SocialRelationLocalService _socialRelationLocalService;
 	private UserLocalService _userLocalService;
 	private WallEntryLocalService _wallEntryLocalService;

@@ -1,5 +1,4 @@
 @import "bourbon";
-@import "field-type-validation";
 
 .ddl-form-builder-app {
 	.lfr-ddm-form-page {
@@ -100,10 +99,6 @@
 
 	.row {
 		min-height: auto;
-	}
-
-	.has-error select.form-control[multiple] {
-		background-image: none;
 	}
 }
 

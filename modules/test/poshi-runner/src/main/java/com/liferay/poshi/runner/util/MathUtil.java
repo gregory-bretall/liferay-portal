@@ -19,16 +19,28 @@ package com.liferay.poshi.runner.util;
  */
 public class MathUtil {
 
-	public static int difference(Integer value1, Integer value2) {
-		return value1 - value2;
+	public static int difference(Integer...values) {
+		int difference = values[0];
+
+		for (int i = 1; i < values.length; i++) {
+			difference -= values[i];
+		}
+
+		return difference;
 	}
 
 	public static int percent(Integer percent, Integer value) {
 		return quotient(product(percent, value), 100, true);
 	}
 
-	public static int product(Integer value1, Integer value2) {
-		return value1 * value2;
+	public static int product(Integer... values) {
+		int product = 1;
+
+		for (int value : values) {
+			product *= value;
+		}
+
+		return product;
 	}
 
 	public static int quotient(Integer value1, Integer value2) {
@@ -43,8 +55,14 @@ public class MathUtil {
 		return quotient(value1, value2);
 	}
 
-	public static int sum(Integer value1, Integer value2) {
-		return value1 + value2;
+	public static int sum(Integer... values) {
+		int sum = 0;
+
+		for (int value : values) {
+			sum += value;
+		}
+
+		return sum;
 	}
 
 }

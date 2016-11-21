@@ -291,7 +291,7 @@ public class ConfigurationImpl
 		// method fixes the weird behavior by returning properties with the
 		// correct values.
 
-		Properties properties = new Properties();
+		_properties = new Properties();
 
 		ComponentProperties componentProperties = getComponentProperties();
 
@@ -299,12 +299,10 @@ public class ConfigurationImpl
 			componentProperties.getProperties();
 
 		for (String key : componentPropertiesProperties.stringPropertyNames()) {
-			properties.setProperty(key, componentProperties.getString(key));
+			_properties.setProperty(key, componentProperties.getString(key));
 		}
 
-		_properties = properties;
-
-		return properties;
+		return _properties;
 	}
 
 	@Override
@@ -370,7 +368,7 @@ public class ConfigurationImpl
 
 		componentProperties.setProperty(key, value);
 
-		clearCache();
+		_values.put(key, value);
 	}
 
 	protected String buildFilterCacheKey(

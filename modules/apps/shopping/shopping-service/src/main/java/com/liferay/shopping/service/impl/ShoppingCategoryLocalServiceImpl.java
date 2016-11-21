@@ -49,7 +49,7 @@ public class ShoppingCategoryLocalServiceImpl
 
 		// Category
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		long groupId = serviceContext.getScopeGroupId();
 

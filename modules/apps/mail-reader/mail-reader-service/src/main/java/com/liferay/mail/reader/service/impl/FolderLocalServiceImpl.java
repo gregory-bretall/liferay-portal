@@ -34,7 +34,7 @@ public class FolderLocalServiceImpl extends FolderLocalServiceBaseImpl {
 			int remoteMessageCount)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		Date now = new Date();
 
 		long folderId = counterLocalService.increment();

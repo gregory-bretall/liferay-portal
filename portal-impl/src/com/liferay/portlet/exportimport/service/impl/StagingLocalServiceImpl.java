@@ -14,8 +14,6 @@
 
 package com.liferay.portlet.exportimport.service.impl;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
 import com.liferay.document.library.kernel.exception.NoSuchFolderException;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
@@ -90,7 +88,6 @@ import javax.portlet.PortletRequest;
  * @author Mate Thurzo
  * @author Vilmos Papp
  */
-@ProviderType
 public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 
 	@Override
@@ -573,7 +570,7 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			liveGroup.getNameMap(), liveGroup.getDescriptionMap(),
 			liveGroup.getType(), liveGroup.isManualMembership(),
 			liveGroup.getMembershipRestriction(), liveGroup.getFriendlyURL(),
-			false, true, serviceContext);
+			false, liveGroup.isActive(), serviceContext);
 
 		if (LanguageUtil.isInheritLocales(liveGroup.getGroupId())) {
 			return stagingGroup;
@@ -700,13 +697,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			}
 		}
 		catch (PrincipalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.NO_PERMISSIONS);
 
@@ -715,25 +705,11 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			throw ree;
 		}
 		catch (RemoteAuthException rae) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(rae, rae);
-			}
-
 			rae.setURL(remoteURL);
 
 			throw rae;
 		}
 		catch (SystemException se) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(se, se);
-			}
-
 			if (!forceDisable) {
 				RemoteExportException ree = new RemoteExportException(
 					RemoteExportException.BAD_CONNECTION);
@@ -765,13 +741,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			GroupServiceHttp.enableStaging(httpPrincipal, remoteGroupId);
 		}
 		catch (NoSuchGroupException nsge) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsge, nsge);
-			}
-
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.NO_GROUP);
 
@@ -780,13 +749,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			throw ree;
 		}
 		catch (PrincipalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.NO_PERMISSIONS);
 
@@ -795,25 +757,11 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			throw ree;
 		}
 		catch (RemoteAuthException rae) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(rae, rae);
-			}
-
 			rae.setURL(remoteURL);
 
 			throw rae;
 		}
 		catch (SystemException se) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(se, se);
-			}
-
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.BAD_CONNECTION);
 
@@ -833,13 +781,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 				getAssembledFileName(stagingRequestId));
 		}
 		catch (NoSuchFileEntryException nsfee) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsfee, nsfee);
-			}
-
 			return null;
 		}
 	}
@@ -1016,13 +957,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 				httpPrincipal, remoteGroupId, stagedPortletIds);
 		}
 		catch (NoSuchGroupException nsge) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsge, nsge);
-			}
-
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.NO_GROUP);
 
@@ -1031,13 +965,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			throw ree;
 		}
 		catch (PrincipalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.NO_PERMISSIONS);
 
@@ -1046,25 +973,11 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			throw ree;
 		}
 		catch (RemoteAuthException rae) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(rae, rae);
-			}
-
 			rae.setURL(remoteURL);
 
 			throw rae;
 		}
 		catch (SystemException se) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(se, se);
-			}
-
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.BAD_CONNECTION);
 

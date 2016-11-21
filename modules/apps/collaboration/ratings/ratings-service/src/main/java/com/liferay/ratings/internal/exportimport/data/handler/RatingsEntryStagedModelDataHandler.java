@@ -126,7 +126,7 @@ public class RatingsEntryStagedModelDataHandler
 		catch (PortalException pe) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Unable to import ratings entry " + entry.getEntryId(), pe);
+					"Unable to import ratings entry " + entry.getEntryId());
 			}
 
 			return;

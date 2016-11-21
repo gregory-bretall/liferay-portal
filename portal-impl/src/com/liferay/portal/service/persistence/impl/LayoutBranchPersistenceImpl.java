@@ -2080,7 +2080,7 @@ public class LayoutBranchPersistenceImpl extends BasePersistenceImpl<LayoutBranc
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((LayoutBranchModelImpl)layoutBranch, true);
+		clearUniqueFindersCache((LayoutBranchModelImpl)layoutBranch);
 	}
 
 	@Override
@@ -2092,39 +2092,54 @@ public class LayoutBranchPersistenceImpl extends BasePersistenceImpl<LayoutBranc
 			entityCache.removeResult(LayoutBranchModelImpl.ENTITY_CACHE_ENABLED,
 				LayoutBranchImpl.class, layoutBranch.getPrimaryKey());
 
-			clearUniqueFindersCache((LayoutBranchModelImpl)layoutBranch, true);
+			clearUniqueFindersCache((LayoutBranchModelImpl)layoutBranch);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		LayoutBranchModelImpl layoutBranchModelImpl) {
-		Object[] args = new Object[] {
-				layoutBranchModelImpl.getLayoutSetBranchId(),
-				layoutBranchModelImpl.getPlid(), layoutBranchModelImpl.getName()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_L_P_N, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_L_P_N, args,
-			layoutBranchModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		LayoutBranchModelImpl layoutBranchModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
+		LayoutBranchModelImpl layoutBranchModelImpl, boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 					layoutBranchModelImpl.getLayoutSetBranchId(),
 					layoutBranchModelImpl.getPlid(),
 					layoutBranchModelImpl.getName()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_L_P_N, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_L_P_N, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_L_P_N, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_L_P_N, args,
+				layoutBranchModelImpl);
 		}
+		else {
+			if ((layoutBranchModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_L_P_N.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						layoutBranchModelImpl.getLayoutSetBranchId(),
+						layoutBranchModelImpl.getPlid(),
+						layoutBranchModelImpl.getName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_L_P_N, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_L_P_N, args,
+					layoutBranchModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
+		LayoutBranchModelImpl layoutBranchModelImpl) {
+		Object[] args = new Object[] {
+				layoutBranchModelImpl.getLayoutSetBranchId(),
+				layoutBranchModelImpl.getPlid(), layoutBranchModelImpl.getName()
+			};
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_L_P_N, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_L_P_N, args);
 
 		if ((layoutBranchModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_L_P_N.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					layoutBranchModelImpl.getOriginalLayoutSetBranchId(),
 					layoutBranchModelImpl.getOriginalPlid(),
 					layoutBranchModelImpl.getOriginalName()
@@ -2342,8 +2357,8 @@ public class LayoutBranchPersistenceImpl extends BasePersistenceImpl<LayoutBranc
 			LayoutBranchImpl.class, layoutBranch.getPrimaryKey(), layoutBranch,
 			false);
 
-		clearUniqueFindersCache(layoutBranchModelImpl, false);
-		cacheUniqueFindersCache(layoutBranchModelImpl);
+		clearUniqueFindersCache(layoutBranchModelImpl);
+		cacheUniqueFindersCache(layoutBranchModelImpl, isNew);
 
 		layoutBranch.resetOriginalValues();
 

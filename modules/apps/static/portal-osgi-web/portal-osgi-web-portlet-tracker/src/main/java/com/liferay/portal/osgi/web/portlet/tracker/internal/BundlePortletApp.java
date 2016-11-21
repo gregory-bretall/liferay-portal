@@ -21,9 +21,7 @@ import com.liferay.portal.kernel.model.PortletFilter;
 import com.liferay.portal.kernel.model.PortletURLListener;
 import com.liferay.portal.kernel.model.PublicRenderParameter;
 import com.liferay.portal.kernel.model.SpriteImage;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.xml.QName;
-import com.liferay.portal.osgi.web.servlet.context.helper.ServletContextHelperRegistration;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +31,6 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.osgi.framework.Bundle;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Raymond Augé
@@ -41,12 +38,12 @@ import org.osgi.util.tracker.ServiceTracker;
 public class BundlePortletApp implements PortletApp {
 
 	public BundlePortletApp(
-		Bundle bundle, Portlet portalPortletModel,
-		ServiceTracker<ServletContextHelperRegistration, ServletContext>
-			serviceTracker) {
+		Bundle bundle, Portlet portalPortletModel, String servletContextName,
+		String contextPath) {
 
 		_portalPortletModel = portalPortletModel;
-		_serviceTracker = serviceTracker;
+		_servletContextName = servletContextName;
+		_contextPath = contextPath;
 
 		_pluginPackage = new BundlePluginPackage(bundle, this);
 		_portletApp = portalPortletModel.getPortletApp();
@@ -96,9 +93,7 @@ public class BundlePortletApp implements PortletApp {
 
 	@Override
 	public String getContextPath() {
-		ServletContext servletContext = getServletContext();
-
-		return servletContext.getContextPath();
+		return _contextPath;
 	}
 
 	@Override
@@ -156,19 +151,12 @@ public class BundlePortletApp implements PortletApp {
 
 	@Override
 	public ServletContext getServletContext() {
-		try {
-			return _serviceTracker.waitForService(0);
-		}
-		catch (InterruptedException ie) {
-			return ReflectionUtil.throwException(ie);
-		}
+		return _servletContext;
 	}
 
 	@Override
 	public String getServletContextName() {
-		ServletContext servletContext = getServletContext();
-
-		return servletContext.getServletContextName();
+		return _servletContextName;
 	}
 
 	@Override
@@ -203,7 +191,7 @@ public class BundlePortletApp implements PortletApp {
 
 	@Override
 	public void setServletContext(ServletContext servletContext) {
-		throw new UnsupportedOperationException();
+		_servletContext = servletContext;
 	}
 
 	@Override
@@ -216,10 +204,11 @@ public class BundlePortletApp implements PortletApp {
 		_portletApp.setWARFile(warFile);
 	}
 
+	private final String _contextPath;
 	private final BundlePluginPackage _pluginPackage;
 	private final Portlet _portalPortletModel;
 	private final PortletApp _portletApp;
-	private final ServiceTracker
-		<ServletContextHelperRegistration, ServletContext> _serviceTracker;
+	private ServletContext _servletContext;
+	private final String _servletContextName;
 
 }

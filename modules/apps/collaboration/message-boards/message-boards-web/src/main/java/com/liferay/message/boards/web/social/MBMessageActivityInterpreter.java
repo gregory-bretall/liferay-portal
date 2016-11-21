@@ -18,11 +18,10 @@ import com.liferay.message.boards.kernel.model.MBCategory;
 import com.liferay.message.boards.kernel.model.MBMessage;
 import com.liferay.message.boards.kernel.service.MBMessageLocalService;
 import com.liferay.message.boards.web.constants.MBPortletKeys;
+import com.liferay.message.boards.web.internal.util.MBResourceBundleLoader;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
-import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -90,7 +89,7 @@ public class MBMessageActivityInterpreter
 
 	@Override
 	protected ResourceBundleLoader getResourceBundleLoader() {
-		return _resourceBundleLoader;
+		return MBResourceBundleLoader.INSTANCE;
 	}
 
 	@Override
@@ -171,21 +170,8 @@ public class MBMessageActivityInterpreter
 		_mbMessageLocalService = mbMessageLocalService;
 	}
 
-	@Reference(
-		target = "(bundle.symbolic.name=com.liferay.message.boards.web)",
-		unbind = "-"
-	)
-	protected void setResourceBundleLoader(
-		ResourceBundleLoader resourceBundleLoader) {
-
-		_resourceBundleLoader = new AggregateResourceBundleLoader(
-			resourceBundleLoader,
-			ResourceBundleLoaderUtil.getPortalResourceBundleLoader());
-	}
-
 	private static final String[] _CLASS_NAMES = {MBMessage.class.getName()};
 
 	private MBMessageLocalService _mbMessageLocalService;
-	private ResourceBundleLoader _resourceBundleLoader;
 
 }

@@ -18,7 +18,7 @@
 
 <%
 AssetRenderer<?> assetRenderer = (AssetRenderer<?>)request.getAttribute(WebKeys.ASSET_RENDERER);
-int abstractLength = GetterUtil.getInteger(request.getAttribute(WebKeys.ASSET_ENTRY_ABSTRACT_LENGTH));
+int abstractLength = GetterUtil.getInteger(request.getAttribute("liferay-ui:asset-display:abstractLength"));
 
 String summary = StringUtil.shorten(assetRenderer.getSummary(renderRequest, renderResponse), abstractLength);
 %>

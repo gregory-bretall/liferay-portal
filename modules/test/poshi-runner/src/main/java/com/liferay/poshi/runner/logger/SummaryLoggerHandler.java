@@ -816,7 +816,7 @@ public final class SummaryLoggerHandler {
 			String varName = matcher.group(1);
 
 			String varValue = HtmlUtil.escape(
-				PoshiRunnerVariablesUtil.getStringFromExecuteMap(varName));
+				PoshiRunnerVariablesUtil.getValueFromExecuteMap(varName));
 
 			if ((element.attributeValue("function") != null) &&
 				varName.startsWith("locator")) {
@@ -824,7 +824,7 @@ public final class SummaryLoggerHandler {
 				varName = StringUtil.replace(varName, "locator", "locator-key");
 
 				String locatorKey =
-					PoshiRunnerVariablesUtil.getStringFromExecuteMap(varName);
+					PoshiRunnerVariablesUtil.getValueFromExecuteMap(varName);
 
 				if (Validator.isNotNull(locatorKey)) {
 					StringBuilder sb = new StringBuilder();

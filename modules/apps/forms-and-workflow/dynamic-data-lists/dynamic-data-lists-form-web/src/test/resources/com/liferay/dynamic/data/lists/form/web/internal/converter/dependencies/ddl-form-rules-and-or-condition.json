@@ -2,44 +2,6 @@
 	{
 		"actions": [
 			{
-				"action": "show",
-				"target": "Field2"
-			}
-		],
-		"conditions": [
-			{
-
-				"operands": [
-					{
-						"type": "field",
-						"value": "Field1"
-					},
-					{
-						"type": "constant",
-						"value": "Joe"
-					}
-				],
-				"operator": "not-equals-to"
-			},
-			{
-				"operands": [
-					{
-						"type": "field",
-						"value": "Field1"
-					},
-					{
-						"type": "constant",
-						"value": "Blogs"
-					}
-				],
-				"operator": "not-contains"
-			}
-		],
-		"logical-operator": "OR"
-	},
-	{
-		"actions": [
-			{
 				"action": "enable",
 				"target": "Field3"
 			}
@@ -70,7 +32,7 @@
 						"value": "4"
 					}
 				],
-				"operator": "contains"
+				"operator": "less-than"
 			}
 		],
 		"logical-operator": "AND"
@@ -112,7 +74,7 @@
 						"value": "4"
 					}
 				],
-				"operator": "contains"
+				"operator": "greater-than"
 			},
 			{
 				"operands": [
@@ -125,7 +87,7 @@
 						"value": "3"
 					}
 				],
-				"operator": "equals-to"
+				"operator": "greater-than-equals"
 			}
 		],
 		"logical-operator": "OR"

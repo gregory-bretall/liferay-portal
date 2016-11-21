@@ -17,8 +17,6 @@ package com.liferay.staging.processes.web.internal.portlet.configuration.icon;
 import com.liferay.exportimport.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.configuration.icon.BasePortletConfigurationIcon;
@@ -117,13 +115,6 @@ public class StagingConfigurationPortletConfigurationIcon
 				ActionKeys.MANAGE_STAGING);
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			return false;
 		}
 	}
@@ -132,8 +123,5 @@ public class StagingConfigurationPortletConfigurationIcon
 	public boolean isToolTip() {
 		return false;
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		StagingConfigurationPortletConfigurationIcon.class);
 
 }

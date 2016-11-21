@@ -23,8 +23,6 @@ import com.liferay.expando.kernel.service.ExpandoColumnLocalService;
 import com.liferay.expando.kernel.service.ExpandoTableLocalService;
 import com.liferay.expando.kernel.service.ExpandoValueLocalService;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.LoggingTimer;
@@ -65,13 +63,6 @@ public class UpgradeExpando extends UpgradeProcess {
 					companyId, User.class.getName(), "MP");
 			}
 			catch (NoSuchTableException nste) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nste, nste);
-				}
-
 				return;
 			}
 
@@ -111,8 +102,6 @@ public class UpgradeExpando extends UpgradeProcess {
 				oldExpandoColumn.getColumnId());
 		}
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(UpgradeExpando.class);
 
 	private final ExpandoColumnLocalService _expandoColumnLocalService;
 	private final ExpandoTableLocalService _expandoTableLocalService;

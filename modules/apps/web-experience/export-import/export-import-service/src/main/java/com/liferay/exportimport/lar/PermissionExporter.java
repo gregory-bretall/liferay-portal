@@ -14,16 +14,11 @@
 
 package com.liferay.exportimport.lar;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.exportimport.internal.util.ExportImportPermissionUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.PortletConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
@@ -32,7 +27,6 @@ import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.KeyValuePair;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
@@ -52,7 +46,6 @@ import java.util.Set;
  * @author Zsigmond Rab
  * @author Douglas Wong
  */
-@ProviderType
 public class PermissionExporter {
 
 	public static PermissionExporter getInstance() {
@@ -111,16 +104,8 @@ public class PermissionExporter {
 		throws Exception {
 
 		String resourceName = PortletConstants.getRootPortletId(portletId);
-		String resourcePrimKey = StringPool.BLANK;
-
-		if (layout != null) {
-			resourcePrimKey = PortletPermissionUtil.getPrimaryKey(
-				layout.getPlid(), portletId);
-		}
-		else {
-			resourcePrimKey = PortletPermissionUtil.getPrimaryKey(
-				LayoutConstants.DEFAULT_PLID, portletId);
-		}
+		String resourcePrimKey = PortletPermissionUtil.getPrimaryKey(
+			layout.getPlid(), portletId);
 
 		Element permissionsElement = portletElement.addElement("permissions");
 
@@ -155,12 +140,6 @@ public class PermissionExporter {
 						role.getDescriptiveName());
 				}
 				catch (PortalException pe) {
-
-					// LPS-52675
-
-					if (_log.isDebugEnabled()) {
-						_log.debug(pe, pe);
-					}
 				}
 			}
 
@@ -185,9 +164,6 @@ public class PermissionExporter {
 
 	private PermissionExporter() {
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		PermissionExporter.class);
 
 	private static final PermissionExporter _instance =
 		new PermissionExporter();

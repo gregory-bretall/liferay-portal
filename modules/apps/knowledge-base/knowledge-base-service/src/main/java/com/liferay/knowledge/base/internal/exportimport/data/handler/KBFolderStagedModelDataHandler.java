@@ -23,6 +23,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.knowledge.base.constants.KBFolderConstants;
 import com.liferay.knowledge.base.model.KBFolder;
 import com.liferay.knowledge.base.service.KBFolderLocalService;
+import com.liferay.knowledge.base.service.persistence.KBFolderPersistence;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.xml.Element;
@@ -114,12 +115,10 @@ public class KBFolderStagedModelDataHandler
 		KBFolder importedKBFolder = null;
 
 		if (portletDataContext.isDataStrategyMirror()) {
-			KBFolder existingKBFolder = _kbFolderLocalService.fetchKBFolder(
+			KBFolder existingKBFolder = _kbFolderPersistence.fetchByUUID_G(
 				kbFolder.getUuid(), portletDataContext.getScopeGroupId());
 
 			if (existingKBFolder == null) {
-				serviceContext.setUuid(kbFolder.getUuid());
-
 				importedKBFolder = _kbFolderLocalService.addKBFolder(
 					userId, portletDataContext.getScopeGroupId(),
 					kbFolder.getClassNameId(), kbFolder.getParentKBFolderId(),
@@ -157,6 +156,14 @@ public class KBFolderStagedModelDataHandler
 		_kbFolderLocalService = kbFolderLocalService;
 	}
 
+	@Reference(unbind = "-")
+	protected void setKbFolderPersistence(
+		KBFolderPersistence kbFolderPersistence) {
+
+		_kbFolderPersistence = kbFolderPersistence;
+	}
+
 	private KBFolderLocalService _kbFolderLocalService;
+	private KBFolderPersistence _kbFolderPersistence;
 
 }

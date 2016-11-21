@@ -35,14 +35,7 @@
 	<liferay-ui:search-container-results>
 
 		<%
-		if (mvcRenderCommandName.equals("/message_boards/view_my_subscriptions")) {
-			total = MBThreadServiceUtil.getGroupThreadsCount(scopeGroupId, groupThreadsUserId, WorkflowConstants.STATUS_APPROVED, true);
-
-			searchContainer.setTotal(total);
-
-			results = MBThreadServiceUtil.getGroupThreads(scopeGroupId, groupThreadsUserId, WorkflowConstants.STATUS_APPROVED, true, searchContainer.getStart(), searchContainer.getEnd());
-		}
-		else if (useAssetEntryQuery) {
+		if (useAssetEntryQuery) {
 			AssetEntryQuery assetEntryQuery = new AssetEntryQuery(MBMessage.class.getName(), searchContainer);
 
 			assetEntryQuery.setEnablePermissions(true);
@@ -56,6 +49,13 @@
 			assetEntryQuery.setStart(searchContainer.getStart());
 
 			results = AssetEntryServiceUtil.getEntries(assetEntryQuery);
+		}
+		else if (mvcRenderCommandName.equals("/message_boards/view_my_subscriptions")) {
+			total = MBThreadServiceUtil.getGroupThreadsCount(scopeGroupId, groupThreadsUserId, WorkflowConstants.STATUS_APPROVED, true);
+
+			searchContainer.setTotal(total);
+
+			results = MBThreadServiceUtil.getGroupThreads(scopeGroupId, groupThreadsUserId, WorkflowConstants.STATUS_APPROVED, true, searchContainer.getStart(), searchContainer.getEnd());
 		}
 
 		searchContainer.setResults(results);

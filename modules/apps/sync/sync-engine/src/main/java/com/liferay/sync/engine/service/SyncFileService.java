@@ -63,7 +63,7 @@ public class SyncFileService {
 
 		// Local sync file
 
-		if (FileUtil.notExists(filePath)) {
+		if (Files.notExists(filePath)) {
 			return null;
 		}
 
@@ -93,7 +93,7 @@ public class SyncFileService {
 
 		// Local sync file
 
-		if (FileUtil.notExists(filePath)) {
+		if (Files.notExists(filePath)) {
 			return null;
 		}
 
@@ -208,7 +208,7 @@ public class SyncFileService {
 
 		// Local sync file
 
-		if (FileUtil.notExists(filePath)) {
+		if (Files.notExists(filePath)) {
 			return null;
 		}
 
@@ -315,22 +315,6 @@ public class SyncFileService {
 		try {
 			return _syncFilePersistence.fetchByR_S_T(
 				repositoryId, syncAccountId, typePK);
-		}
-		catch (SQLException sqle) {
-			if (_logger.isDebugEnabled()) {
-				_logger.debug(sqle.getMessage(), sqle);
-			}
-
-			return null;
-		}
-	}
-
-	public static SyncFile fetchSyncFile(
-		long repositoryId, long syncAccountId, long typePK, long versionId) {
-
-		try {
-			return _syncFilePersistence.fetchByR_S_T_V(
-				repositoryId, syncAccountId, typePK, versionId);
 		}
 		catch (SQLException sqle) {
 			if (_logger.isDebugEnabled()) {
@@ -510,9 +494,9 @@ public class SyncFileService {
 		}
 	}
 
-	public static long getSyncFilesCount(Integer... uiEvents) {
+	public static long getSyncFilesCount(int uiEvent) {
 		try {
-			return _syncFilePersistence.countByUIEvents(uiEvents);
+			return _syncFilePersistence.countByUIEvent(uiEvent);
 		}
 		catch (SQLException sqle) {
 			if (_logger.isDebugEnabled()) {
@@ -824,7 +808,7 @@ public class SyncFileService {
 			SyncFileService.update(syncFile);
 
 			if (isAncestorInList(syncFile, unsyncedSyncFileIds) ||
-				!FileUtil.exists(Paths.get(syncFile.getFilePathName()))) {
+				!Files.exists(Paths.get(syncFile.getFilePathName()))) {
 
 				continue;
 			}
@@ -897,7 +881,7 @@ public class SyncFileService {
 			Path filePath, long syncAccountId, SyncFile syncFile)
 		throws Exception {
 
-		if (FileUtil.notExists(filePath)) {
+		if (Files.notExists(filePath)) {
 			return null;
 		}
 

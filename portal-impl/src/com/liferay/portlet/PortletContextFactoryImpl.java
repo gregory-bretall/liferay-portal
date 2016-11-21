@@ -14,6 +14,8 @@
 
 package com.liferay.portlet;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.PortletApp;
 import com.liferay.portal.kernel.portlet.PortletContextFactory;
@@ -78,6 +80,9 @@ public class PortletContextFactoryImpl implements PortletContextFactory {
 	public void destroy(Portlet portlet) {
 		_pool.remove(portlet.getRootPortletId());
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		PortletContextFactoryImpl.class);
 
 	private final Map<String, Map<String, PortletContext>> _pool =
 		new ConcurrentHashMap<>();

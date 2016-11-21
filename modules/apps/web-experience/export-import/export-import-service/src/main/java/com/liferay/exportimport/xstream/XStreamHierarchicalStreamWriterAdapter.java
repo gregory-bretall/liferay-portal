@@ -14,8 +14,6 @@
 
 package com.liferay.exportimport.xstream;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.exportimport.kernel.xstream.XStreamHierarchicalStreamWriter;
 
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -23,8 +21,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 /**
  * @author Daniel Kocsis
  */
-@ProviderType
-public class XStreamHierarchicalStreamWriterAdapter
+class XStreamHierarchicalStreamWriterAdapter
 	implements XStreamHierarchicalStreamWriter {
 
 	public XStreamHierarchicalStreamWriterAdapter(
@@ -34,13 +31,18 @@ public class XStreamHierarchicalStreamWriterAdapter
 	}
 
 	@Override
+	public void startNode(String name) {
+		_hierarchicalStreamWriter.startNode(name);
+	}
+
+	@Override
 	public void addAttribute(String key, String value) {
 		_hierarchicalStreamWriter.addAttribute(key, value);
 	}
 
 	@Override
-	public void close() {
-		_hierarchicalStreamWriter.close();
+	public void setValue(String value) {
+		_hierarchicalStreamWriter.setValue(value);
 	}
 
 	@Override
@@ -54,13 +56,8 @@ public class XStreamHierarchicalStreamWriterAdapter
 	}
 
 	@Override
-	public void setValue(String value) {
-		_hierarchicalStreamWriter.setValue(value);
-	}
-
-	@Override
-	public void startNode(String name) {
-		_hierarchicalStreamWriter.startNode(name);
+	public void close() {
+		_hierarchicalStreamWriter.close();
 	}
 
 	@Override

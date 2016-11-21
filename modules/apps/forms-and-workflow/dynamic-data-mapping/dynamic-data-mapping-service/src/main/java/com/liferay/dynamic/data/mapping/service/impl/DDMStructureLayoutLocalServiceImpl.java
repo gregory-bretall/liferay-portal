@@ -42,7 +42,7 @@ public class DDMStructureLayoutLocalServiceImpl
 			DDMFormLayout ddmFormLayout, ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		validate(ddmFormLayout);
 

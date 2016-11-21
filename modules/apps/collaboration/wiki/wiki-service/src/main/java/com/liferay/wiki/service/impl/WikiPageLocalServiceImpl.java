@@ -165,7 +165,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		// Page
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		WikiNode node = wikiNodePersistence.findByPrimaryKey(nodeId);
 		Date now = new Date();
 
@@ -2059,7 +2059,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		// Page
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		int oldStatus = page.getStatus();
 
@@ -2387,7 +2387,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		}
 		else {
 			portletURL = PortletURLFactoryUtil.create(
-				request, WikiPortletKeys.WIKI, plid,
+				request, WikiConstants.SERVICE_NAME, plid,
 				PortletRequest.RENDER_PHASE);
 		}
 
@@ -3153,7 +3153,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		long pageId = 0;
 

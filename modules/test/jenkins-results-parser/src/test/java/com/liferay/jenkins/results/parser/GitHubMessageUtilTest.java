@@ -40,9 +40,6 @@ public class GitHubMessageUtilTest extends BaseJenkinsResultsParserTestCase {
 	@Before
 	public void setUp() throws Exception {
 		downloadSample(
-			"ff-vnc-1", "37", "test-portal-acceptance-pullrequest(master)",
-			"test-1-12");
-		downloadSample(
 			"generic-1", "1609", "test-portal-acceptance-pullrequest(master)",
 			"test-1-1");
 		downloadSample(
@@ -127,18 +124,12 @@ public class GitHubMessageUtilTest extends BaseJenkinsResultsParserTestCase {
 
 			File reportFile = new File(sampleDir, jobCount + "-report.html");
 
-			StringBuilder sb = new StringBuilder();
-
-			sb.append("<h5 job-result=\"");
-			sb.append(jsonObject.getString("result"));
-			sb.append("\"><a href=\"");
-			sb.append(urlString);
-			sb.append("\">");
-			sb.append(jobNameMatcher.group("jobName"));
-			sb.append("</a></h5>");
-			sb.append(project.getProperty("report.html.content"));
-
-			JenkinsResultsParserUtil.write(reportFile, sb.toString());
+			JenkinsResultsParserUtil.write(
+				reportFile,
+				"<h5 job-result=\"" + jsonObject.getString("result") +
+					"\"><a href=\"" + urlString + "\">" +
+						jobNameMatcher.group("jobName") + "</a></h5>" +
+				project.getProperty("report.html.content"));
 
 			if (reportFilesSB.length() > 0) {
 				reportFilesSB.append(" ");

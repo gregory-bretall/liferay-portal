@@ -125,11 +125,7 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 			startTime = System.currentTimeMillis();
 		}
 
-		Element rootElement = null;
-
 		try {
-			rootElement = portletDataContext.getExportDataRootElement();
-
 			portletDataContext.addDeletionSystemEventStagedModelTypes(
 				getDeletionSystemEventStagedModelTypes());
 
@@ -150,8 +146,6 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 			throw new PortletDataException(e);
 		}
 		finally {
-			portletDataContext.setExportDataRootElement(rootElement);
-
 			if (_log.isInfoEnabled()) {
 				long duration = System.currentTimeMillis() - startTime;
 
@@ -370,12 +364,8 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 
 		long sourceGroupId = portletDataContext.getSourceGroupId();
 
-		Element rootElement = null;
-
 		try {
 			if (Validator.isXml(data)) {
-				rootElement = portletDataContext.getImportDataRootElement();
-
 				addImportDataRootElement(portletDataContext, data);
 			}
 
@@ -389,7 +379,6 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 			throw new PortletDataException(e);
 		}
 		finally {
-			portletDataContext.setImportDataRootElement(rootElement);
 			portletDataContext.setSourceGroupId(sourceGroupId);
 
 			if (_log.isInfoEnabled()) {
@@ -738,8 +727,8 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 			long modelAdditionCount = manifestSummary.getModelAdditionCount(
 				stagedModelType);
 
-			if (portletDataHandlerControl instanceof
-					PortletDataHandlerBoolean) {
+			if (portletDataHandlerControl
+					instanceof PortletDataHandlerBoolean) {
 
 				PortletDataHandlerBoolean portletDataHandlerBoolean =
 					(PortletDataHandlerBoolean)portletDataHandlerControl;

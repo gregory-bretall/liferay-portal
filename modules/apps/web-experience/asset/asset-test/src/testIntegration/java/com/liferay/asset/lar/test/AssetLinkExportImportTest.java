@@ -104,7 +104,7 @@ public class AssetLinkExportImportTest extends BaseExportImportTestCase {
 			assetEntry.getEntryId());
 
 		Assert.assertNotNull(assetLinks);
-		Assert.assertTrue(!assetLinks.isEmpty());
+		Assert.assertTrue(assetLinks.size() > 0);
 	}
 
 	@Test

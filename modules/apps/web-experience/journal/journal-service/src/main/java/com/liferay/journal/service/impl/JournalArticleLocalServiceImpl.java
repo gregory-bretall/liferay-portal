@@ -319,7 +319,7 @@ public class JournalArticleLocalServiceImpl
 
 		// Article
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		articleId = StringUtil.toUpperCase(articleId.trim());
 
 		Date displayDate = null;
@@ -543,7 +543,7 @@ public class JournalArticleLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		Calendar calendar = CalendarFactoryUtil.getCalendar(user.getTimeZone());
 
@@ -760,7 +760,7 @@ public class JournalArticleLocalServiceImpl
 
 		// Article
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		oldArticleId = StringUtil.toUpperCase(oldArticleId.trim());
 		newArticleId = StringUtil.toUpperCase(newArticleId.trim());
 
@@ -1400,17 +1400,6 @@ public class JournalArticleLocalServiceImpl
 				userId, groupId, article.getArticleId(), article.getVersion(),
 				articleURL, serviceContext);
 		}
-	}
-
-	/**
-	 * Returns the web content article with the ID.
-	 *
-	 * @param  id the primary key of the web content article
-	 * @return the web content article with the ID
-	 */
-	@Override
-	public JournalArticle fetchArticle(long id) {
-		return journalArticlePersistence.fetchByPrimaryKey(id);
 	}
 
 	@Override
@@ -2785,7 +2774,7 @@ public class JournalArticleLocalServiceImpl
 		if (article == null) {
 			throw new NoSuchArticleException(
 				"No approved JournalArticle exists with the key {groupId=" +
-					groupId + ", articleId=" + articleId + "}");
+					groupId + ", " + "articleId=" + articleId + "}");
 		}
 
 		return article;
@@ -5052,7 +5041,7 @@ public class JournalArticleLocalServiceImpl
 			String layoutUuid, ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		JournalArticle article = journalArticlePersistence.findByG_A_V(
 			groupId, articleId, version);
@@ -5252,7 +5241,7 @@ public class JournalArticleLocalServiceImpl
 
 		// Article
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		articleId = StringUtil.toUpperCase(articleId.trim());
 
 		byte[] smallImageBytes = null;
@@ -5585,10 +5574,11 @@ public class JournalArticleLocalServiceImpl
 
 		JournalArticle article = null;
 
-		User user = userLocalService.fetchUser(oldArticle.getUserId());
+		User user = userPersistence.fetchByC_U(
+			oldArticle.getCompanyId(), oldArticle.getUserId());
 
 		if (user == null) {
-			user = userLocalService.getDefaultUser(oldArticle.getCompanyId());
+			user = userPersistence.fetchByC_DU(oldArticle.getCompanyId(), true);
 		}
 
 		Locale defaultLocale = getArticleDefaultLocale(content);
@@ -5862,7 +5852,7 @@ public class JournalArticleLocalServiceImpl
 
 		// Article
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		Date now = new Date();
 
 		if ((status == WorkflowConstants.STATUS_APPROVED) &&
@@ -6027,7 +6017,7 @@ public class JournalArticleLocalServiceImpl
 				catch (Exception e) {
 					_log.error(
 						"Unable to send email to notify the change of status " +
-							"to " + msg + " for article " + article.getId() +
+							" to " + msg + " for article " + article.getId() +
 								": " + e.getMessage());
 				}
 			}
@@ -7476,10 +7466,10 @@ public class JournalArticleLocalServiceImpl
 			return;
 		}
 
-		Company company = companyLocalService.getCompany(
+		Company company = companyPersistence.findByPrimaryKey(
 			article.getCompanyId());
 
-		User user = userLocalService.getUser(article.getUserId());
+		User user = userPersistence.findByPrimaryKey(article.getUserId());
 
 		String fromName = journalGroupServiceConfiguration.emailFromName();
 		String fromAddress =
@@ -7759,7 +7749,7 @@ public class JournalArticleLocalServiceImpl
 				previousApprovedArticle.getModifiedDate());
 			assetEntry.setTitle(previousApprovedArticle.getTitleMapAsXML());
 
-			assetEntryLocalService.updateAssetEntry(assetEntry);
+			assetEntryPersistence.update(assetEntry);
 		}
 	}
 
@@ -8155,27 +8145,17 @@ public class JournalArticleLocalServiceImpl
 			String languageId)
 		throws PortalException {
 
+		long journalArticleLocalizationId = counterLocalService.increment();
+
 		JournalArticleLocalization journalArticleLocalization =
-			journalArticleLocalizationPersistence.fetchByA_L(
-				articlePK, languageId);
+			journalArticleLocalizationPersistence.create(
+				journalArticleLocalizationId);
 
-		if (journalArticleLocalization == null) {
-			long journalArticleLocalizationId = counterLocalService.increment();
-
-			journalArticleLocalization =
-				journalArticleLocalizationPersistence.create(
-					journalArticleLocalizationId);
-
-			journalArticleLocalization.setCompanyId(companyId);
-			journalArticleLocalization.setArticlePK(articlePK);
-			journalArticleLocalization.setTitle(title);
-			journalArticleLocalization.setDescription(description);
-			journalArticleLocalization.setLanguageId(languageId);
-		}
-		else {
-			journalArticleLocalization.setTitle(title);
-			journalArticleLocalization.setDescription(description);
-		}
+		journalArticleLocalization.setCompanyId(companyId);
+		journalArticleLocalization.setArticlePK(articlePK);
+		journalArticleLocalization.setTitle(title);
+		journalArticleLocalization.setDescription(description);
+		journalArticleLocalization.setLanguageId(languageId);
 
 		return journalArticleLocalizationPersistence.update(
 			journalArticleLocalization);
@@ -8196,26 +8176,10 @@ public class JournalArticleLocalServiceImpl
 			Map<Locale, String> descriptionMap)
 		throws PortalException {
 
-		List<JournalArticleLocalization> oldJournalArticleLocalizations =
-			new ArrayList<>(
-				journalArticleLocalizationPersistence.findByArticlePK(
-					articleId));
+		journalArticleLocalizationPersistence.removeByArticlePK(articleId);
 
-		List<JournalArticleLocalization> newJournalArticleLocalizations =
-			_addArticleLocalizedFields(
-				companyId, articleId, titleMap, descriptionMap);
-
-		oldJournalArticleLocalizations.removeAll(
-			newJournalArticleLocalizations);
-
-		for (JournalArticleLocalization oldJournalArticleLocalization :
-				oldJournalArticleLocalizations) {
-
-			journalArticleLocalizationPersistence.remove(
-				oldJournalArticleLocalization);
-		}
-
-		return newJournalArticleLocalizations;
+		return _addArticleLocalizedFields(
+			companyId, articleId, titleMap, descriptionMap);
 	}
 
 	private JournalArticleLocalization _updateArticleLocalizedFields(

@@ -16,14 +16,12 @@ package com.liferay.portal.cache;
 
 import com.liferay.portal.cache.configuration.PortalCacheConfiguration;
 import com.liferay.portal.cache.configuration.PortalCacheManagerConfiguration;
-import com.liferay.portal.cache.internal.mvcc.MVCCPortalCache;
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.PortalCacheException;
 import com.liferay.portal.kernel.cache.PortalCacheListener;
 import com.liferay.portal.kernel.cache.PortalCacheListenerScope;
 import com.liferay.portal.kernel.cache.PortalCacheManager;
 import com.liferay.portal.kernel.cache.PortalCacheManagerListener;
-import com.liferay.portal.kernel.model.MVCCModel;
 import com.liferay.portal.kernel.resiliency.spi.SPIUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
@@ -67,14 +65,6 @@ public abstract class BasePortalCacheManager<K extends Serializable, V>
 			String portalCacheName, boolean blocking)
 		throws PortalCacheException {
 
-		return getPortalCache(portalCacheName, blocking, false);
-	}
-
-	@Override
-	public PortalCache<K, V> getPortalCache(
-			String portalCacheName, boolean blocking, boolean mvcc)
-		throws PortalCacheException {
-
 		PortalCache<K, V> portalCache = portalCaches.get(portalCacheName);
 
 		if (portalCache != null) {
@@ -97,11 +87,6 @@ public abstract class BasePortalCacheManager<K extends Serializable, V>
 		portalCache = createPortalCache(portalCacheConfiguration);
 
 		_initPortalCacheListeners(portalCache, portalCacheConfiguration);
-
-		if (mvcc) {
-			portalCache = (PortalCache<K, V>)new MVCCPortalCache<>(
-				(LowLevelCache<K, MVCCModel>)portalCache);
-		}
 
 		if (isTransactionalPortalCacheEnabled() &&
 			isTransactionalPortalCache(portalCacheName)) {
@@ -189,7 +174,7 @@ public abstract class BasePortalCacheManager<K extends Serializable, V>
 	}
 
 	public void setClusterAware(boolean clusterAware) {
-		_clusterAware = clusterAware;
+		this._clusterAware = clusterAware;
 	}
 
 	public void setMpiOnly(boolean mpiOnly) {

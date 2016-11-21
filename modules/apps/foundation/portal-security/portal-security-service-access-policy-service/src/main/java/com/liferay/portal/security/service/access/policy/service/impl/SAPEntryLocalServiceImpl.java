@@ -65,7 +65,7 @@ public class SAPEntryLocalServiceImpl extends SAPEntryLocalServiceBaseImpl {
 
 		// Service access policy entry
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		allowedServiceSignatures = normalizeServiceSignatures(
 			allowedServiceSignatures);
 		name = StringUtil.trim(name);

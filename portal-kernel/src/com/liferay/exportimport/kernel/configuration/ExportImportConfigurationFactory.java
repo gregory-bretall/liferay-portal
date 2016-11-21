@@ -14,8 +14,6 @@
 
 package com.liferay.exportimport.kernel.configuration;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.exportimport.kernel.lar.ExportImportDateUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
@@ -37,7 +35,6 @@ import javax.portlet.PortletRequest;
 /**
  * @author Levente Hudák
  */
-@ProviderType
 public class ExportImportConfigurationFactory {
 
 	public static ExportImportConfiguration

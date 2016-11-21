@@ -77,7 +77,7 @@ public class RecentGroupManager {
 		for (long groupId : groupIds) {
 			Group group = _groupLocalService.fetchGroup(groupId);
 
-			if (!_groupLocalService.isLiveGroupActive(group)) {
+			if ((group == null) || !group.isActive()) {
 				continue;
 			}
 

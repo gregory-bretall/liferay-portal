@@ -22,8 +22,8 @@ import aQute.bnd.annotation.ProviderType;
 @ProviderType
 public class MinusExpression extends UnaryExpression {
 
-	public MinusExpression(Expression operandExpression) {
-		super(operandExpression);
+	public MinusExpression(Expression operand) {
+		super(operand);
 	}
 
 	@Override

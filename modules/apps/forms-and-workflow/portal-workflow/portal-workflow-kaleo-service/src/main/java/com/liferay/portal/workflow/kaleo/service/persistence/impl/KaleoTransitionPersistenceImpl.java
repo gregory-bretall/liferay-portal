@@ -1764,15 +1764,11 @@ public class KaleoTransitionPersistenceImpl extends BasePersistenceImpl<KaleoTra
 						finderArgs, list);
 				}
 				else {
-					if (list.size() > 1) {
-						Collections.sort(list, Collections.reverseOrder());
-
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								"KaleoTransitionPersistenceImpl.fetchByKNI_N(long, String, boolean) with parameters (" +
-								StringUtil.merge(finderArgs) +
-								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
-						}
+					if ((list.size() > 1) && _log.isWarnEnabled()) {
+						_log.warn(
+							"KaleoTransitionPersistenceImpl.fetchByKNI_N(long, String, boolean) with parameters (" +
+							StringUtil.merge(finderArgs) +
+							") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
 					}
 
 					KaleoTransition kaleoTransition = list.get(0);
@@ -2018,15 +2014,11 @@ public class KaleoTransitionPersistenceImpl extends BasePersistenceImpl<KaleoTra
 						finderArgs, list);
 				}
 				else {
-					if (list.size() > 1) {
-						Collections.sort(list, Collections.reverseOrder());
-
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								"KaleoTransitionPersistenceImpl.fetchByKNI_DT(long, boolean, boolean) with parameters (" +
-								StringUtil.merge(finderArgs) +
-								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
-						}
+					if ((list.size() > 1) && _log.isWarnEnabled()) {
+						_log.warn(
+							"KaleoTransitionPersistenceImpl.fetchByKNI_DT(long, boolean, boolean) with parameters (" +
+							StringUtil.merge(finderArgs) +
+							") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
 					}
 
 					KaleoTransition kaleoTransition = list.get(0);
@@ -2215,7 +2207,7 @@ public class KaleoTransitionPersistenceImpl extends BasePersistenceImpl<KaleoTra
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((KaleoTransitionModelImpl)kaleoTransition, true);
+		clearUniqueFindersCache((KaleoTransitionModelImpl)kaleoTransition);
 	}
 
 	@Override
@@ -2227,49 +2219,75 @@ public class KaleoTransitionPersistenceImpl extends BasePersistenceImpl<KaleoTra
 			entityCache.removeResult(KaleoTransitionModelImpl.ENTITY_CACHE_ENABLED,
 				KaleoTransitionImpl.class, kaleoTransition.getPrimaryKey());
 
-			clearUniqueFindersCache((KaleoTransitionModelImpl)kaleoTransition,
-				true);
+			clearUniqueFindersCache((KaleoTransitionModelImpl)kaleoTransition);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		KaleoTransitionModelImpl kaleoTransitionModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					kaleoTransitionModelImpl.getKaleoNodeId(),
+					kaleoTransitionModelImpl.getName()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_KNI_N, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_KNI_N, args,
+				kaleoTransitionModelImpl);
+
+			args = new Object[] {
+					kaleoTransitionModelImpl.getKaleoNodeId(),
+					kaleoTransitionModelImpl.getDefaultTransition()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_KNI_DT, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_KNI_DT, args,
+				kaleoTransitionModelImpl);
+		}
+		else {
+			if ((kaleoTransitionModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_KNI_N.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						kaleoTransitionModelImpl.getKaleoNodeId(),
+						kaleoTransitionModelImpl.getName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_KNI_N, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_KNI_N, args,
+					kaleoTransitionModelImpl);
+			}
+
+			if ((kaleoTransitionModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_KNI_DT.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						kaleoTransitionModelImpl.getKaleoNodeId(),
+						kaleoTransitionModelImpl.getDefaultTransition()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_KNI_DT, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_KNI_DT, args,
+					kaleoTransitionModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		KaleoTransitionModelImpl kaleoTransitionModelImpl) {
 		Object[] args = new Object[] {
 				kaleoTransitionModelImpl.getKaleoNodeId(),
 				kaleoTransitionModelImpl.getName()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_KNI_N, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_KNI_N, args,
-			kaleoTransitionModelImpl, false);
-
-		args = new Object[] {
-				kaleoTransitionModelImpl.getKaleoNodeId(),
-				kaleoTransitionModelImpl.getDefaultTransition()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_KNI_DT, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_KNI_DT, args,
-			kaleoTransitionModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		KaleoTransitionModelImpl kaleoTransitionModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					kaleoTransitionModelImpl.getKaleoNodeId(),
-					kaleoTransitionModelImpl.getName()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_KNI_N, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_KNI_N, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_KNI_N, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_KNI_N, args);
 
 		if ((kaleoTransitionModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_KNI_N.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					kaleoTransitionModelImpl.getOriginalKaleoNodeId(),
 					kaleoTransitionModelImpl.getOriginalName()
 				};
@@ -2278,19 +2296,17 @@ public class KaleoTransitionPersistenceImpl extends BasePersistenceImpl<KaleoTra
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_KNI_N, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					kaleoTransitionModelImpl.getKaleoNodeId(),
-					kaleoTransitionModelImpl.getDefaultTransition()
-				};
+		args = new Object[] {
+				kaleoTransitionModelImpl.getKaleoNodeId(),
+				kaleoTransitionModelImpl.getDefaultTransition()
+			};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_KNI_DT, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_KNI_DT, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_KNI_DT, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_KNI_DT, args);
 
 		if ((kaleoTransitionModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_KNI_DT.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					kaleoTransitionModelImpl.getOriginalKaleoNodeId(),
 					kaleoTransitionModelImpl.getOriginalDefaultTransition()
 				};
@@ -2522,8 +2538,8 @@ public class KaleoTransitionPersistenceImpl extends BasePersistenceImpl<KaleoTra
 			KaleoTransitionImpl.class, kaleoTransition.getPrimaryKey(),
 			kaleoTransition, false);
 
-		clearUniqueFindersCache(kaleoTransitionModelImpl, false);
-		cacheUniqueFindersCache(kaleoTransitionModelImpl);
+		clearUniqueFindersCache(kaleoTransitionModelImpl);
+		cacheUniqueFindersCache(kaleoTransitionModelImpl, isNew);
 
 		kaleoTransition.resetOriginalValues();
 

@@ -22,7 +22,6 @@ import com.liferay.gradle.plugins.upgrade.table.builder.UpgradeTableBuilderPlugi
 import java.io.File;
 
 import org.gradle.api.Action;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskContainer;
 
@@ -32,16 +31,40 @@ import org.gradle.api.tasks.TaskContainer;
 public class UpgradeTableBuilderDefaultsPlugin
 	extends BasePortalToolDefaultsPlugin<UpgradeTableBuilderPlugin> {
 
-	public static final Plugin<Project> INSTANCE =
-		new UpgradeTableBuilderDefaultsPlugin();
-
 	@Override
 	protected void configureDefaults(
 		Project project, UpgradeTableBuilderPlugin upgradeTableBuilderPlugin) {
 
 		super.configureDefaults(project, upgradeTableBuilderPlugin);
 
-		_configureTasksBuildUpgradeTable(project);
+		configureTasksBuildUpgradeTable(project);
+	}
+
+	protected void configureTaskBuildUpgradeTable(
+		BuildUpgradeTableTask buildUpgradeTableTask) {
+
+		File file = GradleUtil.getProperty(
+			buildUpgradeTableTask.getProject(), "upgrade.table.dir",
+			(File)null);
+
+		buildUpgradeTableTask.setUpgradeTableDir(file);
+	}
+
+	protected void configureTasksBuildUpgradeTable(Project project) {
+		TaskContainer taskContainer = project.getTasks();
+
+		taskContainer.withType(
+			BuildUpgradeTableTask.class,
+			new Action<BuildUpgradeTableTask>() {
+
+				@Override
+				public void execute(
+					BuildUpgradeTableTask buildUpgradeTableTask) {
+
+					configureTaskBuildUpgradeTable(buildUpgradeTableTask);
+				}
+
+			});
 	}
 
 	@Override
@@ -57,36 +80,6 @@ public class UpgradeTableBuilderDefaultsPlugin
 	@Override
 	protected String getPortalToolName() {
 		return _PORTAL_TOOL_NAME;
-	}
-
-	private UpgradeTableBuilderDefaultsPlugin() {
-	}
-
-	private void _configureTaskBuildUpgradeTable(
-		BuildUpgradeTableTask buildUpgradeTableTask) {
-
-		File file = GradleUtil.getProperty(
-			buildUpgradeTableTask.getProject(), "upgrade.table.dir",
-			(File)null);
-
-		buildUpgradeTableTask.setUpgradeTableDir(file);
-	}
-
-	private void _configureTasksBuildUpgradeTable(Project project) {
-		TaskContainer taskContainer = project.getTasks();
-
-		taskContainer.withType(
-			BuildUpgradeTableTask.class,
-			new Action<BuildUpgradeTableTask>() {
-
-				@Override
-				public void execute(
-					BuildUpgradeTableTask buildUpgradeTableTask) {
-
-					_configureTaskBuildUpgradeTable(buildUpgradeTableTask);
-				}
-
-			});
 	}
 
 	private static final String _PORTAL_TOOL_NAME =

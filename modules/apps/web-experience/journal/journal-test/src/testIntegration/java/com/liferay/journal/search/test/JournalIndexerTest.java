@@ -101,26 +101,22 @@ public class JournalIndexerTest {
 			PortletPreferencesFactoryUtil.getPortalPreferences(
 				TestPropsValues.getUserId(), true);
 
-		_originalPortalPreferencesXML = PortletPreferencesFactoryUtil.toXML(
-			portalPreferenceces);
-
 		portalPreferenceces.setValue(
 			"", "indexAllArticleVersionsEnabled", "true");
 		portalPreferenceces.setValue(
 			"", "expireAllArticleVersionsEnabled", "true");
 
-		PortalPreferencesLocalServiceUtil.updatePreferences(
-			TestPropsValues.getCompanyId(),
-			PortletKeys.PREFS_OWNER_TYPE_COMPANY,
-			PortletPreferencesFactoryUtil.toXML(portalPreferenceces));
+		_portalPreferences =
+			PortalPreferencesLocalServiceUtil.addPortalPreferences(
+				TestPropsValues.getCompanyId(),
+				PortletKeys.PREFS_OWNER_TYPE_COMPANY,
+				PortletPreferencesFactoryUtil.toXML(portalPreferenceces));
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		PortalPreferencesLocalServiceUtil.updatePreferences(
-			TestPropsValues.getCompanyId(),
-			PortletKeys.PREFS_OWNER_TYPE_COMPANY,
-			_originalPortalPreferencesXML);
+		PortalPreferencesLocalServiceUtil.deletePortalPreferences(
+			_portalPreferences);
 	}
 
 	@Test
@@ -861,6 +857,7 @@ public class JournalIndexerTest {
 	@DeleteAfterTestRun
 	private Group _group;
 
-	private String _originalPortalPreferencesXML;
+	private com.liferay.portal.kernel.model.PortalPreferences
+		_portalPreferences;
 
 }

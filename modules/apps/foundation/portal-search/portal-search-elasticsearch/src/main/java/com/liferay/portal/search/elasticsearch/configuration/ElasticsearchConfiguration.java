@@ -146,7 +146,4 @@ public interface ElasticsearchConfiguration {
 	@Meta.AD(description = "additional-type-mappings-help", required = false)
 	public String additionalTypeMappings();
 
-	@Meta.AD(description = "override-type-mappings-help", required = false)
-	public String overrideTypeMappings();
-
 }

@@ -16,8 +16,9 @@ package com.liferay.portal.search.elasticsearch.internal.index;
 
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.elasticsearch.internal.connection.ElasticsearchFixture;
-import com.liferay.portal.search.elasticsearch.internal.connection.Index;
-import com.liferay.portal.search.elasticsearch.internal.connection.IndexName;
+import com.liferay.portal.search.elasticsearch.internal.connection.ElasticsearchFixture.Index;
+import com.liferay.portal.search.elasticsearch.internal.connection.ElasticsearchFixture.IndexName;
+import com.liferay.portal.search.elasticsearch.internal.connection.LiferayIndexCreationHelper;
 
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
@@ -35,20 +36,17 @@ public class LiferayTypeMappingsTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_liferayIndexFixture = new LiferayIndexFixture(
-			LiferayTypeMappingsTest.class.getSimpleName(),
-			new IndexName(testName.getMethodName()));
+		_elasticsearchFixture = new ElasticsearchFixture(
+			LiferayTypeMappingsTest.class.getSimpleName());
 
-		_liferayIndexFixture.setUp();
+		_elasticsearchFixture.setUp();
 
-		_index = _liferayIndexFixture.getIndex();
-
-		_elasticsearchFixture = _liferayIndexFixture.getElasticsearchFixture();
+		_index = createIndex();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		_liferayIndexFixture.tearDown();
+		_elasticsearchFixture.tearDown();
 	}
 
 	@Test
@@ -88,8 +86,14 @@ public class LiferayTypeMappingsTest {
 			_index.getName(), _elasticsearchFixture.getIndicesAdminClient());
 	}
 
+	protected Index createIndex() {
+		return _elasticsearchFixture.createIndex(
+			new IndexName(testName.getMethodName()),
+			new LiferayIndexCreationHelper(
+				_elasticsearchFixture.getIndicesAdminClient()));
+	}
+
 	private ElasticsearchFixture _elasticsearchFixture;
 	private Index _index;
-	private LiferayIndexFixture _liferayIndexFixture;
 
 }

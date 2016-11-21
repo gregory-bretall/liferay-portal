@@ -42,7 +42,7 @@ public class BuildUpgradeTableTask extends JavaExec {
 
 	@Override
 	public void exec() {
-		setArgs(_getCompleteArgs());
+		setArgs(getCompleteArgs());
 
 		super.exec();
 	}
@@ -84,20 +84,14 @@ public class BuildUpgradeTableTask extends JavaExec {
 		_upgradeTableDir = upgradeTableDir;
 	}
 
-	private List<String> _getCompleteArgs() {
+	protected List<String> getCompleteArgs() {
 		List<String> args = new ArrayList<>(getArgs());
 
 		args.add("upgrade.base.dir=" + FileUtil.getAbsolutePath(getBaseDir()));
 		args.add("upgrade.osgi.module=" + isOsgiModule());
-
-		File releaseInfoFile = getReleaseInfoFile();
-
-		if (releaseInfoFile != null) {
-			args.add(
-				"upgrade.release.info.file=" +
-					FileUtil.getAbsolutePath(releaseInfoFile));
-		}
-
+		args.add(
+			"upgrade.release.info.file=" +
+				FileUtil.getAbsolutePath(getReleaseInfoFile()));
 		args.add(
 			"upgrade.table.dir=" +
 				FileUtil.getAbsolutePath(getUpgradeTableDir()));

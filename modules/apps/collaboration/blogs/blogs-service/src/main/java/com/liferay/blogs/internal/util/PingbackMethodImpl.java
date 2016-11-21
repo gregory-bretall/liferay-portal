@@ -14,7 +14,7 @@
 
 package com.liferay.blogs.internal.util;
 
-import com.liferay.blogs.model.BlogsEntry;
+import com.liferay.blogs.kernel.model.BlogsEntry;
 import com.liferay.blogs.service.BlogsEntryLocalService;
 import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.comment.DuplicateCommentException;
@@ -45,6 +45,9 @@ import com.liferay.portal.kernel.xmlrpc.Response;
 import com.liferay.portal.kernel.xmlrpc.XmlRpcConstants;
 import com.liferay.portal.kernel.xmlrpc.XmlRpcUtil;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.blogs.pingback.DisabledPingbackException;
+import com.liferay.portlet.blogs.pingback.InvalidSourceURIException;
+import com.liferay.portlet.blogs.pingback.UnavailableSourceURIException;
 
 import java.io.IOException;
 
@@ -87,11 +90,7 @@ public class PingbackMethodImpl implements Method {
 	@Override
 	public Response execute(long companyId) {
 		try {
-			Response response = addPingback(companyId);
-
-			if (response != null) {
-				return response;
-			}
+			addPingback(companyId);
 
 			return XmlRpcUtil.createSuccess("Pingback accepted");
 		}
@@ -99,6 +98,18 @@ public class PingbackMethodImpl implements Method {
 			return XmlRpcUtil.createFault(
 				PINGBACK_ALREADY_REGISTERED,
 				"Pingback is already registered: " + dce.getMessage());
+		}
+		catch (InvalidSourceURIException isurie) {
+			return XmlRpcUtil.createFault(
+				SOURCE_URI_INVALID, isurie.getMessage());
+		}
+		catch (DisabledPingbackException dpe) {
+			return XmlRpcUtil.createFault(
+				XmlRpcConstants.REQUESTED_METHOD_NOT_FOUND, dpe.getMessage());
+		}
+		catch (UnavailableSourceURIException usurie) {
+			return XmlRpcUtil.createFault(
+				SOURCE_URI_DOES_NOT_EXIST, usurie.getMessage());
 		}
 		catch (Exception e) {
 			if (_log.isDebugEnabled()) {
@@ -137,27 +148,19 @@ public class PingbackMethodImpl implements Method {
 		}
 	}
 
-	protected Response addPingback(long companyId) throws Exception {
+	protected long addPingback(long companyId) throws Exception {
 		if (!PropsValues.BLOGS_PINGBACK_ENABLED) {
-			return XmlRpcUtil.createFault(
-				XmlRpcConstants.REQUESTED_METHOD_NOT_FOUND,
-				"Pingbacks are disabled");
+			throw new DisabledPingbackException("Pingbacks are disabled");
 		}
 
-		Response response = validateSource();
-
-		if (response != null) {
-			return response;
-		}
+		validateSource();
 
 		BlogsEntry entry = getBlogsEntry(companyId);
 
 		if (!entry.isAllowPingbacks() ||
 			Validator.isNull(entry.getUrlTitle())) {
 
-			return XmlRpcUtil.createFault(
-				XmlRpcConstants.REQUESTED_METHOD_NOT_FOUND,
-				"Pingbacks are disabled");
+			throw new DisabledPingbackException("Pingbacks are disabled");
 		}
 
 		long userId = _userLocalService.getDefaultUserId(companyId);
@@ -173,11 +176,9 @@ public class PingbackMethodImpl implements Method {
 		ServiceContext serviceContext = buildServiceContext(
 			companyId, groupId, entry.getUrlTitle());
 
-		_commentManager.addComment(
+		return _commentManager.addComment(
 			userId, groupId, className, classPK, body,
 			new IdentityServiceContextFunction(serviceContext));
-
-		return null;
 	}
 
 	protected ServiceContext buildServiceContext(
@@ -357,7 +358,7 @@ public class PingbackMethodImpl implements Method {
 		_userLocalService = userLocalService;
 	}
 
-	protected Response validateSource() throws Exception {
+	protected void validateSource() throws Exception {
 		Source source = null;
 
 		try {
@@ -370,8 +371,8 @@ public class PingbackMethodImpl implements Method {
 				_log.debug(e, e);
 			}
 
-			return XmlRpcUtil.createFault(
-				SOURCE_URI_DOES_NOT_EXIST, "Error accessing source URI");
+			throw new UnavailableSourceURIException(
+				"Error accessing source URI", e);
 		}
 
 		List<StartTag> startTags = source.getAllStartTags("a");
@@ -381,12 +382,12 @@ public class PingbackMethodImpl implements Method {
 				startTag.getAttributeValue("href"));
 
 			if (href.equals(_targetURI)) {
-				return null;
+				return;
 			}
 		}
 
-		return XmlRpcUtil.createFault(
-			SOURCE_URI_INVALID, "Unable to find target URI in source");
+		throw new InvalidSourceURIException(
+			"Unable to find target URI in source");
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

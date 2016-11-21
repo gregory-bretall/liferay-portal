@@ -202,7 +202,7 @@ public class AssetDisplayTag extends IncludeTag {
 	@Override
 	protected void setAttributes(HttpServletRequest request) {
 		request.setAttribute(
-			WebKeys.ASSET_ENTRY_ABSTRACT_LENGTH, _abstractLength);
+			"liferay-ui:asset-display:abstractLength", _abstractLength);
 
 		AssetEntry assetEntry = _assetEntry;
 

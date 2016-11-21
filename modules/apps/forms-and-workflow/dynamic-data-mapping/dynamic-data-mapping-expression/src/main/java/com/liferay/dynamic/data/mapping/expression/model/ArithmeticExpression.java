@@ -23,10 +23,9 @@ import aQute.bnd.annotation.ProviderType;
 public class ArithmeticExpression extends BinaryExpression {
 
 	public ArithmeticExpression(
-		String operator, Expression leftOperandExpression,
-		Expression rightOperandExpression) {
+		String operator, Expression leftOperand, Expression rightOperand) {
 
-		super(operator, leftOperandExpression, rightOperandExpression);
+		super(operator, leftOperand, rightOperand);
 	}
 
 	@Override

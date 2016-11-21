@@ -121,14 +121,15 @@ public class MDRRuleGroupInstanceServiceImpl
 		long groupId = 0;
 
 		if (className.equals(Layout.class.getName())) {
-			Layout layout = layoutLocalService.fetchLayout(classPK);
+			Layout layout = layoutPersistence.fetchByPrimaryKey(classPK);
 
 			if (layout != null) {
 				groupId = layout.getGroupId();
 			}
 		}
 		else if (className.equals(LayoutSet.class.getName())) {
-			LayoutSet layoutSet = layoutSetLocalService.fetchLayoutSet(classPK);
+			LayoutSet layoutSet = layoutSetPersistence.fetchByPrimaryKey(
+				classPK);
 
 			if (layoutSet != null) {
 				groupId = layoutSet.getGroupId();

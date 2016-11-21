@@ -627,19 +627,17 @@ AUI.add(
 
 						var banner = instance._getBanner();
 
-						remainingTime = instance._formatTime(remainingTime);
-
 						banner.set(
 							'message',
 							Lang.sub(
 								instance._warningText,
 								[
-									remainingTime
+									instance._formatTime(remainingTime)
 								]
 							)
 						);
 
-						DOC.title = Lang.sub(Liferay.Language.get('session-expires-in-x'), [remainingTime]) + ' | ' + instance.get('pageTitle');
+						DOC.title = banner.get('contentBox').text();
 					}
 				}
 			}

@@ -298,8 +298,8 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 					Liferay.Util.openWindow(
 						{
 							dialog: {
-								height: 450,
-								width: 560
+								height: 460,
+								width: 770
 							},
 							id: '<%= namespace %>signInDialog',
 							title: '<%= UnicodeLanguageUtil.get(resourceBundle, "sign-in") %>',
@@ -454,14 +454,6 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 
 				editorInstance.dispose();
 			}
-
-			<%
-			String messageId = ParamUtil.getString(request, "messageId");
-			%>
-
-			<c:if test="<%= Validator.isNotNull(messageId) %>">
-				<%= randomNamespace %>scrollIntoView(<%= messageId %>);
-			</c:if>
 		</aui:script>
 
 		<aui:script sandbox="<%= true %>">

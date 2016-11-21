@@ -460,7 +460,8 @@ public class KaleoLogLocalServiceImpl extends KaleoLogLocalServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(serviceContext.getGuestOrUserId());
+		User user = userPersistence.findByPrimaryKey(
+			serviceContext.getGuestOrUserId());
 		Date now = new Date();
 
 		long kaleoLogId = counterLocalService.increment();

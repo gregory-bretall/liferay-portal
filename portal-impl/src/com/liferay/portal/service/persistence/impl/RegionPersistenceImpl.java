@@ -1948,7 +1948,7 @@ public class RegionPersistenceImpl extends BasePersistenceImpl<Region>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((RegionModelImpl)region, true);
+		clearUniqueFindersCache((RegionModelImpl)region);
 	}
 
 	@Override
@@ -1960,36 +1960,50 @@ public class RegionPersistenceImpl extends BasePersistenceImpl<Region>
 			entityCache.removeResult(RegionModelImpl.ENTITY_CACHE_ENABLED,
 				RegionImpl.class, region.getPrimaryKey());
 
-			clearUniqueFindersCache((RegionModelImpl)region, true);
+			clearUniqueFindersCache((RegionModelImpl)region);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(RegionModelImpl regionModelImpl) {
-		Object[] args = new Object[] {
-				regionModelImpl.getCountryId(), regionModelImpl.getRegionCode()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_C_R, args, Long.valueOf(1),
-			false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_C_R, args, regionModelImpl,
-			false);
-	}
-
-	protected void clearUniqueFindersCache(RegionModelImpl regionModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
+	protected void cacheUniqueFindersCache(RegionModelImpl regionModelImpl,
+		boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 					regionModelImpl.getCountryId(),
 					regionModelImpl.getRegionCode()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_R, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_R, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_C_R, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_C_R, args,
+				regionModelImpl);
 		}
+		else {
+			if ((regionModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_C_R.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						regionModelImpl.getCountryId(),
+						regionModelImpl.getRegionCode()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_C_R, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_C_R, args,
+					regionModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(RegionModelImpl regionModelImpl) {
+		Object[] args = new Object[] {
+				regionModelImpl.getCountryId(), regionModelImpl.getRegionCode()
+			};
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_R, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_R, args);
 
 		if ((regionModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_R.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					regionModelImpl.getOriginalCountryId(),
 					regionModelImpl.getOriginalRegionCode()
 				};
@@ -2190,8 +2204,8 @@ public class RegionPersistenceImpl extends BasePersistenceImpl<Region>
 		entityCache.putResult(RegionModelImpl.ENTITY_CACHE_ENABLED,
 			RegionImpl.class, region.getPrimaryKey(), region, false);
 
-		clearUniqueFindersCache(regionModelImpl, false);
-		cacheUniqueFindersCache(regionModelImpl);
+		clearUniqueFindersCache(regionModelImpl);
+		cacheUniqueFindersCache(regionModelImpl, isNew);
 
 		region.resetOriginalValues();
 

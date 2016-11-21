@@ -60,7 +60,7 @@ public class TopLevelBuild extends BaseBuild {
 
 	@Override
 	protected ExecutorService getExecutorService() {
-		return Executors.newFixedThreadPool(20);
+		return Executors.newFixedThreadPool(100);
 	}
 
 	private long _updateDuration;

@@ -25,7 +25,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
-import com.liferay.portal.kernel.search.IndexWriterHelper;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistry;
 import com.liferay.portal.kernel.search.Summary;
@@ -84,7 +84,7 @@ public class DDLRecordSetIndexer extends BaseIndexer<DDLRecordSet> {
 	protected void doReindex(DDLRecordSet recordSet) throws Exception {
 		Document document = getDocument(recordSet);
 
-		indexWriterHelper.updateDocument(
+		IndexWriterHelperUtil.updateDocument(
 			getSearchEngineId(), recordSet.getCompanyId(), document,
 			isCommitImmediately());
 
@@ -93,7 +93,8 @@ public class DDLRecordSetIndexer extends BaseIndexer<DDLRecordSet> {
 
 	@Override
 	protected void doReindex(String className, long classPK) throws Exception {
-		DDLRecordSet recordSet = ddlRecordSetLocalService.getRecordSet(classPK);
+		DDLRecordSet recordSet = _ddlRecordSetLocalService.getRecordSet(
+			classPK);
 
 		doReindex(recordSet);
 	}
@@ -106,7 +107,7 @@ public class DDLRecordSetIndexer extends BaseIndexer<DDLRecordSet> {
 	}
 
 	protected void reindexRecords(DDLRecordSet recordSet) throws Exception {
-		Indexer<DDLRecord> indexer = indexerRegistry.nullSafeGetIndexer(
+		Indexer<DDLRecord> indexer = _indexerRegistry.nullSafeGetIndexer(
 			DDLRecord.class);
 
 		indexer.reindex(recordSet.getRecords());
@@ -114,7 +115,7 @@ public class DDLRecordSetIndexer extends BaseIndexer<DDLRecordSet> {
 
 	protected void reindexRecordSets(long companyId) throws Exception {
 		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
-			ddlRecordSetLocalService.getIndexableActionableDynamicQuery();
+			_ddlRecordSetLocalService.getIndexableActionableDynamicQuery();
 
 		indexableActionableDynamicQuery.setCompanyId(companyId);
 		indexableActionableDynamicQuery.setPerformActionMethod(
@@ -148,16 +149,22 @@ public class DDLRecordSetIndexer extends BaseIndexer<DDLRecordSet> {
 		indexableActionableDynamicQuery.performActions();
 	}
 
-	@Reference
-	protected DDLRecordSetLocalService ddlRecordSetLocalService;
+	@Reference(unbind = "-")
+	protected void setDDLRecordSetLocalService(
+		DDLRecordSetLocalService ddlRecordSetLocalService) {
 
-	@Reference
-	protected IndexerRegistry indexerRegistry;
+		_ddlRecordSetLocalService = ddlRecordSetLocalService;
+	}
 
-	@Reference
-	protected IndexWriterHelper indexWriterHelper;
+	@Reference(unbind = "-")
+	protected void setIndexerRegistry(IndexerRegistry indexerRegistry) {
+		_indexerRegistry = indexerRegistry;
+	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DDLRecordSetIndexer.class);
+
+	private DDLRecordSetLocalService _ddlRecordSetLocalService;
+	private IndexerRegistry _indexerRegistry;
 
 }

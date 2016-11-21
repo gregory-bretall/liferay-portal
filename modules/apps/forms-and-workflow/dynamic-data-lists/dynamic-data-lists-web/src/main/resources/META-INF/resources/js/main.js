@@ -350,7 +350,7 @@ AUI.add(
 					);
 				},
 
-				buildDataTableColumns: function(columns, locale, structure, editable) {
+				buildDataTableColumns: function(columns, structure, editable) {
 					var instance = this;
 
 					columns.forEach(
@@ -517,7 +517,7 @@ AUI.add(
 								structureField = instance.findStructureFieldByAttribute(structure, 'name', name);
 
 								var multiple = A.DataType.Boolean.parse(structureField.multiple);
-								var options = instance.getCellEditorOptions(structureField.options, locale);
+								var options = instance.getCellEditorOptions(structureField.options);
 
 								item.formatter = function(obj) {
 									var data = obj.data;
@@ -601,18 +601,12 @@ AUI.add(
 					return structureField;
 				},
 
-				getCellEditorOptions: function(options, locale) {
+				getCellEditorOptions: function(options) {
 					var normalized = {};
 
 					options.forEach(
 						function(item, index) {
 							normalized[item.value] = item.label;
-
-							var localizationMap = item.localizationMap;
-
-							if (localizationMap[locale]) {
-								normalized[item.value] = localizationMap[locale].label;
-							}
 						}
 					);
 

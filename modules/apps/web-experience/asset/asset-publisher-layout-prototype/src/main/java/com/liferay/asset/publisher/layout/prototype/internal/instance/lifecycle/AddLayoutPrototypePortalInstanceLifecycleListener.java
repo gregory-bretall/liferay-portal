@@ -36,7 +36,6 @@ import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.language.LanguageResources;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -102,13 +101,6 @@ public class AddLayoutPrototypePortalInstanceLifecycleListener
 
 		String portletId = DefaultLayoutPrototypesUtil.addPortletId(
 			layout, AssetPublisherPortletKeys.ASSET_PUBLISHER, "column-2");
-
-		Map<String, String> preferences = new HashMap<>();
-
-		preferences.put("showOnlyLayoutAssets", Boolean.TRUE.toString());
-
-		DefaultLayoutPrototypesUtil.updatePortletSetup(
-			layout, portletId, preferences);
 
 		UnicodeProperties typeSettingsProperties =
 			layout.getTypeSettingsProperties();

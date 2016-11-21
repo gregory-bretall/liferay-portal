@@ -1,4 +1,4 @@
-<definition component-name="portal-staging" extends="PGStaging" ignore-command-names="ActivateDeactivateRemoteStaging,ActivateDeactivateStagingLocalLiveDM,ActivateRemoteStaging,ActivateStaging,ActivateStagingSiteWithPublicAndPrivatePage,AddDMDocumentStagingLocalLive,AddEventRepeatDaily,AddPageVariation,AddPageWithPageVersioningEnabled,AddSitePagesVariation,AssertEditWebContentStaging,AssertExportApplications,AssertNoEditLink,DeactivateStaging,DeleteDMDocument,LayoutScope,StagingPublishPortlet,PublishWCViaRemoteStaging,PublishWCIncludingTextsAndImages,PublishWCWithPagesVariationViaRemoteStaging">
+<definition component-name="portal-staging" extends="PGStaging" ignore-command-names="ActivateDeactivateRemoteStaging,ActivateDeactivateStagingLocalLiveDM,ActivateRemoteStaging,ActivateStaging,ActivateStagingSiteWithPublicAndPrivatePage,AddDMDocumentStagingLocalLive,AddEventRepeatDaily,AddPageVariation,AddPageWithPageVersioningEnabled,AddSitePagesVariation,AssertEditWebContentStaging,AssertExportApplications,AssertNoEditLink,BlogsOrganizationWorkflowStaging,DeactivateStaging,DeleteDMDocument,LayoutScope,StagingPublishPortlet,PublishWCViaRemoteStaging,PublishWCIncludingTextsAndImages,PublishWCWithPagesVariationViaRemoteStaging">
 	<property name="portal.release" value="true" />
 	<property name="testray.main.component.name" value="Staging" />
 
@@ -696,53 +696,6 @@
 		</execute>
 	</command>
 
-	<command name="PublishSiteTeams" priority="3">
-		<execute macro="ProductMenu#gotoSite">
-			<var name="site" value="Site Name" />
-		</execute>
-
-		<execute macro="ProductMenu#gotoSitesPublishing">
-			<var name="portlet" value="Staging" />
-		</execute>
-
-		<execute macro="Staging#activateStagingCP">
-			<var name="siteName" value="Site Name" />
-		</execute>
-
-		<execute macro="Navigator#gotoStagedSitePage">
-			<var name="pageName" value="Staging Test Page" />
-			<var name="siteName" value="Site Name" />
-		</execute>
-
-		<execute macro="ProductMenu#gotoSitesMembers">
-			<var name="portlet" value="Site Teams" />
-		</execute>
-
-		<execute macro="Team#addCP">
-			<var name="teamDescription" value="Site Team Description" />
-			<var name="teamName" value="Site Team Name" />
-		</execute>
-
-		<execute macro="ProductMenu#gotoSitesMembers">
-			<var name="portlet" value="Site Teams" />
-		</execute>
-
-		<execute macro="Staging#publishToLiveNowViaPortletCP" />
-
-		<execute macro="Navigator#openSiteURL">
-			<var name="siteName" value="Site Name" />
-		</execute>
-
-		<execute macro="ProductMenu#gotoSitesMembers">
-			<var name="portlet" value="Site Teams" />
-		</execute>
-
-		<execute macro="Team#viewCP">
-			<var name="teamDescription" value="Site Team Description" />
-			<var name="teamName" value="Site Team Name" />
-		</execute>
-	</command>
-
 	<command name="StagingAssetPublisher" priority="3">
 		<execute macro="ProductMenu#gotoControlPanelSites">
 			<var name="portlet" value="Sites" />
@@ -1101,7 +1054,7 @@
 
 		<execute macro="DMMetadataSet#save" />
 
-		<execute macro="Alert#viewSuccessMessage" />
+		<execute function="Pause" locator1="3000" />
 
 		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Staging Test Page" />
@@ -1225,13 +1178,15 @@
 			<var name="permissionDefinitionValue" value="Action" />
 			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_DOCUMENTS_AND_MEDIA" />
 			<var name="permissionNavigationValue" value="Documents and Media" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 			<var name="roleType" value="Site" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoControlPanelUsers">
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
+
+		<execute function="Pause" locator1="1000" />
 
 		<execute macro="User#addCP">
 			<var name="userEmailAddress" value="userea@liferay.com" />
@@ -1274,7 +1229,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfn userln" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 		</execute>
 
 		<execute macro="User#logoutAndLoginPG">
@@ -1290,6 +1245,8 @@
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="Documents and Media" />
 		</execute>
+
+		<execute function="Pause" locator1="3000" />
 
 		<execute macro="DMDocument#addPG">
 			<var name="dmDocumentDescription" value="DM Document Description" />
@@ -1422,7 +1379,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfn userln" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 		</execute>
 
 		<execute macro="User#logoutAndLoginPG">
@@ -1588,7 +1545,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfn userln" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 		</execute>
 
 		<execute macro="User#logoutAndLoginPG">
@@ -1895,7 +1852,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfn userln" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 		</execute>
 
 		<execute macro="User#logoutAndLoginPG">
@@ -2131,6 +2088,8 @@
 			<var name="portletName" value="Web Content Display" />
 		</execute>
 
+		<execute function="Pause" locator1="3000" />
+
 		<execute macro="WebContent#addWithWorkflowPGViaWCD">
 			<var name="webContentContent" value="Web Content Content" />
 			<var name="webContentTitle" value="Web Content Title" />
@@ -2304,7 +2263,7 @@
 		</execute>
 
 		<execute macro="Role#addCP">
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 			<var name="roleType" value="Site" />
 		</execute>
 
@@ -2314,7 +2273,7 @@
 
 		<execute macro="Role#definePermissionsCP">
 			<var name="permissionDefinitionKeys" value="SITE_ADMIN_PAGES_SITE_PAGES_GENERAL_PERMISSIONS_ACTION_CHECKBOX,SITE_ADMIN_PAGES_SITE_PAGES_RESOURCE_PERMISSIONS_SITE_ACTION_CHECKBOX,SITE_ADMIN_PAGES_SITE_PAGES_RESOURCE_PERMISSIONS_PAGE_ACTION_CHECKBOX,SITE_ADMIN_PAGES_SITE_PAGES_RESOURCE_PERMISSIONS_PAGE_VARIATION_ACTION_CHECKBOX,SITE_ADMIN_PAGES_SITE_PAGES_RESOURCE_PERMISSIONS_SITE_PAGES_VARIATION_ACTION_CHECKBOX" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 			<var name="roleType" value="Site" />
 		</execute>
 
@@ -2323,7 +2282,7 @@
 		</execute>
 
 		<execute macro="Role#addCP">
-			<var name="roleTitle" value="Content Creator" />
+			<var name="roleName" value="Content Creator" />
 			<var name="roleType" value="Site" />
 		</execute>
 
@@ -2333,7 +2292,7 @@
 
 		<execute macro="Role#definePermissionsCP">
 			<var name="permissionDefinitionKeys" value="SITE_ADMIN_CONTENT_WEB_CONTENT_GENERAL_PERMISSIONS_ACTION_CHECKBOX,SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_ACTION_CHECKBOX,SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_FOLDER_ACTION_CHECKBOX,SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_ARTICLE_ACTION_CHECKBOX,SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_FEED_ACTION_CHECKBOX,SITE_ADMIN_APPLICATIONS_WEB_CONTENT_DISPLAY_APPLICATIONS_PERMISSIONS_ACTION_CHECKBOX," />
-			<var name="roleTitle" value="Content Creator" />
+			<var name="roleName" value="Content Creator" />
 			<var name="roleType" value="Site" />
 		</execute>
 
@@ -2386,7 +2345,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfncreator creator" />
-			<var name="roleTitle" value="Content Creator" />
+			<var name="roleName" value="Content Creator" />
 		</execute>
 
 		<execute macro="Navigator#openSiteURL">
@@ -2401,7 +2360,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfncreator creator" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoControlPanelUsers">
@@ -2453,7 +2412,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfnapprover approver" />
-			<var name="roleTitle" value="Site Content Reviewer" />
+			<var name="roleName" value="Site Content Reviewer" />
 		</execute>
 
 		<execute macro="User#logoutAndLoginPG">
@@ -2991,7 +2950,7 @@
 		</execute>
 
 		<execute macro="User#assignRegularRoleCP">
-			<var name="roleTitle" value="Administrator" />
+			<var name="roleName" value="Administrator" />
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
@@ -3005,7 +2964,6 @@
 			<var name="orgName" value="Organization Name" />
 			<var name="userFirstName" value="userfn" />
 			<var name="userLastName" value="userln" />
-			<var name="userName" value="userfn userln" />
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
@@ -3363,7 +3321,7 @@
 
 		<execute macro="Site#assignSiteRoleCP">
 			<var name="resourceName" value="userfn userln" />
-			<var name="roleTitle" value="Staging Admin" />
+			<var name="roleName" value="Staging Admin" />
 		</execute>
 
 		<execute macro="Navigator#openSiteURL">
@@ -3602,8 +3560,6 @@
 		<execute macro="ProductMenu#gotoSitesContent">
 			<var name="portlet" value="Web Content" />
 		</execute>
-
-		<execute macro="WebContentNavigator#gotoManageTemplates" />
 
 		<execute macro="WebContentTemplates#addCP">
 			<var name="templateDescription" value="Template Description" />
@@ -3919,6 +3875,8 @@
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="Documents and Media" />
 		</execute>
+
+		<execute function="Pause" locator1="30000" />
 
 		<execute macro="DMDocument#addPG">
 			<var name="dmDocumentDescription" value="DM Document Description" />
@@ -4392,10 +4350,6 @@
 		<execute macro="User#deactivateCP">
 			<var name="userFirstName" value="userfn" />
 		</execute>
-
-		<execute function="Pause" locator1="3000" />
-
-		<execute macro="User#deleteCP" />
 
 		<execute macro="Navigator#gotoStagedSitePage">
 			<var name="pageName" value="Test Page Name" />

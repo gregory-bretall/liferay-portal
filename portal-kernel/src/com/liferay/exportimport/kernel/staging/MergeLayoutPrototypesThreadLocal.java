@@ -14,8 +14,6 @@
 
 package com.liferay.exportimport.kernel.staging;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.HashUtil;
 
@@ -30,7 +28,6 @@ import java.util.Set;
  * @author Raymond Augé
  * @author Shuyang Zhou
  */
-@ProviderType
 public class MergeLayoutPrototypesThreadLocal {
 
 	public static void clearMergeComplete() {

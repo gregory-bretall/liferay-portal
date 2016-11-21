@@ -18,6 +18,8 @@ import com.liferay.message.boards.kernel.service.MBMessageLocalService;
 import com.liferay.message.boards.kernel.service.MBMessageService;
 import com.liferay.message.boards.web.constants.MBPortletKeys;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -25,8 +27,12 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.taglib.util.RestoreEntryUtil;
+import com.liferay.trash.kernel.service.TrashEntryService;
+import com.liferay.trash.kernel.util.TrashUtil;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -66,14 +72,29 @@ public class EditMessageAttachmentsMVCActionCommand
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
 		try {
-			if (cmd.equals(Constants.DELETE)) {
+			if (cmd.equals(Constants.CHECK)) {
+				JSONObject jsonObject = RestoreEntryUtil.checkEntry(
+					actionRequest);
+
+				JSONPortletResponseUtil.writeJSON(
+					actionRequest, actionResponse, jsonObject);
+
+				return;
+			}
+			else if (cmd.equals(Constants.DELETE)) {
 				deleteAttachment(actionRequest);
 			}
 			else if (cmd.equals(Constants.EMPTY_TRASH)) {
 				emptyTrash(actionRequest);
 			}
+			else if (cmd.equals(Constants.RENAME)) {
+				restoreRename(actionRequest);
+			}
 			else if (cmd.equals(Constants.RESTORE)) {
 				restoreEntries(actionRequest);
+			}
+			else if (cmd.equals(Constants.OVERRIDE)) {
+				restoreOverride(actionRequest);
 			}
 
 			if (Validator.isNotNull(cmd)) {
@@ -100,15 +121,48 @@ public class EditMessageAttachmentsMVCActionCommand
 	protected void restoreEntries(ActionRequest actionRequest)
 		throws Exception {
 
+		long trashEntryId = ParamUtil.getLong(actionRequest, "trashEntryId");
+
+		if (trashEntryId > 0) {
+			_trashEntryService.restoreEntry(trashEntryId);
+
+			return;
+		}
+
+		long[] restoreEntryIds = StringUtil.split(
+			ParamUtil.getString(actionRequest, "restoreTrashEntryIds"), 0L);
+
+		for (long restoreEntryId : restoreEntryIds) {
+			_trashEntryService.restoreEntry(restoreEntryId);
+		}
+	}
+
+	protected void restoreOverride(ActionRequest actionRequest)
+		throws Exception {
+
+		long trashEntryId = ParamUtil.getLong(actionRequest, "trashEntryId");
+
+		long duplicateEntryId = ParamUtil.getLong(
+			actionRequest, "duplicateEntryId");
+
+		_trashEntryService.restoreEntry(trashEntryId, duplicateEntryId, null);
+	}
+
+	protected void restoreRename(ActionRequest actionRequest) throws Exception {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		long messageId = ParamUtil.getLong(actionRequest, "messageId");
+		long trashEntryId = ParamUtil.getLong(actionRequest, "trashEntryId");
 
-		String fileName = ParamUtil.getString(actionRequest, "fileName");
+		String newName = ParamUtil.getString(actionRequest, "newName");
 
-		_mbMessageLocalService.restoreMessageAttachmentFromTrash(
-			themeDisplay.getUserId(), messageId, fileName);
+		if (Validator.isNull(newName)) {
+			String oldName = ParamUtil.getString(actionRequest, "oldName");
+
+			newName = TrashUtil.getNewName(themeDisplay, null, 0, oldName);
+		}
+
+		_trashEntryService.restoreEntry(trashEntryId, 0, newName);
 	}
 
 	@Reference(unbind = "-")
@@ -123,7 +177,13 @@ public class EditMessageAttachmentsMVCActionCommand
 		_mbMessageService = mbMessageService;
 	}
 
+	@Reference(unbind = "-")
+	protected void setTrashEntryService(TrashEntryService trashEntryService) {
+		_trashEntryService = trashEntryService;
+	}
+
 	private MBMessageLocalService _mbMessageLocalService;
 	private MBMessageService _mbMessageService;
+	private TrashEntryService _trashEntryService;
 
 }

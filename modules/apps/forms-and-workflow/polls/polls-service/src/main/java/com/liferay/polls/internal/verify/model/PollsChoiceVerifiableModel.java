@@ -65,7 +65,7 @@ public class PollsChoiceVerifiableModel
 
 	@Override
 	public boolean isUpdateDates() {
-		return false;
+		return true;
 	}
 
 }

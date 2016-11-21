@@ -28,10 +28,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class BaseAutoLogin implements AutoLogin {
 
-	/**
-	 * @deprecated As of 7.0.0, with no direct replacement
-	 */
-	@Deprecated
 	@Override
 	public String[] handleException(
 			HttpServletRequest request, HttpServletResponse response,

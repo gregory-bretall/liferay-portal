@@ -22,7 +22,6 @@ import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.service.SyncSiteService;
 import com.liferay.sync.engine.upgrade.BaseUpgradeProcess;
 import com.liferay.sync.engine.upgrade.util.UpgradeUtil;
-import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.PropsValues;
 import com.liferay.sync.engine.util.StreamUtil;
 
@@ -146,7 +145,7 @@ public class UpgradeProcess_3_0_10 extends BaseUpgradeProcess {
 
 			for (SyncSite syncSite : syncSites) {
 				if (syncSite.isActive() &&
-					!FileUtil.exists(Paths.get(syncSite.getFilePathName()))) {
+					!Files.exists(Paths.get(syncSite.getFilePathName()))) {
 
 					Files.createDirectories(
 						Paths.get(syncSite.getFilePathName()));

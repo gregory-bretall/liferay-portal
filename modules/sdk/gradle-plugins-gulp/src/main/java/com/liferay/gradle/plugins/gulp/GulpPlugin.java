@@ -20,7 +20,6 @@ import com.liferay.gradle.util.GradleUtil;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Rule;
-import org.gradle.api.Task;
 import org.gradle.api.tasks.TaskContainer;
 
 /**
@@ -35,19 +34,14 @@ public class GulpPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		GradleUtil.applyPlugin(project, NodePlugin.class);
 
-		Task npmInstallTask = GradleUtil.getTask(
-			project, NodePlugin.NPM_INSTALL_TASK_NAME);
-
-		_addTaskRuleGulp(project, npmInstallTask);
+		_addTaskRuleGulp(project);
 	}
 
 	private ExecuteGulpTask _addTaskExecuteGulp(
-		Project project, String taskName, Task npmInstallTask) {
+		Project project, String taskName) {
 
 		ExecuteGulpTask executeGulpTask = GradleUtil.addTask(
 			project, taskName, ExecuteGulpTask.class);
-
-		executeGulpTask.dependsOn(npmInstallTask);
 
 		char gulpCommandFirstChar = taskName.charAt(4);
 
@@ -59,9 +53,7 @@ public class GulpPlugin implements Plugin<Project> {
 		return executeGulpTask;
 	}
 
-	private void _addTaskRuleGulp(
-		final Project project, final Task npmInstallTask) {
-
+	private void _addTaskRuleGulp(final Project project) {
 		TaskContainer taskContainer = project.getTasks();
 
 		taskContainer.addRule(
@@ -70,7 +62,7 @@ public class GulpPlugin implements Plugin<Project> {
 				@Override
 				public void apply(String taskName) {
 					if (taskName.startsWith("gulp")) {
-						_addTaskExecuteGulp(project, taskName, npmInstallTask);
+						_addTaskExecuteGulp(project, taskName);
 					}
 				}
 

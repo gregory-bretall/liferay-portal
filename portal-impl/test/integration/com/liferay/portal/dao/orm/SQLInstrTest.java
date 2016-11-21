@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.sql.Connection;
@@ -40,28 +41,29 @@ public class SQLInstrTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new LiferayIntegrationTestRule();
+		new AggregateTestRule(
+			new LiferayIntegrationTestRule(), TransactionalTestRule.INSTANCE);
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		_db = DBManagerUtil.getDB();
 
 		_db.runSQL(
-			"create table SQLInstrTest (id LONG not null primary key, data " +
+			"create table TestInstr (id LONG not null primary key, data " +
 				"VARCHAR(10) null)");
 
-		_db.runSQL("insert into SQLInstrTest values (1, 'EXAMPLE')");
+		_db.runSQL("insert into TestInstr values (1, 'EXAMPLE')");
 	}
 
 	@AfterClass
 	public static void tearDownClass() throws Exception {
-		_db.runSQL("drop table SQLInstrTest");
+		_db.runSQL("drop table TestInstr");
 	}
 
 	@Test
 	public void testInstr() throws Exception {
 		String sql = _db.buildSQL(
-			"select INSTR(data, 'X') from SQLInstrTest where id = 1");
+			"select INSTR(data,'X') from TestInstr where id = 1");
 
 		sql = SQLTransformer.transform(sql);
 
@@ -82,7 +84,7 @@ public class SQLInstrTest {
 	@Test
 	public void testInstrNotFound() throws Exception {
 		String sql = _db.buildSQL(
-			"select INSTR(data, '?') from SQLInstrTest where id = 1");
+			"select INSTR(data,'?') from TestInstr where id = 1");
 
 		sql = SQLTransformer.transform(sql);
 

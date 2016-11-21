@@ -1776,15 +1776,11 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 						finderArgs, list);
 				}
 				else {
-					if (list.size() > 1) {
-						Collections.sort(list, Collections.reverseOrder());
-
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								"KaleoTaskInstanceTokenPersistenceImpl.fetchByKII_KTI(long, long, boolean) with parameters (" +
-								StringUtil.merge(finderArgs) +
-								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
-						}
+					if ((list.size() > 1) && _log.isWarnEnabled()) {
+						_log.warn(
+							"KaleoTaskInstanceTokenPersistenceImpl.fetchByKII_KTI(long, long, boolean) with parameters (" +
+							StringUtil.merge(finderArgs) +
+							") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
 					}
 
 					KaleoTaskInstanceToken kaleoTaskInstanceToken = list.get(0);
@@ -2570,8 +2566,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((KaleoTaskInstanceTokenModelImpl)kaleoTaskInstanceToken,
-			true);
+		clearUniqueFindersCache((KaleoTaskInstanceTokenModelImpl)kaleoTaskInstanceToken);
 	}
 
 	@Override
@@ -2584,40 +2579,53 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 				KaleoTaskInstanceTokenImpl.class,
 				kaleoTaskInstanceToken.getPrimaryKey());
 
-			clearUniqueFindersCache((KaleoTaskInstanceTokenModelImpl)kaleoTaskInstanceToken,
-				true);
+			clearUniqueFindersCache((KaleoTaskInstanceTokenModelImpl)kaleoTaskInstanceToken);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		KaleoTaskInstanceTokenModelImpl kaleoTaskInstanceTokenModelImpl,
+		boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					kaleoTaskInstanceTokenModelImpl.getKaleoInstanceId(),
+					kaleoTaskInstanceTokenModelImpl.getKaleoTaskId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_KII_KTI, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_KII_KTI, args,
+				kaleoTaskInstanceTokenModelImpl);
+		}
+		else {
+			if ((kaleoTaskInstanceTokenModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_KII_KTI.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						kaleoTaskInstanceTokenModelImpl.getKaleoInstanceId(),
+						kaleoTaskInstanceTokenModelImpl.getKaleoTaskId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_KII_KTI, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_KII_KTI, args,
+					kaleoTaskInstanceTokenModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		KaleoTaskInstanceTokenModelImpl kaleoTaskInstanceTokenModelImpl) {
 		Object[] args = new Object[] {
 				kaleoTaskInstanceTokenModelImpl.getKaleoInstanceId(),
 				kaleoTaskInstanceTokenModelImpl.getKaleoTaskId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_KII_KTI, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_KII_KTI, args,
-			kaleoTaskInstanceTokenModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		KaleoTaskInstanceTokenModelImpl kaleoTaskInstanceTokenModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					kaleoTaskInstanceTokenModelImpl.getKaleoInstanceId(),
-					kaleoTaskInstanceTokenModelImpl.getKaleoTaskId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_KII_KTI, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_KII_KTI, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_KII_KTI, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_KII_KTI, args);
 
 		if ((kaleoTaskInstanceTokenModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_KII_KTI.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					kaleoTaskInstanceTokenModelImpl.getOriginalKaleoInstanceId(),
 					kaleoTaskInstanceTokenModelImpl.getOriginalKaleoTaskId()
 				};
@@ -2880,8 +2888,8 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 			kaleoTaskInstanceToken.getPrimaryKey(), kaleoTaskInstanceToken,
 			false);
 
-		clearUniqueFindersCache(kaleoTaskInstanceTokenModelImpl, false);
-		cacheUniqueFindersCache(kaleoTaskInstanceTokenModelImpl);
+		clearUniqueFindersCache(kaleoTaskInstanceTokenModelImpl);
+		cacheUniqueFindersCache(kaleoTaskInstanceTokenModelImpl, isNew);
 
 		kaleoTaskInstanceToken.resetOriginalValues();
 

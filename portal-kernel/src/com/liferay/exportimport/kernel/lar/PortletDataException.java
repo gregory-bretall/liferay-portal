@@ -14,15 +14,12 @@
 
 package com.liferay.exportimport.kernel.lar;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.StagedModel;
 
 /**
  * @author Raymond Augé
  */
-@ProviderType
 public class PortletDataException extends PortalException {
 
 	public static final int DEFAULT = 1;

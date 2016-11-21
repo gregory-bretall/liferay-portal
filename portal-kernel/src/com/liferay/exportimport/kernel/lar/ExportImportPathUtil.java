@@ -66,12 +66,6 @@ public class ExportImportPathUtil {
 	public static String getCompanyModelPath(
 		long companyId, String className, long classPK) {
 
-		return getCompanyModelPath(companyId, className, Long.valueOf(classPK));
-	}
-
-	public static String getCompanyModelPath(
-		long companyId, String className, Serializable classPK) {
-
 		return getModelPath(
 			PATH_PREFIX_COMPANY, companyId, className, classPK, null);
 	}
@@ -132,12 +126,6 @@ public class ExportImportPathUtil {
 		return sb.toString();
 	}
 
-	public static String getModelPath(
-		long groupId, String className, long classPK) {
-
-		return getModelPath(groupId, className, Long.valueOf(classPK));
-	}
-
 	/**
 	 * Returns a model path based on the group ID, class name, and class PK.
 	 *
@@ -159,7 +147,7 @@ public class ExportImportPathUtil {
 	 * @return a model path based on the parameters
 	 */
 	public static String getModelPath(
-		long groupId, String className, Serializable classPK) {
+		long groupId, String className, long classPK) {
 
 		return getModelPath(
 			PATH_PREFIX_GROUP, groupId, className, classPK, null);

@@ -262,8 +262,6 @@ if (portletTitleBasedNavigation) {
 	AUI.$('#<portlet:namespace />selectFolderButton').on(
 		'click',
 		function(event) {
-			var folderName = AUI.$('#<portlet:namespace />folderName').val();
-
 			Liferay.Util.selectEntity(
 				{
 					dialog: {
@@ -273,7 +271,6 @@ if (portletTitleBasedNavigation) {
 						width: 680
 					},
 					id: '<portlet:namespace />selectFolder',
-					selectedData: [folderName],
 					title: '<liferay-ui:message arguments="folder" key="select-x" />',
 
 					<portlet:renderURL var="selectFolderURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
@@ -286,9 +283,9 @@ if (portletTitleBasedNavigation) {
 				function(event) {
 					var folderData = {
 						idString: 'newFolderId',
-						idValue: event.entityid,
+						idValue: event.folderid,
 						nameString: 'folderName',
-						nameValue: event.entityname
+						nameValue: event.name
 					};
 
 					Liferay.Util.selectFolder(folderData, '<portlet:namespace />');

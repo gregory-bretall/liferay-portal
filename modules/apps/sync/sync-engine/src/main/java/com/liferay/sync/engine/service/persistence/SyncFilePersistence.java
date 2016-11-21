@@ -42,12 +42,12 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 		super(SyncFile.class);
 	}
 
-	public long countByUIEvents(Integer... uiEvents) throws SQLException {
+	public long countByUIEvent(int uiEvent) throws SQLException {
 		QueryBuilder<SyncFile, Long> queryBuilder = queryBuilder();
 
 		Where<SyncFile, Long> where = queryBuilder.where();
 
-		where.in("uiEvent", uiEvents);
+		where.eq("uiEvent", uiEvent);
 
 		return where.countOf();
 	}
@@ -160,26 +160,6 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 		where.eq("uiEvent", uiEvent);
 
 		where.and(2);
-
-		return where.queryForFirst();
-	}
-
-	public SyncFile fetchByR_S_T_V(
-			long repositoryId, long syncAccountId, long typePK, long versionId)
-		throws SQLException {
-
-		QueryBuilder<SyncFile, Long> queryBuilder = queryBuilder();
-
-		queryBuilder.limit(1L);
-
-		Where<SyncFile, Long> where = queryBuilder.where();
-
-		where.eq("repositoryId", repositoryId);
-		where.eq("syncAccountId", syncAccountId);
-		where.eq("typePK", typePK);
-		where.eq("versionId", versionId);
-
-		where.and(4);
 
 		return where.queryForFirst();
 	}

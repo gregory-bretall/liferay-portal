@@ -15,7 +15,7 @@
 package com.liferay.portal.search.internal.hits;
 
 import com.liferay.portal.kernel.search.Hits;
-import com.liferay.portal.kernel.search.IndexWriterHelper;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
@@ -25,7 +25,6 @@ import com.liferay.portal.kernel.search.suggest.SuggestionConstants;
 import java.util.Locale;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Michael C. Han
@@ -58,12 +57,9 @@ public class QueryIndexingHitsProcessor implements HitsProcessor {
 	protected void addDocument(long companyId, String keywords, Locale locale)
 		throws SearchException {
 
-		indexWriterHelper.indexKeyword(
+		IndexWriterHelperUtil.indexKeyword(
 			companyId, keywords, 0, SuggestionConstants.TYPE_QUERY_SUGGESTION,
 			locale);
 	}
-
-	@Reference
-	protected IndexWriterHelper indexWriterHelper;
 
 }

@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
-import com.liferay.portal.kernel.search.IndexWriterHelper;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -90,14 +90,14 @@ public class MessageIndexer extends BaseIndexer<Message> {
 	protected void doReindex(Message message) throws Exception {
 		Document document = getDocument(message);
 
-		indexWriterHelper.updateDocument(
+		IndexWriterHelperUtil.updateDocument(
 			getSearchEngineId(), message.getCompanyId(), document,
 			isCommitImmediately());
 	}
 
 	@Override
 	protected void doReindex(String className, long classPK) throws Exception {
-		Message message = messageLocalService.getMessage(classPK);
+		Message message = _messageLocalService.getMessage(classPK);
 
 		doReindex(message);
 	}
@@ -111,7 +111,7 @@ public class MessageIndexer extends BaseIndexer<Message> {
 
 	protected void reindexMessages(long companyId) throws PortalException {
 		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
-			messageLocalService.getIndexableActionableDynamicQuery();
+			_messageLocalService.getIndexableActionableDynamicQuery();
 
 		indexableActionableDynamicQuery.setCompanyId(companyId);
 		indexableActionableDynamicQuery.setPerformActionMethod(
@@ -142,12 +142,15 @@ public class MessageIndexer extends BaseIndexer<Message> {
 		indexableActionableDynamicQuery.performActions();
 	}
 
-	@Reference
-	protected IndexWriterHelper indexWriterHelper;
+	@Reference(unbind = "-")
+	protected void setMessageLocalService(
+		MessageLocalService messageLocalService) {
 
-	@Reference
-	protected MessageLocalService messageLocalService;
+		_messageLocalService = messageLocalService;
+	}
 
 	private static final Log _log = LogFactoryUtil.getLog(MessageIndexer.class);
+
+	private static MessageLocalService _messageLocalService;
 
 }

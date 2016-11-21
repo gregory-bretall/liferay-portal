@@ -129,17 +129,14 @@ public class CounterLocalServiceTest {
 
 		List<String> arguments = new ArrayList<>();
 
-		arguments.add("-Dliferay.mode=test");
-		arguments.add("-Dsun.zip.disableMemoryMapping=true");
+		arguments.add("-Xmx1024m");
+		arguments.add("-XX:MaxPermSize=200m");
 
 		for (String property :
 				HypersonicServerTestRule.INSTANCE.getJdbcProperties()) {
 
 			arguments.add("-D" + property);
 		}
-
-		arguments.add("-Xmx1024m");
-		arguments.add("-XX:MaxPermSize=200m");
 
 		Builder builder = new Builder();
 

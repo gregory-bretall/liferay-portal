@@ -33,6 +33,8 @@ import com.liferay.portal.kernel.model.PublicRenderParameter;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.portlet.InvokerPortlet;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.portlet.PortletBag;
+import com.liferay.portal.kernel.portlet.PortletBagPool;
 import com.liferay.portal.kernel.portlet.PortletInstanceFactory;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
@@ -45,6 +47,7 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -82,7 +85,6 @@ import javax.servlet.ServletContext;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.annotations.Activate;
@@ -179,7 +181,7 @@ public class PortletTracker
 		portletModel.unsetReady();
 
 		ServiceRegistrations serviceRegistrations = _serviceRegistrations.get(
-			(Long)serviceReference.getProperty(Constants.SERVICE_BUNDLEID));
+			serviceReference.getBundle());
 
 		if (serviceRegistrations == null) {
 			return;
@@ -190,15 +192,9 @@ public class PortletTracker
 
 		bundlePortletApp.removePortlet(portletModel);
 
-		try {
-			_bundleContext.ungetService(serviceReference);
-		}
-		catch (IllegalStateException ise) {
+		serviceRegistrations.removeServiceReference(serviceReference);
 
-			// We still need to remove the service so we can ignore this and
-			// keep going
-
-		}
+		_bundleContext.ungetService(serviceReference);
 
 		_portletInstanceFactory.destroy(portletModel);
 
@@ -211,7 +207,12 @@ public class PortletTracker
 			portletCategory.separate(portletModel.getRootPortletId());
 		}
 
-		serviceRegistrations.removeServiceReference(serviceReference);
+		PortletBag portletBag = PortletBagPool.remove(
+			portletModel.getRootPortletId());
+
+		if (portletBag != null) {
+			portletBag.destroy();
+		}
 	}
 
 	@Activate
@@ -250,7 +251,7 @@ public class PortletTracker
 		thread.setContextClassLoader(bundleWiring.getClassLoader());
 
 		ServiceRegistrations serviceRegistrations = getServiceRegistrations(
-			bundle.getBundleId());
+			bundle);
 
 		try {
 			BundlePortletApp bundlePortletApp = createBundlePortletApp(
@@ -920,14 +921,17 @@ public class PortletTracker
 			_portletLocalService.getPortletById(
 				CompanyConstants.SYSTEM, PortletKeys.PORTAL);
 
-		ServiceTracker<ServletContextHelperRegistration, ServletContext>
-			serviceTracker = getServletContextHelperRegistrationServiceTracker(
-				bundle, serviceRegistrations);
+		ServletContextHelperRegistration servletContextHelperRegistration =
+			getServletContextHelperRegistration(bundle, serviceRegistrations);
 
-		serviceRegistrations.setServiceTracker(serviceTracker);
+		ServletContext servletContext =
+			servletContextHelperRegistration.getServletContext();
 
 		bundlePortletApp = new BundlePortletApp(
-			bundle, portalPortletModel, serviceTracker);
+			bundle, portalPortletModel, servletContext.getServletContextName(),
+			servletContext.getContextPath());
+
+		bundlePortletApp.setServletContext(servletContext);
 
 		serviceRegistrations.setBundlePortletApp(bundlePortletApp);
 
@@ -939,6 +943,10 @@ public class PortletTracker
 	@Deactivate
 	protected void deactivate() {
 		_serviceTracker.close();
+
+		_serviceTracker = null;
+
+		_bundleContext = null;
 
 		if (_log.isInfoEnabled()) {
 			_log.info("Deactivated");
@@ -990,16 +998,15 @@ public class PortletTracker
 		return _saxReader.createQName(name, _saxReader.createNamespace(uri));
 	}
 
-	protected ServiceRegistrations getServiceRegistrations(Long bundleId) {
+	protected ServiceRegistrations getServiceRegistrations(Bundle bundle) {
 		ServiceRegistrations serviceRegistrations = _serviceRegistrations.get(
-			bundleId);
+			bundle);
 
 		if (serviceRegistrations == null) {
-			serviceRegistrations = new ServiceRegistrations(bundleId);
+			serviceRegistrations = new ServiceRegistrations(bundle);
 
 			ServiceRegistrations oldServiceRegistrations =
-				_serviceRegistrations.putIfAbsent(
-					bundleId, serviceRegistrations);
+				_serviceRegistrations.putIfAbsent(bundle, serviceRegistrations);
 
 			if (oldServiceRegistrations != null) {
 				serviceRegistrations = oldServiceRegistrations;
@@ -1009,20 +1016,33 @@ public class PortletTracker
 		return serviceRegistrations;
 	}
 
-	protected ServiceTracker<ServletContextHelperRegistration, ServletContext>
-		getServletContextHelperRegistrationServiceTracker(
+	protected ServletContextHelperRegistration
+		getServletContextHelperRegistration(
 			Bundle bundle, ServiceRegistrations serviceRegistrations) {
 
 		BundleContext bundleContext = bundle.getBundleContext();
 
-		ServiceTracker<ServletContextHelperRegistration, ServletContext>
-			serviceTracker = new ServiceTracker<>(
-				bundleContext, ServletContextHelperRegistration.class,
-				new ServletContextServiceTrackerCustomizer(bundleContext));
+		ServiceTracker
+			<ServletContextHelperRegistration, ServletContextHelperRegistration>
+				serviceTracker = new ServiceTracker<>(
+					bundleContext, ServletContextHelperRegistration.class,
+					null);
 
 		serviceTracker.open();
 
-		return serviceTracker;
+		try {
+			ServletContextHelperRegistration servletContextHelperRegistration =
+				serviceTracker.waitForService(2000);
+
+			serviceRegistrations.
+				setServletContextHelperRegistrationServiceReference(
+					serviceTracker.getServiceReference());
+
+			return servletContextHelperRegistration;
+		}
+		catch (InterruptedException ie) {
+			return ReflectionUtil.throwException(ie);
+		}
 	}
 
 	protected void readResourceActions(
@@ -1133,7 +1153,7 @@ public class PortletTracker
 	@Reference
 	private SAXReader _saxReader;
 
-	private final ConcurrentMap<Long, ServiceRegistrations>
+	private final ConcurrentMap<Bundle, ServiceRegistrations>
 		_serviceRegistrations = new ConcurrentHashMap<>();
 	private ServiceTracker<Portlet, com.liferay.portal.kernel.model.Portlet>
 		_serviceTracker;
@@ -1143,8 +1163,8 @@ public class PortletTracker
 
 	private class ServiceRegistrations {
 
-		public ServiceRegistrations(Long bundleId) {
-			_bundleId = bundleId;
+		public ServiceRegistrations(Bundle bundle) {
+			_bundle = bundle;
 		}
 
 		public synchronized void addServiceReference(
@@ -1166,9 +1186,12 @@ public class PortletTracker
 
 			_bundlePortletApp = null;
 
-			_serviceRegistrations.remove(_bundleId);
+			_serviceRegistrations.remove(_bundle);
 
-			_serviceTracker.close();
+			BundleContext bundleContext = _bundle.getBundleContext();
+
+			bundleContext.ungetService(
+				_servletContextHelperRegistrationServiceReference);
 		}
 
 		public synchronized void setBundlePortletApp(
@@ -1177,11 +1200,13 @@ public class PortletTracker
 			_bundlePortletApp = bundlePortletApp;
 		}
 
-		public synchronized void setServiceTracker(
-			ServiceTracker<ServletContextHelperRegistration, ServletContext>
-				serviceTracker) {
+		public synchronized void
+			setServletContextHelperRegistrationServiceReference(
+				ServiceReference<ServletContextHelperRegistration>
+					servletContextHelperRegistrationServiceReference) {
 
-			_serviceTracker = serviceTracker;
+			_servletContextHelperRegistrationServiceReference =
+				servletContextHelperRegistrationServiceReference;
 		}
 
 		protected synchronized void doConfiguration(ClassLoader classLoader) {
@@ -1201,58 +1226,13 @@ public class PortletTracker
 			return _bundlePortletApp;
 		}
 
-		private final Long _bundleId;
+		private final Bundle _bundle;
 		private BundlePortletApp _bundlePortletApp;
 		private Configuration _configuration;
 		private final List<ServiceReference<Portlet>> _serviceReferences =
 			new ArrayList<>();
-		private ServiceTracker<ServletContextHelperRegistration, ServletContext>
-			_serviceTracker;
-
-	}
-
-	private class ServletContextServiceTrackerCustomizer
-		implements ServiceTrackerCustomizer
-			<ServletContextHelperRegistration, ServletContext> {
-
-		public ServletContextServiceTrackerCustomizer(
-			BundleContext bundleContext) {
-
-			_bundleContext = bundleContext;
-		}
-
-		@Override
-		public ServletContext addingService(
-			ServiceReference<ServletContextHelperRegistration> reference) {
-
-			ServletContextHelperRegistration service =
-				_bundleContext.getService(reference);
-
-			return service.getServletContext();
-		}
-
-		@Override
-		public void modifiedService(
-			ServiceReference<ServletContextHelperRegistration> reference,
-			ServletContext servletContext) {
-		}
-
-		@Override
-		public void removedService(
-			ServiceReference<ServletContextHelperRegistration> reference,
-			ServletContext servletContext) {
-
-			try {
-				_bundleContext.ungetService(reference);
-			}
-			catch (IllegalStateException ise) {
-
-				// Ignore this because the service is already ungotten
-
-			}
-		}
-
-		private final BundleContext _bundleContext;
+		private ServiceReference<ServletContextHelperRegistration>
+			_servletContextHelperRegistrationServiceReference;
 
 	}
 

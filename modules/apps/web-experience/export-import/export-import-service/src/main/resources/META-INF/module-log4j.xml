@@ -6,6 +6,14 @@
 		<priority value="ERROR" />
 	</category>
 
+	<category name="com.liferay.exportimport.background.task">
+		<priority value="INFO" />
+	</category>
+
+	<category name="com.liferay.exportimport.background.task.display">
+		<priority value="ERROR" />
+	</category>
+
 	<category name="com.liferay.exportimport.backgroundtask">
 		<priority value="ERROR" />
 	</category>
@@ -16,14 +24,6 @@
 
 	<category name="com.liferay.exportimport.controller">
 		<priority value="WARN" />
-	</category>
-
-	<category name="com.liferay.exportimport.internal.background.task">
-		<priority value="INFO" />
-	</category>
-
-	<category name="com.liferay.exportimport.internal.background.task.display">
-		<priority value="ERROR" />
 	</category>
 
 	<category name="com.liferay.exportimport.lar">

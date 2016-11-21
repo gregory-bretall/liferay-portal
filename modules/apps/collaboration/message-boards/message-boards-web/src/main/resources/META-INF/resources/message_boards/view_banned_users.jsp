@@ -42,21 +42,37 @@ portletURL.setParameter("mvcRenderCommandName", "/message_boards/view_banned_use
 		>
 
 			<%
-			User bannedUser = UserLocalServiceUtil.fetchUser(ban.getBanUserId());
+			String bannedUserDisplayURL = StringPool.BLANK;
+
+			try {
+				User bannedUser = UserLocalServiceUtil.getUser(ban.getBanUserId());
+
+				bannedUserDisplayURL = bannedUser.getDisplayURL(themeDisplay);
+			}
+			catch (NoSuchUserException nsue) {
+			}
 			%>
 
 			<liferay-ui:search-container-column-text
-				href="<%= ((bannedUser != null) && bannedUser.isActive()) ? bannedUser.getDisplayURL(themeDisplay) : null %>"
+				href="<%= bannedUserDisplayURL %>"
 				name="banned-user"
 				value="<%= HtmlUtil.escape(PortalUtil.getUserName(ban.getBanUserId(), StringPool.BLANK)) %>"
 			/>
 
 			<%
-			User bannedByUser = UserLocalServiceUtil.fetchUser(ban.getUserId());
+			String bannedByUserDisplayURL = StringPool.BLANK;
+
+			try {
+				User bannedByUser = UserLocalServiceUtil.getUser(ban.getUserId());
+
+				bannedByUserDisplayURL = bannedByUser.getDisplayURL(themeDisplay);
+			}
+			catch (NoSuchUserException nsue) {
+			}
 			%>
 
 			<liferay-ui:search-container-column-text
-				href="<%= ((bannedByUser != null) && bannedByUser.isActive()) ? bannedByUser.getDisplayURL(themeDisplay) : null %>"
+				href="<%= bannedByUserDisplayURL %>"
 				name="banned-by"
 				value="<%= HtmlUtil.escape(PortalUtil.getUserName(ban.getUserId(), StringPool.BLANK)) %>"
 			/>

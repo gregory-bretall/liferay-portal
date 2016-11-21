@@ -209,16 +209,6 @@ public class GradleUtil extends com.liferay.gradle.util.GradleUtil {
 		return false;
 	}
 
-	public static boolean isTestProject(Project project) {
-		String projectName = project.getName();
-
-		if (projectName.endsWith("-test")) {
-			return true;
-		}
-
-		return false;
-	}
-
 	public static void setProjectSnapshotVersion(
 		Project project, String... propertyNames) {
 

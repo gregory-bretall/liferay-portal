@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskContainer;
@@ -41,38 +40,7 @@ public class XMLFormatterDefaultsPlugin
 
 	public static final String FORMAT_XSD_TASK_NAME = "formatXSD";
 
-	public static final Plugin<Project> INSTANCE =
-		new XMLFormatterDefaultsPlugin();
-
-	@Override
-	protected void configureDefaults(
-		Project project, XMLFormatterPlugin xmlFormatterPlugin) {
-
-		super.configureDefaults(project, xmlFormatterPlugin);
-
-		_addTaskFormatWSDL(project);
-		_addTaskFormatXSD(project);
-	}
-
-	@Override
-	protected Class<XMLFormatterPlugin> getPluginClass() {
-		return XMLFormatterPlugin.class;
-	}
-
-	@Override
-	protected String getPortalToolConfigurationName() {
-		return XMLFormatterPlugin.CONFIGURATION_NAME;
-	}
-
-	@Override
-	protected String getPortalToolName() {
-		return _PORTAL_TOOL_NAME;
-	}
-
-	private XMLFormatterDefaultsPlugin() {
-	}
-
-	private FormatXMLTask _addTaskFormatWSDL(
+	protected FormatXMLTask addTaskFormatWSDL(
 		final BuildWSDLTask buildWSDLTask) {
 
 		Project project = buildWSDLTask.getProject();
@@ -99,7 +67,7 @@ public class XMLFormatterDefaultsPlugin
 		return formatXMLTask;
 	}
 
-	private void _addTaskFormatWSDL(Project project) {
+	protected void addTaskFormatWSDL(Project project) {
 		TaskContainer taskContainer = project.getTasks();
 
 		taskContainer.withType(
@@ -108,13 +76,13 @@ public class XMLFormatterDefaultsPlugin
 
 				@Override
 				public void execute(BuildWSDLTask buildWSDLTask) {
-					_addTaskFormatWSDL(buildWSDLTask);
+					addTaskFormatWSDL(buildWSDLTask);
 				}
 
 			});
 	}
 
-	private FormatXMLTask _addTaskFormatXSD(final BuildXSDTask buildXSDTask) {
+	protected FormatXMLTask addTaskFormatXSD(final BuildXSDTask buildXSDTask) {
 		Project project = buildXSDTask.getProject();
 
 		TaskContainer taskContainer = project.getTasks();
@@ -139,7 +107,7 @@ public class XMLFormatterDefaultsPlugin
 		return formatXMLTask;
 	}
 
-	private void _addTaskFormatXSD(Project project) {
+	protected void addTaskFormatXSD(Project project) {
 		TaskContainer taskContainer = project.getTasks();
 
 		taskContainer.withType(
@@ -148,10 +116,35 @@ public class XMLFormatterDefaultsPlugin
 
 				@Override
 				public void execute(BuildXSDTask buildXSDTask) {
-					_addTaskFormatXSD(buildXSDTask);
+					addTaskFormatXSD(buildXSDTask);
 				}
 
 			});
+	}
+
+	@Override
+	protected void configureDefaults(
+		Project project, XMLFormatterPlugin xmlFormatterPlugin) {
+
+		super.configureDefaults(project, xmlFormatterPlugin);
+
+		addTaskFormatWSDL(project);
+		addTaskFormatXSD(project);
+	}
+
+	@Override
+	protected Class<XMLFormatterPlugin> getPluginClass() {
+		return XMLFormatterPlugin.class;
+	}
+
+	@Override
+	protected String getPortalToolConfigurationName() {
+		return XMLFormatterPlugin.CONFIGURATION_NAME;
+	}
+
+	@Override
+	protected String getPortalToolName() {
+		return _PORTAL_TOOL_NAME;
 	}
 
 	private static final String _PORTAL_TOOL_NAME = "com.liferay.xml.formatter";

@@ -117,20 +117,12 @@ public interface DDLRecordSetSettings {
 
 	@DDMFormField(
 		label = "%select-a-storage-type",
-		properties = {
-			"dataSourceType=data-provider",
-			"ddmDataProviderInstanceId=ddm-storage-types"
-		},
-		type = "select"
+		properties = {"dataSourceType=manual"}, type = "select"
 	)
 	public String storageType();
 
 	@DDMFormField(
-		label = "%select-a-workflow",
-		properties = {
-			"dataSourceType=data-provider",
-			"ddmDataProviderInstanceId=workflow-definitions"
-		},
+		label = "%select-a-workflow", properties = {"dataSourceType=manual"},
 		type = "select"
 	)
 	public String workflowDefinition();

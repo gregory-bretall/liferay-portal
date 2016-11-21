@@ -130,21 +130,16 @@ if (selUser != null) {
 							</c:otherwise>
 						</c:choose>
 
-						<c:if test="<%= PropsValues.LAYOUT_USER_PUBLIC_LAYOUTS_ENABLED && (publicLayoutSetPrototype != null) %>">
-
-							<%
-							String publicLayoutSetPrototypeName = HtmlUtil.escape(publicLayoutSetPrototype.getName(locale));
-							%>
-
+						<c:if test="<%= PropsValues.LAYOUT_USER_PUBLIC_LAYOUTS_ENABLED %>">
 							<c:choose>
-								<c:when test="<%= hasUnlinkLayoutSetPrototypePermission %>">
-									<aui:input label='<%= LanguageUtil.format(request, "enable-propagation-of-changes-from-the-site-template-x", publicLayoutSetPrototypeName, false) %>' name="publicLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= publicLayoutSetPrototypeLinkEnabled %>" />
+								<c:when test="<%= (publicLayoutSetPrototype != null) && hasUnlinkLayoutSetPrototypePermission %>">
+									<aui:input label='<%= LanguageUtil.format(request, "enable-propagation-of-changes-from-the-site-template-x", HtmlUtil.escape(publicLayoutSetPrototype.getName(locale)), false) %>' name="publicLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= publicLayoutSetPrototypeLinkEnabled %>" />
 								</c:when>
-								<c:otherwise>
-									<liferay-ui:message arguments="<%= publicLayoutSetPrototypeName %>" key="these-pages-are-linked-to-site-template-x" translateArguments="<%= false %>" />
+								<c:when test="<%= publicLayoutSetPrototype != null %>">
+									<liferay-ui:message arguments="<%= new Object[] {HtmlUtil.escape(privateLayoutSetPrototype.getName(locale))} %>" key="these-pages-are-linked-to-site-template-x" translateArguments="<%= false %>" />
 
 									<aui:input name="layoutSetPrototypeLinkEnabled" type="hidden" value="<%= true %>" />
-								</c:otherwise>
+								</c:when>
 							</c:choose>
 						</c:if>
 					</c:when>
@@ -205,21 +200,16 @@ if (selUser != null) {
 							</c:otherwise>
 						</c:choose>
 
-						<c:if test="<%= PropsValues.LAYOUT_USER_PRIVATE_LAYOUTS_ENABLED && (privateLayoutSetPrototype != null) %>">
-
-							<%
-							String privateLayoutSetPrototypeName = HtmlUtil.escape(privateLayoutSetPrototype.getName(locale));
-							%>
-
+						<c:if test="<%= PropsValues.LAYOUT_USER_PRIVATE_LAYOUTS_ENABLED %>">
 							<c:choose>
-								<c:when test="<%= hasUnlinkLayoutSetPrototypePermission %>">
-									<aui:input label='<%= LanguageUtil.format(request, "enable-propagation-of-changes-from-the-site-template-x", privateLayoutSetPrototypeName, false) %>' name="privateLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= privateLayoutSetPrototypeLinkEnabled %>" />
+								<c:when test="<%= (privateLayoutSetPrototype != null) && hasUnlinkLayoutSetPrototypePermission %>">
+									<aui:input label='<%= LanguageUtil.format(request, "enable-propagation-of-changes-from-the-site-template-x", HtmlUtil.escape(privateLayoutSetPrototype.getName(locale)), false) %>' name="privateLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= privateLayoutSetPrototypeLinkEnabled %>" />
 								</c:when>
-								<c:otherwise>
-									<liferay-ui:message arguments="<%= privateLayoutSetPrototypeName %>" key="these-pages-are-linked-to-site-template-x" translateArguments="<%= false %>" />
+								<c:when test="<%= privateLayoutSetPrototype != null %>">
+									<liferay-ui:message arguments="<%= new Object[] {HtmlUtil.escape(privateLayoutSetPrototype.getName(locale))} %>" key="these-pages-are-linked-to-site-template-x" translateArguments="<%= false %>" />
 
 									<aui:input name="layoutSetPrototypeLinkEnabled" type="hidden" value="<%= true %>" />
-								</c:otherwise>
+								</c:when>
 							</c:choose>
 						</c:if>
 					</c:when>

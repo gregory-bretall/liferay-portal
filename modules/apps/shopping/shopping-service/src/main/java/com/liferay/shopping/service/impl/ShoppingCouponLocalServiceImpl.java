@@ -60,7 +60,7 @@ public class ShoppingCouponLocalServiceImpl
 			double discount, String discountType, ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		long groupId = serviceContext.getScopeGroupId();
 
 		code = StringUtil.toUpperCase(code.trim());
@@ -181,7 +181,7 @@ public class ShoppingCouponLocalServiceImpl
 			String discountType, ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		ShoppingCoupon coupon = shoppingCouponPersistence.findByPrimaryKey(
 			couponId);

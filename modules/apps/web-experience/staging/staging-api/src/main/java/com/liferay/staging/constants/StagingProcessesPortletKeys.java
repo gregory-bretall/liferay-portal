@@ -14,12 +14,9 @@
 
 package com.liferay.staging.constants;
 
-import aQute.bnd.annotation.ProviderType;
-
 /**
  * @author Levente Hudák
  */
-@ProviderType
 public class StagingProcessesPortletKeys {
 
 	public static final String STAGING_PROCESSES =

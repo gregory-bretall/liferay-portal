@@ -44,11 +44,11 @@ public class FileUtilTest {
 	public void testDeleteFile() throws Exception {
 		Path filePath = Files.createTempFile("test", null);
 
-		Assert.assertTrue(FileUtil.exists(filePath));
+		Assert.assertTrue(Files.exists(filePath));
 
 		FileUtil.deleteFile(filePath);
 
-		Assert.assertTrue(FileUtil.notExists(filePath));
+		Assert.assertTrue(Files.notExists(filePath));
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class FileUtilTest {
 	public void testMoveFile() throws Exception {
 		Path sourceFilePath = Files.createTempFile("test", null);
 
-		Assert.assertTrue(FileUtil.exists(sourceFilePath));
+		Assert.assertTrue(Files.exists(sourceFilePath));
 
 		Path targetDirectoryFilePath = Files.createTempDirectory("test");
 
@@ -143,8 +143,8 @@ public class FileUtilTest {
 
 		FileUtil.moveFile(sourceFilePath, targetFilePath);
 
-		Assert.assertTrue(FileUtil.notExists(sourceFilePath));
-		Assert.assertTrue(FileUtil.exists(targetFilePath));
+		Assert.assertTrue(Files.notExists(sourceFilePath));
+		Assert.assertTrue(Files.exists(targetFilePath));
 	}
 
 	@Test

@@ -2366,15 +2366,11 @@ public class ModulePersistenceImpl extends BasePersistenceImpl<Module>
 						finderArgs, list);
 				}
 				else {
-					if (list.size() > 1) {
-						Collections.sort(list, Collections.reverseOrder());
-
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								"ModulePersistenceImpl.fetchByA_CN(long, String, boolean) with parameters (" +
-								StringUtil.merge(finderArgs) +
-								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
-						}
+					if ((list.size() > 1) && _log.isWarnEnabled()) {
+						_log.warn(
+							"ModulePersistenceImpl.fetchByA_CN(long, String, boolean) with parameters (" +
+							StringUtil.merge(finderArgs) +
+							") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
 					}
 
 					Module module = list.get(0);
@@ -2667,15 +2663,11 @@ public class ModulePersistenceImpl extends BasePersistenceImpl<Module>
 						finderArgs, list);
 				}
 				else {
-					if (list.size() > 1) {
-						Collections.sort(list, Collections.reverseOrder());
-
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								"ModulePersistenceImpl.fetchByA_BSN_BV(long, String, String, boolean) with parameters (" +
-								StringUtil.merge(finderArgs) +
-								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
-						}
+					if ((list.size() > 1) && _log.isWarnEnabled()) {
+						_log.warn(
+							"ModulePersistenceImpl.fetchByA_BSN_BV(long, String, String, boolean) with parameters (" +
+							StringUtil.merge(finderArgs) +
+							") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
 					}
 
 					Module module = list.get(0);
@@ -2905,7 +2897,7 @@ public class ModulePersistenceImpl extends BasePersistenceImpl<Module>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((ModuleModelImpl)module, true);
+		clearUniqueFindersCache((ModuleModelImpl)module);
 	}
 
 	@Override
@@ -2917,46 +2909,74 @@ public class ModulePersistenceImpl extends BasePersistenceImpl<Module>
 			entityCache.removeResult(ModuleModelImpl.ENTITY_CACHE_ENABLED,
 				ModuleImpl.class, module.getPrimaryKey());
 
-			clearUniqueFindersCache((ModuleModelImpl)module, true);
+			clearUniqueFindersCache((ModuleModelImpl)module);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(ModuleModelImpl moduleModelImpl) {
-		Object[] args = new Object[] {
-				moduleModelImpl.getAppId(), moduleModelImpl.getContextName()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_A_CN, args, Long.valueOf(1),
-			false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_A_CN, args, moduleModelImpl,
-			false);
-
-		args = new Object[] {
-				moduleModelImpl.getAppId(),
-				moduleModelImpl.getBundleSymbolicName(),
-				moduleModelImpl.getBundleVersion()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_A_BSN_BV, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_A_BSN_BV, args,
-			moduleModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(ModuleModelImpl moduleModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
+	protected void cacheUniqueFindersCache(ModuleModelImpl moduleModelImpl,
+		boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 					moduleModelImpl.getAppId(), moduleModelImpl.getContextName()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_A_CN, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_A_CN, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_A_CN, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_A_CN, args,
+				moduleModelImpl);
+
+			args = new Object[] {
+					moduleModelImpl.getAppId(),
+					moduleModelImpl.getBundleSymbolicName(),
+					moduleModelImpl.getBundleVersion()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_A_BSN_BV, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_A_BSN_BV, args,
+				moduleModelImpl);
 		}
+		else {
+			if ((moduleModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_A_CN.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						moduleModelImpl.getAppId(),
+						moduleModelImpl.getContextName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_A_CN, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_A_CN, args,
+					moduleModelImpl);
+			}
+
+			if ((moduleModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_A_BSN_BV.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						moduleModelImpl.getAppId(),
+						moduleModelImpl.getBundleSymbolicName(),
+						moduleModelImpl.getBundleVersion()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_A_BSN_BV, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_A_BSN_BV, args,
+					moduleModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(ModuleModelImpl moduleModelImpl) {
+		Object[] args = new Object[] {
+				moduleModelImpl.getAppId(), moduleModelImpl.getContextName()
+			};
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_A_CN, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_A_CN, args);
 
 		if ((moduleModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_A_CN.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					moduleModelImpl.getOriginalAppId(),
 					moduleModelImpl.getOriginalContextName()
 				};
@@ -2965,20 +2985,18 @@ public class ModulePersistenceImpl extends BasePersistenceImpl<Module>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_A_CN, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					moduleModelImpl.getAppId(),
-					moduleModelImpl.getBundleSymbolicName(),
-					moduleModelImpl.getBundleVersion()
-				};
+		args = new Object[] {
+				moduleModelImpl.getAppId(),
+				moduleModelImpl.getBundleSymbolicName(),
+				moduleModelImpl.getBundleVersion()
+			};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_A_BSN_BV, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_A_BSN_BV, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_A_BSN_BV, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_A_BSN_BV, args);
 
 		if ((moduleModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_A_BSN_BV.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					moduleModelImpl.getOriginalAppId(),
 					moduleModelImpl.getOriginalBundleSymbolicName(),
 					moduleModelImpl.getOriginalBundleVersion()
@@ -3203,8 +3221,8 @@ public class ModulePersistenceImpl extends BasePersistenceImpl<Module>
 		entityCache.putResult(ModuleModelImpl.ENTITY_CACHE_ENABLED,
 			ModuleImpl.class, module.getPrimaryKey(), module, false);
 
-		clearUniqueFindersCache(moduleModelImpl, false);
-		cacheUniqueFindersCache(moduleModelImpl);
+		clearUniqueFindersCache(moduleModelImpl);
+		cacheUniqueFindersCache(moduleModelImpl, isNew);
 
 		module.resetOriginalValues();
 

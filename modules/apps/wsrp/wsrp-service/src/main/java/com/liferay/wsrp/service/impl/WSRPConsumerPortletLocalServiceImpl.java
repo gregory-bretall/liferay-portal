@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.kernel.xml.Namespace;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
+import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.wsrp.constants.WSRPPortletKeys;
 import com.liferay.wsrp.exception.NoSuchConsumerPortletException;
 import com.liferay.wsrp.exception.WSRPConsumerPortletHandleException;
@@ -490,9 +491,9 @@ public class WSRPConsumerPortletLocalServiceImpl
 		if (_consumerPortletClass == null) {
 			ClassLoader classLoader = getClassLoader();
 
-			Class<?> clazz = classLoader.loadClass(portlet.getPortletClass());
-
-			_consumerPortletClass = clazz.asSubclass(ConsumerPortlet.class);
+			_consumerPortletClass =
+				(Class<ConsumerPortlet>)classLoader.loadClass(
+					portlet.getPortletClass());
 		}
 
 		return _consumerPortletClass.newInstance();
@@ -515,6 +516,7 @@ public class WSRPConsumerPortletLocalServiceImpl
 
 		portlet.setCompanyId(companyId);
 		portlet.setDisplayName(portletId);
+		portlet.setPortletApp(_consumerPortlet.getPortletApp());
 		portlet.setPortletId(portletId);
 		portlet.setPortletName(portletId);
 
@@ -546,7 +548,8 @@ public class WSRPConsumerPortletLocalServiceImpl
 
 		if (portletDescription != null) {
 			addPortletExtraInfo(
-				portlet, portlet.getPortletApp(), portletDescription, name);
+				portlet, _consumerPortlet.getPortletApp(), portletDescription,
+				name);
 
 			portlet.setActive(true);
 		}
@@ -675,7 +678,13 @@ public class WSRPConsumerPortletLocalServiceImpl
 	private static final Map<String, Portlet> _portletsPool =
 		new ConcurrentHashMap<>();
 
-	private Class<? extends ConsumerPortlet> _consumerPortletClass;
+	@ServiceReference(
+		filterString = "(javax.portlet.name=" + WSRPPortletKeys.WSRP_CONSUMER + ")",
+		type = Portlet.class
+	)
+	private Portlet _consumerPortlet;
+
+	private Class<ConsumerPortlet> _consumerPortletClass;
 	private final Map<Long, Tuple> _failedWSRPConsumerPortlets =
 		new ConcurrentHashMap<>();
 

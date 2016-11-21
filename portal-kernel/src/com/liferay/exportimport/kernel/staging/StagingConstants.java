@@ -14,15 +14,12 @@
 
 package com.liferay.exportimport.kernel.staging;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsUtil;
 
 /**
  * @author Raymond Augé
  */
-@ProviderType
 public class StagingConstants {
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(

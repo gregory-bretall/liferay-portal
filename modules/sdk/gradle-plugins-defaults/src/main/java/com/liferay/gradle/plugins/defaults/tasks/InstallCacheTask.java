@@ -105,8 +105,8 @@ public class InstallCacheTask extends DefaultTask {
 
 	@TaskAction
 	public void installCache() throws IOException {
-		_installCache("jar");
-		_installCache("pom");
+		installCache("jar");
+		installCache("pom");
 	}
 
 	public void setArtifactGroup(Object artifactGroup) {
@@ -129,7 +129,7 @@ public class InstallCacheTask extends DefaultTask {
 		_mavenRootDir = mavenRootDir;
 	}
 
-	private void _copy(final File file, final File destinationDir) {
+	protected void copy(final File file, final File destinationDir) {
 		Project project = getProject();
 
 		project.copy(
@@ -144,7 +144,7 @@ public class InstallCacheTask extends DefaultTask {
 			});
 	}
 
-	private void _installCache(String extension) throws IOException {
+	protected void installCache(String extension) throws IOException {
 		File file = new File(
 			getMavenInputDir(),
 			getArtifactName() + "-" + getArtifactVersion() + "." + extension);
@@ -154,7 +154,7 @@ public class InstallCacheTask extends DefaultTask {
 		}
 
 		if (extension.equals("pom")) {
-			file = _normalizeTextFile(file);
+			file = normalizeTextFile(file);
 		}
 
 		HashValue hashValue = HashUtil.sha1(file);
@@ -163,15 +163,15 @@ public class InstallCacheTask extends DefaultTask {
 
 		hash = hash.replaceFirst("^0*", "");
 
-		_copy(file, new File(getCacheDestinationDir(), hash));
+		copy(file, new File(getCacheDestinationDir(), hash));
 	}
 
-	private File _normalizeTextFile(File file) throws IOException {
+	protected File normalizeTextFile(File file) throws IOException {
 		Project project = getProject();
 
 		final File tempFile = new File(getTemporaryDir(), file.getName());
 
-		_copy(file, tempFile.getParentFile());
+		copy(file, tempFile.getParentFile());
 
 		CharsetToolkit charsetToolkit = new CharsetToolkit(tempFile);
 

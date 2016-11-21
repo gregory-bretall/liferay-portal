@@ -50,8 +50,9 @@ public class ConfigurationSynchronousConfigurationListener
 		if (factoryPid != null) {
 			message.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
 		}
-
-		message.put(Constants.SERVICE_PID, configurationEvent.getPid());
+		else {
+			message.put(Constants.SERVICE_PID, configurationEvent.getPid());
+		}
 
 		message.put("configuration.event.type", configurationEvent.getType());
 

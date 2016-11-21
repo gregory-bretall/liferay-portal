@@ -1889,13 +1889,6 @@ public class LanguageImpl implements Language, Serializable {
 						PropsValues.LOCALES_ENABLED);
 				}
 				catch (SystemException se) {
-
-					// LPS-52675
-
-					if (_log.isDebugEnabled()) {
-						_log.debug(se, se);
-					}
-
 					languageIds = PropsValues.LOCALES_ENABLED;
 				}
 			}

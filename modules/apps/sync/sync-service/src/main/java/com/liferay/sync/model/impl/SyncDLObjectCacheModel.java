@@ -66,7 +66,7 @@ public class SyncDLObjectCacheModel implements CacheModel<SyncDLObject>,
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(57);
+		StringBundler sb = new StringBundler(55);
 
 		sb.append("{syncDLObjectId=");
 		sb.append(syncDLObjectId);
@@ -108,8 +108,6 @@ public class SyncDLObjectCacheModel implements CacheModel<SyncDLObject>,
 		sb.append(checksum);
 		sb.append(", event=");
 		sb.append(event);
-		sb.append(", lanTokenKey=");
-		sb.append(lanTokenKey);
 		sb.append(", lastPermissionChangeDate=");
 		sb.append(lastPermissionChangeDate);
 		sb.append(", lockExpirationDate=");
@@ -222,13 +220,6 @@ public class SyncDLObjectCacheModel implements CacheModel<SyncDLObject>,
 			syncDLObjectImpl.setEvent(event);
 		}
 
-		if (lanTokenKey == null) {
-			syncDLObjectImpl.setLanTokenKey(StringPool.BLANK);
-		}
-		else {
-			syncDLObjectImpl.setLanTokenKey(lanTokenKey);
-		}
-
 		if (lastPermissionChangeDate == Long.MIN_VALUE) {
 			syncDLObjectImpl.setLastPermissionChangeDate(null);
 		}
@@ -304,7 +295,6 @@ public class SyncDLObjectCacheModel implements CacheModel<SyncDLObject>,
 		size = objectInput.readLong();
 		checksum = objectInput.readUTF();
 		event = objectInput.readUTF();
-		lanTokenKey = objectInput.readUTF();
 		lastPermissionChangeDate = objectInput.readLong();
 		lockExpirationDate = objectInput.readLong();
 
@@ -414,13 +404,6 @@ public class SyncDLObjectCacheModel implements CacheModel<SyncDLObject>,
 			objectOutput.writeUTF(event);
 		}
 
-		if (lanTokenKey == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
-		}
-		else {
-			objectOutput.writeUTF(lanTokenKey);
-		}
-
 		objectOutput.writeLong(lastPermissionChangeDate);
 		objectOutput.writeLong(lockExpirationDate);
 
@@ -470,7 +453,6 @@ public class SyncDLObjectCacheModel implements CacheModel<SyncDLObject>,
 	public long size;
 	public String checksum;
 	public String event;
-	public String lanTokenKey;
 	public long lastPermissionChangeDate;
 	public long lockExpirationDate;
 	public long lockUserId;

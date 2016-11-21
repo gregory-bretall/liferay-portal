@@ -21,7 +21,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Peter Fellwock
  */
-@Component (enabled = false)
+@Component
 public class ChatGroupServiceConfigurationBeanDeclaration
 	implements ConfigurationBeanDeclaration {
 

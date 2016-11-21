@@ -25,11 +25,10 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.persistence.UserUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -236,7 +235,7 @@ public class StatusFinderImpl
 		for (Object[] objectArray : objectArrayList) {
 			long userId = (Long)objectArray[7];
 
-			User user = _userLocalService.getUser(userId);
+			User user = UserUtil.findByPrimaryKey(userId);
 
 			Object[] newObjectArray = new Object[objectArray.length + 1];
 
@@ -251,8 +250,5 @@ public class StatusFinderImpl
 
 		return newObjectArrayList;
 	}
-
-	@ServiceReference(type = UserLocalService.class)
-	private UserLocalService _userLocalService;
 
 }

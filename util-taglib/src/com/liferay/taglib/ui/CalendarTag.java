@@ -24,9 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Brian Wing Shun Chan
- * @deprecated As of 7.0.0, with no direct replacement
  */
-@Deprecated
 public class CalendarTag extends IncludeTag {
 
 	public void setData(Set<Integer> data) {

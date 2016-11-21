@@ -23,7 +23,6 @@ import com.liferay.portal.captcha.recaptcha.ReCaptchaImpl;
 import com.liferay.portal.captcha.simplecaptcha.SimpleCaptchaImpl;
 import com.liferay.portal.convert.ConvertException;
 import com.liferay.portal.convert.ConvertProcess;
-import com.liferay.portal.instances.service.PortalInstancesLocalService;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.cache.CacheRegistryUtil;
@@ -85,6 +84,7 @@ import com.liferay.portal.kernel.xuggler.XugglerUtil;
 import com.liferay.portal.security.lang.DoPrivilegedBean;
 import com.liferay.portal.upload.UploadServletRequestImpl;
 import com.liferay.portal.util.MaintenanceUtil;
+import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.ShutdownUtil;
 import com.liferay.portlet.ActionResponseImpl;
@@ -357,8 +357,7 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		if (!ParamUtil.getBoolean(actionRequest, "blocking")) {
 			_indexWriterHelper.reindex(
 				themeDisplay.getUserId(), "reindex",
-				_portalInstancesLocalService.getCompanyIds(), className,
-				taskContextMap);
+				PortalInstances.getCompanyIds(), className, taskContextMap);
 
 			return;
 		}
@@ -411,8 +410,7 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		try {
 			_indexWriterHelper.reindex(
 				themeDisplay.getUserId(), jobName,
-				_portalInstancesLocalService.getCompanyIds(), className,
-				taskContextMap);
+				PortalInstances.getCompanyIds(), className, taskContextMap);
 
 			countDownLatch.await(
 				ParamUtil.getLong(actionRequest, "timeout", Time.HOUR),
@@ -427,7 +425,7 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 	protected void reindexDictionaries(ActionRequest actionRequest)
 		throws Exception {
 
-		long[] companyIds = _portalInstancesLocalService.getCompanyIds();
+		long[] companyIds = PortalInstances.getCompanyIds();
 
 		for (long companyId : companyIds) {
 			_indexWriterHelper.indexQuerySuggestionDictionaries(companyId);
@@ -859,9 +857,6 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 	@Reference
 	private OrganizationMembershipPolicyFactory
 		_organizationMembershipPolicyFactory;
-
-	@Reference
-	private PortalInstancesLocalService _portalInstancesLocalService;
 
 	@Reference
 	private PortalUUID _portalUUID;

@@ -47,7 +47,8 @@ public class KaleoTaskAssignmentLocalServiceImpl
 			Assignment assignment, ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(serviceContext.getGuestOrUserId());
+		User user = userPersistence.findByPrimaryKey(
+			serviceContext.getGuestOrUserId());
 		Date now = new Date();
 
 		long kaleoTaskAssignmentId = counterLocalService.increment();

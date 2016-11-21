@@ -529,7 +529,7 @@ public class JspServlet extends HttpServlet {
 
 		Path dirPath = fileSystem.getPath(dir);
 
-		if (Files.exists(dirPath) && !paths.isEmpty()) {
+		if (Files.exists(dirPath) && (paths.size() > 0)) {
 			try {
 				Files.walkFileTree(dirPath, new DeleteFileVisitor(paths));
 			}

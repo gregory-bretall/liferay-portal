@@ -29,9 +29,7 @@ import javax.portlet.PortletRequest;
 
 /**
  * @author Eudaldo Alonso
- * @deprecated As of 2.6.0, with no direct replacement
  */
-@Deprecated
 public class RestoreEntryUtil {
 
 	public static JSONObject checkEntry(PortletRequest portletRequest)

@@ -35,6 +35,7 @@ import groovy.lang.Closure;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import java.lang.reflect.Method;
 
@@ -44,10 +45,10 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
+import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
-import org.gradle.api.UncheckedIOException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ProjectDependency;
@@ -69,7 +70,6 @@ import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.Upload;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
-import org.gradle.util.GUtil;
 
 /**
  * @author Andrea Di Giorgi
@@ -87,6 +87,18 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 	public static final String RECORD_ARTIFACT_TASK_NAME = "recordArtifact";
 
 	public static final String UPDATE_VERSION_TASK_NAME = "updateVersion";
+
+	public static Properties getArtifactProperties(
+		WritePropertiesTask recordArtifactTask) {
+
+		try {
+			return FileUtil.readProperties(recordArtifactTask.getOutputFile());
+		}
+		catch (IOException ioe) {
+			throw new GradleException(
+				"Unable to read artifact properties", ioe);
+		}
+	}
 
 	public static File getRelengDir(Project project) {
 		File rootDir = GradleUtil.getRootDir(project, ".releng");
@@ -116,14 +128,14 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 			(BuildChangeLogTask)GradleUtil.getTask(
 				project, ChangeLogBuilderPlugin.BUILD_CHANGE_LOG_TASK_NAME);
 
-		final WritePropertiesTask recordArtifactTask = _addTaskRecordArtifact(
+		final WritePropertiesTask recordArtifactTask = addTaskRecordArtifact(
 			project, relengDir);
 
-		_addTaskPrintArtifactPublishCommands(project, recordArtifactTask);
-		_addTaskPrintStaleArtifact(project, recordArtifactTask);
+		addTaskPrintArtifactPublishCommands(project, recordArtifactTask);
+		addTaskPrintStaleArtifact(project, recordArtifactTask);
 
-		_configureTaskBuildChangeLog(buildChangeLogTask, relengDir);
-		_configureTaskUploadArchives(project, recordArtifactTask);
+		configureTaskBuildChangeLog(buildChangeLogTask, relengDir);
+		configureTaskUploadArchives(project, recordArtifactTask);
 
 		GradleUtil.withPlugin(
 			project, JavaPlugin.class,
@@ -131,17 +143,14 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(JavaPlugin javaPlugin) {
-					_configureTaskProcessResources(project, buildChangeLogTask);
+					configureTaskProcessResources(project, buildChangeLogTask);
 				}
 
 			});
 	}
 
-	private LiferayRelengPlugin() {
-	}
-
-	private PrintArtifactPublishCommandsTask
-		_addTaskPrintArtifactPublishCommands(
+	protected PrintArtifactPublishCommandsTask
+		addTaskPrintArtifactPublishCommands(
 			Project project, final WritePropertiesTask recordArtifactTask) {
 
 		final PrintArtifactPublishCommandsTask
@@ -163,7 +172,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 			"Prints the artifact publish commands if this project has been " +
 				"changed since the last publish.");
 
-		_configureTaskEnabledIfStale(
+		configureTaskEnabledIfStale(
 			printArtifactPublishCommandsTask, recordArtifactTask);
 
 		String projectPath = project.getPath();
@@ -171,7 +180,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		if (projectPath.startsWith(":apps:") ||
 			projectPath.startsWith(":private:apps:")) {
 
-			_configureTaskEnabledIfLeaf(printArtifactPublishCommandsTask);
+			configureTaskEnabledIfLeaf(printArtifactPublishCommandsTask);
 			_configureTaskEnabledIfDependenciesArePublished(
 				printArtifactPublishCommandsTask);
 		}
@@ -184,7 +193,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 				public void execute(
 					LiferayOSGiDefaultsPlugin liferayOSGiDefaultsPlugin) {
 
-					_configureTaskPrintArtifactPublishCommandsForOSGi(
+					configureTaskPrintArtifactPublishCommandsForOSGi(
 						printArtifactPublishCommandsTask);
 				}
 
@@ -242,7 +251,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		return printArtifactPublishCommandsTask;
 	}
 
-	private Task _addTaskPrintStaleArtifact(
+	protected Task addTaskPrintStaleArtifact(
 		Project project, final WritePropertiesTask recordArtifactTask) {
 
 		final Task task = project.task(PRINT_STALE_ARTIFACT_TASK_NAME);
@@ -266,7 +275,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 				"since the last publish.");
 		task.setGroup(JavaBasePlugin.VERIFICATION_GROUP);
 
-		_configureTaskEnabledIfStale(task, recordArtifactTask);
+		configureTaskEnabledIfStale(task, recordArtifactTask);
 
 		GradleUtil.withPlugin(
 			project, LiferayOSGiDefaultsPlugin.class,
@@ -276,7 +285,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 				public void execute(
 					LiferayOSGiDefaultsPlugin liferayOSGiDefaultsPlugin) {
 
-					_configureTaskPrintStaleArtifactForOSGi(task);
+					configureTaskPrintStaleArtifactForOSGi(task);
 				}
 
 			});
@@ -284,7 +293,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		return task;
 	}
 
-	private WritePropertiesTask _addTaskRecordArtifact(
+	protected WritePropertiesTask addTaskRecordArtifact(
 		Project project, File destinationDir) {
 
 		final WritePropertiesTask writePropertiesTask = GradleUtil.addTask(
@@ -337,7 +346,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 								ArchivePublishArtifact archivePublishArtifact =
 									(ArchivePublishArtifact)publishArtifact;
 
-								return _getArtifactRemoteURL(
+								return getArtifactRemoteURL(
 									archivePublishArtifact.getArchiveTask(),
 									false);
 							}
@@ -345,7 +354,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 								Project project =
 									writePropertiesTask.getProject();
 
-								return _getArtifactRemoteURL(
+								return getArtifactRemoteURL(
 									project, publishArtifact.getName(),
 									String.valueOf(project.getVersion()),
 									publishArtifact.getExtension(), false);
@@ -362,40 +371,14 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		return writePropertiesTask;
 	}
 
-	private void _configureTaskBuildChangeLog(
+	protected void configureTaskBuildChangeLog(
 		BuildChangeLogTask buildChangeLogTask, File destinationDir) {
 
 		buildChangeLogTask.setChangeLogFile(
 			new File(destinationDir, "liferay-releng.changelog"));
 	}
 
-	private void _configureTaskEnabledIfDependenciesArePublished(Task task) {
-		task.onlyIf(
-			new Spec<Task>() {
-
-				@Override
-				public boolean isSatisfiedBy(Task task) {
-					try {
-						Project project = task.getProject();
-
-						if (FileUtil.contains(
-								project.getBuildFile(),
-								"version: \"default\"")) {
-
-							return false;
-						}
-
-						return true;
-					}
-					catch (IOException ioe) {
-						throw new UncheckedIOException(ioe);
-					}
-				}
-
-			});
-	}
-
-	private void _configureTaskEnabledIfLeaf(Task task) {
+	protected void configureTaskEnabledIfLeaf(Task task) {
 		task.onlyIf(
 			new Spec<Task>() {
 
@@ -431,7 +414,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 			});
 	}
 
-	private void _configureTaskEnabledIfRelease(Task task) {
+	protected void configureTaskEnabledIfRelease(Task task) {
 		task.onlyIf(
 			new Spec<Task>() {
 
@@ -452,7 +435,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 			});
 	}
 
-	private void _configureTaskEnabledIfStale(
+	protected void configureTaskEnabledIfStale(
 		Task task, final WritePropertiesTask recordArtifactTask) {
 
 		String force = GradleUtil.getTaskPrefixedProperty(task, "force");
@@ -482,32 +465,22 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 
 				@Override
 				public boolean isSatisfiedBy(Task task) {
-					Properties artifactProperties;
+					Properties artifactProperties = getArtifactProperties(
+						recordArtifactTask);
 
-					File artifactPropertiesFile =
-						recordArtifactTask.getOutputFile();
-
-					if (artifactPropertiesFile.exists()) {
-						artifactProperties = GUtil.loadProperties(
-							artifactPropertiesFile);
-					}
-					else {
-						artifactProperties = new Properties();
-					}
-
-					return _isStale(
+					return isStale(
 						recordArtifactTask.getProject(), artifactProperties);
 				}
 
 			});
 	}
 
-	private void _configureTaskPrintArtifactPublishCommandsForOSGi(
+	protected void configureTaskPrintArtifactPublishCommandsForOSGi(
 		PrintArtifactPublishCommandsTask printArtifactPublishCommandsTask) {
 
 		Project project = printArtifactPublishCommandsTask.getProject();
 
-		if (GradleUtil.isTestProject(project)) {
+		if (LiferayOSGiDefaultsPlugin.isTestProject(project)) {
 			printArtifactPublishCommandsTask.setEnabled(false);
 		}
 
@@ -515,13 +488,13 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 			LiferayOSGiDefaultsPlugin.UPDATE_FILE_VERSIONS_TASK_NAME);
 	}
 
-	private void _configureTaskPrintStaleArtifactForOSGi(Task task) {
-		if (GradleUtil.isTestProject(task.getProject())) {
+	protected void configureTaskPrintStaleArtifactForOSGi(Task task) {
+		if (LiferayOSGiDefaultsPlugin.isTestProject(task.getProject())) {
 			task.setEnabled(false);
 		}
 	}
 
-	private void _configureTaskProcessResources(
+	protected void configureTaskProcessResources(
 		Project project, final BuildChangeLogTask buildChangeLogTask) {
 
 		Copy copy = (Copy)GradleUtil.getTask(
@@ -546,7 +519,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 			});
 	}
 
-	private void _configureTaskUploadArchives(
+	protected void configureTaskUploadArchives(
 		Project project, Task recordArtifactTask) {
 
 		Task uploadArchivesTask = GradleUtil.getTask(
@@ -554,10 +527,10 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 
 		uploadArchivesTask.dependsOn(recordArtifactTask);
 
-		_configureTaskEnabledIfRelease(recordArtifactTask);
+		configureTaskEnabledIfRelease(recordArtifactTask);
 	}
 
-	private StringBuilder _getArtifactRemoteBaseURL(
+	protected StringBuilder getArtifactRemoteBaseURL(
 			Project project, boolean cdn)
 		throws Exception {
 
@@ -600,11 +573,11 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		return sb;
 	}
 
-	private String _getArtifactRemoteURL(
+	protected String getArtifactRemoteURL(
 			AbstractArchiveTask abstractArchiveTask, boolean cdn)
 		throws Exception {
 
-		StringBuilder sb = _getArtifactRemoteBaseURL(
+		StringBuilder sb = getArtifactRemoteBaseURL(
 			abstractArchiveTask.getProject(), cdn);
 
 		sb.append(abstractArchiveTask.getBaseName());
@@ -616,12 +589,12 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		return sb.toString();
 	}
 
-	private String _getArtifactRemoteURL(
+	protected String getArtifactRemoteURL(
 			Project project, String name, String version, String extension,
 			boolean cdn)
 		throws Exception {
 
-		StringBuilder sb = _getArtifactRemoteBaseURL(project, cdn);
+		StringBuilder sb = getArtifactRemoteBaseURL(project, cdn);
 
 		sb.append(name);
 		sb.append('/');
@@ -636,7 +609,7 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		return sb.toString();
 	}
 
-	private boolean _isStale(
+	protected boolean isStale(
 		final Project project, Properties artifactProperties) {
 
 		Logger logger = project.getLogger();
@@ -695,6 +668,35 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		}
 
 		return false;
+	}
+
+	private LiferayRelengPlugin() {
+	}
+
+	private void _configureTaskEnabledIfDependenciesArePublished(Task task) {
+		task.onlyIf(
+			new Spec<Task>() {
+
+				@Override
+				public boolean isSatisfiedBy(Task task) {
+					try {
+						Project project = task.getProject();
+
+						if (FileUtil.contains(
+								project.getBuildFile(),
+								"version: \"default\"")) {
+
+							return false;
+						}
+
+						return true;
+					}
+					catch (IOException ioe) {
+						throw new UncheckedIOException(ioe);
+					}
+				}
+
+			});
 	}
 
 }

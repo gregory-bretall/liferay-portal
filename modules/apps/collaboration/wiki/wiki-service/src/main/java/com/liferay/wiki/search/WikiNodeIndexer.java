@@ -25,7 +25,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
-import com.liferay.portal.kernel.search.IndexWriterHelper;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -128,14 +128,14 @@ public class WikiNodeIndexer extends BaseIndexer<WikiNode> {
 		Document document = getDocument(wikiNode);
 
 		if (!wikiNode.isInTrash()) {
-			_indexWriterHelper.deleteDocument(
+			IndexWriterHelperUtil.deleteDocument(
 				getSearchEngineId(), wikiNode.getCompanyId(),
 				document.get(Field.UID), isCommitImmediately());
 
 			return;
 		}
 
-		_indexWriterHelper.updateDocument(
+		IndexWriterHelperUtil.updateDocument(
 			getSearchEngineId(), wikiNode.getCompanyId(), document,
 			isCommitImmediately());
 	}
@@ -191,9 +191,6 @@ public class WikiNodeIndexer extends BaseIndexer<WikiNode> {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		WikiNodeIndexer.class);
-
-	@Reference
-	private IndexWriterHelper _indexWriterHelper;
 
 	private WikiNodeLocalService _wikiNodeLocalService;
 

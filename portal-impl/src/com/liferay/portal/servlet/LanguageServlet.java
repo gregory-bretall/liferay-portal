@@ -58,7 +58,7 @@ public class LanguageServlet extends HttpServlet {
 				request, LanguageServlet.class.getName());
 		}
 		catch (PortalException pe) {
-			_log.error("Invalid authentication token received", pe);
+			_log.error("Invalid authentication token received");
 
 			return;
 		}

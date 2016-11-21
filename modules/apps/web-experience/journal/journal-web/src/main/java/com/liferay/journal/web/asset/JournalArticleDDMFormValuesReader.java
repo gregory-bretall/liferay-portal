@@ -29,8 +29,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 /**
  * @author Adolfo Pérez
  */
-public final class JournalArticleDDMFormValuesReader
-	extends BaseDDMFormValuesReader {
+final class JournalArticleDDMFormValuesReader extends BaseDDMFormValuesReader {
 
 	public JournalArticleDDMFormValuesReader(JournalArticle article) {
 		_article = article;
@@ -57,18 +56,17 @@ public final class JournalArticleDDMFormValuesReader
 		}
 	}
 
+	public void setJournalConverter(JournalConverter journalConverter) {
+		_journalConverter = journalConverter;
+	}
+
 	public void setFieldsToDDMFormValuesConverter(
 		FieldsToDDMFormValuesConverter fieldsToDDMFormValuesConverter) {
 
 		_fieldsToDDMFormValuesConverter = fieldsToDDMFormValuesConverter;
 	}
 
-	public void setJournalConverter(JournalConverter journalConverter) {
-		_journalConverter = journalConverter;
-	}
-
 	private final JournalArticle _article;
 	private FieldsToDDMFormValuesConverter _fieldsToDDMFormValuesConverter;
 	private JournalConverter _journalConverter;
-
 }

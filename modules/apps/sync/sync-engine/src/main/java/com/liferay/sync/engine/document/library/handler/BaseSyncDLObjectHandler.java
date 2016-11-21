@@ -19,6 +19,7 @@ import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.util.FileUtil;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -31,7 +32,7 @@ public class BaseSyncDLObjectHandler extends BaseJSONHandler {
 		super(event);
 	}
 
-	protected void processFilePathChange(
+	protected boolean processFilePathChange(
 			SyncFile sourceSyncFile, SyncFile targetSyncFile)
 		throws Exception {
 
@@ -57,9 +58,11 @@ public class BaseSyncDLObjectHandler extends BaseJSONHandler {
 				targetFilePath, targetSyncFile.getParentFolderId(),
 				sourceSyncFile);
 
-			if (FileUtil.exists(sourceFilePath)) {
+			if (Files.exists(sourceFilePath)) {
 				FileUtil.moveFile(sourceFilePath, targetFilePath);
 			}
+
+			return true;
 		}
 
 		String sourceSyncFileName = FileUtil.getSanitizedFileName(
@@ -76,10 +79,14 @@ public class BaseSyncDLObjectHandler extends BaseJSONHandler {
 				targetFilePath, sourceSyncFile.getParentFolderId(),
 				sourceSyncFile);
 
-			if (FileUtil.exists(sourceFilePath)) {
+			if (Files.exists(sourceFilePath)) {
 				FileUtil.moveFile(sourceFilePath, targetFilePath);
 			}
+
+			return true;
 		}
+
+		return false;
 	}
 
 }

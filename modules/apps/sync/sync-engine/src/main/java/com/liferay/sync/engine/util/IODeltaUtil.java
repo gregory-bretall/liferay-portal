@@ -52,9 +52,7 @@ public class IODeltaUtil {
 
 		Path syncFilePath = Paths.get(syncFile.getFilePathName());
 
-		if (Files.isDirectory(syncFilePath) ||
-			FileUtil.notExists(syncFilePath)) {
-
+		if (Files.isDirectory(syncFilePath) || Files.notExists(syncFilePath)) {
 			return null;
 		}
 
@@ -67,7 +65,7 @@ public class IODeltaUtil {
 
 			Path checksumsFilePath = getChecksumsFilePath(syncFile);
 
-			if (FileUtil.notExists(checksumsFilePath)) {
+			if (Files.notExists(checksumsFilePath)) {
 				Files.createFile(checksumsFilePath);
 			}
 
@@ -108,7 +106,7 @@ public class IODeltaUtil {
 		try {
 			Path sourceChecksumsFilePath = getChecksumsFilePath(sourceSyncFile);
 
-			if (FileUtil.notExists(sourceChecksumsFilePath)) {
+			if (Files.notExists(sourceChecksumsFilePath)) {
 				checksums(sourceSyncFile);
 			}
 
@@ -130,9 +128,9 @@ public class IODeltaUtil {
 	public static Path delta(
 		Path targetFilePath, Path checksumsFilePath, Path deltaFilePath) {
 
-		if (FileUtil.notExists(targetFilePath) ||
-			FileUtil.notExists(checksumsFilePath) ||
-			FileUtil.notExists(deltaFilePath)) {
+		if (Files.notExists(targetFilePath) ||
+			Files.notExists(checksumsFilePath) ||
+			Files.notExists(deltaFilePath)) {
 
 			return null;
 		}
@@ -201,7 +199,7 @@ public class IODeltaUtil {
 	public static Path patch(
 		Path targetFilePath, InputStream deltaInputStream) {
 
-		if (FileUtil.notExists(targetFilePath)) {
+		if (Files.notExists(targetFilePath)) {
 			return null;
 		}
 
@@ -248,13 +246,6 @@ public class IODeltaUtil {
 		}
 
 		try {
-
-			// Workaround for JDK-8150700
-
-			if (OSDetector.isWindows()) {
-				Files.delete(targetFilePath);
-			}
-
 			Files.move(
 				patchedFilePath, targetFilePath,
 				StandardCopyOption.REPLACE_EXISTING);

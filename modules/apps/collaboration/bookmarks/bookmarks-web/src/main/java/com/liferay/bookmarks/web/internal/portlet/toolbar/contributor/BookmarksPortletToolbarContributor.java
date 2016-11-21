@@ -158,13 +158,6 @@ public class BookmarksPortletToolbarContributor
 				permissionChecker, groupId, folderId, actionId);
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			return false;
 		}
 
@@ -245,8 +238,7 @@ public class BookmarksPortletToolbarContributor
 		catch (ConfigurationException ce) {
 			_log.error(
 				"Unable to obtain bookmarks root folder ID for group " +
-					themeDisplay.getScopeGroupId(),
-				ce);
+					themeDisplay.getScopeGroupId());
 		}
 
 		long folderId = BeanParamUtil.getLong(

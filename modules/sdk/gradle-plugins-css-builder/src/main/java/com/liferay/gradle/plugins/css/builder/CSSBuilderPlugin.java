@@ -27,7 +27,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.BasePlugin;
@@ -52,39 +51,40 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
-		Configuration cssBuilderConfiguration = _addConfigurationCSSBuilder(
+		Configuration cssBuilderConfiguration = addConfigurationCSSBuilder(
 			project);
 		Configuration portalCommonCSSConfiguration =
-			_addConfigurationPortalCommonCSS(project);
+			addConfigurationPortalCommonCSS(project);
 
-		_addTaskBuildCSS(project);
+		addTaskBuildCSS(project);
 
-		_configureTasksBuildCSS(
+		configureTasksBuildCSS(
 			project, cssBuilderConfiguration, portalCommonCSSConfiguration);
 	}
 
-	private Configuration _addConfigurationCSSBuilder(final Project project) {
+	protected Configuration addConfigurationCSSBuilder(final Project project) {
 		Configuration configuration = GradleUtil.addConfiguration(
 			project, CSS_BUILDER_CONFIGURATION_NAME);
-
-		configuration.defaultDependencies(
-			new Action<DependencySet>() {
-
-				@Override
-				public void execute(DependencySet dependencySet) {
-					_addDependenciesCSSBuilder(project);
-				}
-
-			});
 
 		configuration.setDescription(
 			"Configures Liferay CSS Builder for this project.");
 		configuration.setVisible(false);
 
+		GradleUtil.executeIfEmpty(
+			configuration,
+			new Action<Configuration>() {
+
+				@Override
+				public void execute(Configuration configuration) {
+					addDependenciesCSSBuilder(project);
+				}
+
+			});
+
 		return configuration;
 	}
 
-	private Configuration _addConfigurationPortalCommonCSS(
+	protected Configuration addConfigurationPortalCommonCSS(
 		final Project project) {
 
 		Configuration configuration = GradleUtil.addConfiguration(
@@ -102,7 +102,7 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(Configuration configuration) {
-					_addDependenciesPortalCommonCSS(project);
+					addDependenciesPortalCommonCSS(project);
 				}
 
 			});
@@ -110,19 +110,19 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 		return configuration;
 	}
 
-	private void _addDependenciesCSSBuilder(Project project) {
+	protected void addDependenciesCSSBuilder(Project project) {
 		GradleUtil.addDependency(
 			project, CSS_BUILDER_CONFIGURATION_NAME, "com.liferay",
 			"com.liferay.css.builder", "latest.release");
 	}
 
-	private void _addDependenciesPortalCommonCSS(Project project) {
+	protected void addDependenciesPortalCommonCSS(Project project) {
 		GradleUtil.addDependency(
 			project, PORTAL_COMMON_CSS_CONFIGURATION_NAME, "com.liferay",
 			"com.liferay.frontend.css.common", "latest.release", false);
 	}
 
-	private BuildCSSTask _addTaskBuildCSS(Project project) {
+	protected BuildCSSTask addTaskBuildCSS(Project project) {
 		final BuildCSSTask buildCSSTask = GradleUtil.addTask(
 			project, BUILD_CSS_TASK_NAME, BuildCSSTask.class);
 
@@ -137,7 +137,7 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(JavaPlugin javaPlugin) {
-					_configureTaskBuildCSSForJavaPlugin(buildCSSTask);
+					configureTaskBuildCSSForJavaPlugin(buildCSSTask);
 				}
 
 			});
@@ -148,7 +148,7 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(WarPlugin warPlugin) {
-					_configureTaskBuildCSSForWarPlugin(buildCSSTask);
+					configureTaskBuildCSSForWarPlugin(buildCSSTask);
 				}
 
 			});
@@ -156,13 +156,13 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 		return buildCSSTask;
 	}
 
-	private void _configureTaskBuildCSSClasspath(
+	protected void configureTaskBuildCSSClasspath(
 		BuildCSSTask buildCSSTask, FileCollection classpath) {
 
 		buildCSSTask.setClasspath(classpath);
 	}
 
-	private void _configureTaskBuildCSSForJavaPlugin(
+	protected void configureTaskBuildCSSForJavaPlugin(
 		final BuildCSSTask buildCSSTask) {
 
 		buildCSSTask.setDocrootDir(
@@ -170,7 +170,7 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public File call() throws Exception {
-					return _getResourcesDir(buildCSSTask.getProject());
+					return getResourcesDir(buildCSSTask.getProject());
 				}
 
 			});
@@ -181,7 +181,7 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 		processResourcesTask.dependsOn(buildCSSTask);
 	}
 
-	private void _configureTaskBuildCSSForWarPlugin(
+	protected void configureTaskBuildCSSForWarPlugin(
 		final BuildCSSTask buildCSSTask) {
 
 		buildCSSTask.setDocrootDir(
@@ -189,13 +189,13 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public File call() throws Exception {
-					return _getWebAppDir(buildCSSTask.getProject());
+					return getWebAppDir(buildCSSTask.getProject());
 				}
 
 			});
 	}
 
-	private void _configureTaskBuildCSSPortalCommonFile(
+	protected void configureTaskBuildCSSPortalCommonFile(
 		BuildCSSTask buildCSSTask,
 		final Configuration portalCommonCSSConfiguration) {
 
@@ -210,7 +210,7 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 			});
 	}
 
-	private void _configureTasksBuildCSS(
+	protected void configureTasksBuildCSS(
 		Project project, final Configuration cssBuilderConfiguration,
 		final Configuration portalCommonCSSConfiguration) {
 
@@ -222,23 +222,23 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(BuildCSSTask buildCSSTask) {
-					_configureTaskBuildCSSClasspath(
+					configureTaskBuildCSSClasspath(
 						buildCSSTask, cssBuilderConfiguration);
-					_configureTaskBuildCSSPortalCommonFile(
+					configureTaskBuildCSSPortalCommonFile(
 						buildCSSTask, portalCommonCSSConfiguration);
 				}
 
 			});
 	}
 
-	private File _getResourcesDir(Project project) {
+	protected File getResourcesDir(Project project) {
 		SourceSet sourceSet = GradleUtil.getSourceSet(
 			project, SourceSet.MAIN_SOURCE_SET_NAME);
 
-		return _getSrcDir(sourceSet.getResources());
+		return getSrcDir(sourceSet.getResources());
 	}
 
-	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
+	protected File getSrcDir(SourceDirectorySet sourceDirectorySet) {
 		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
 
 		Iterator<File> iterator = srcDirs.iterator();
@@ -246,7 +246,7 @@ public class CSSBuilderPlugin implements Plugin<Project> {
 		return iterator.next();
 	}
 
-	private File _getWebAppDir(Project project) {
+	protected File getWebAppDir(Project project) {
 		WarPluginConvention warPluginConvention = GradleUtil.getConvention(
 			project, WarPluginConvention.class);
 

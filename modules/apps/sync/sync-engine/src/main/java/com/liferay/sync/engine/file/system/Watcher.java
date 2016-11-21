@@ -203,7 +203,7 @@ public abstract class Watcher implements Runnable {
 	protected abstract void init();
 
 	protected boolean isIgnoredFilePath(Path filePath) {
-		if (FileUtil.notExists(filePath)) {
+		if (Files.notExists(filePath)) {
 			return true;
 		}
 
@@ -226,7 +226,7 @@ public abstract class Watcher implements Runnable {
 		List<Path> failedFilePaths = getFailedFilePaths();
 
 		for (Path failedFilePath : failedFilePaths) {
-			if (FileUtil.notExists(failedFilePath)) {
+			if (Files.notExists(failedFilePath)) {
 				failedFilePaths.remove(failedFilePath);
 
 				continue;
@@ -262,9 +262,7 @@ public abstract class Watcher implements Runnable {
 
 		Path syncAccountFilePath = Paths.get(syncAccount.getFilePathName());
 
-		if (!FileUtil.isRealFilePath(syncAccountFilePath) ||
-			!FileUtil.exists(syncAccountFilePath)) {
-
+		if (!FileUtil.exists(syncAccountFilePath)) {
 			if (_logger.isTraceEnabled()) {
 				_logger.trace(
 					"Missing sync account file path {}", syncAccountFilePath);
@@ -281,8 +279,7 @@ public abstract class Watcher implements Runnable {
 				missingFilePath.toString(), syncAccount.getSyncAccountId());
 
 			if ((syncSite != null) && syncSite.isActive() &&
-				(!FileUtil.isRealFilePath(syncAccountFilePath) ||
-				 !FileUtil.exists(missingFilePath))) {
+				!FileUtil.exists(missingFilePath)) {
 
 				if (_logger.isTraceEnabled()) {
 					_logger.trace(
@@ -326,7 +323,7 @@ public abstract class Watcher implements Runnable {
 			}
 		}
 		else if (eventType.equals(SyncWatchEvent.EVENT_TYPE_DELETE)) {
-			if (FileUtil.exists(filePath)) {
+			if (Files.exists(filePath)) {
 				return;
 			}
 
@@ -342,7 +339,7 @@ public abstract class Watcher implements Runnable {
 
 			processMissingFilePath(filePath);
 
-			if (FileUtil.notExists(filePath.getParent())) {
+			if (Files.notExists(filePath.getParent())) {
 				return;
 			}
 
@@ -354,7 +351,7 @@ public abstract class Watcher implements Runnable {
 				 !FileUtil.isValidChecksum(filePath)) ||
 				FileUtil.isIgnoredFileName(
 					String.valueOf(filePath.getFileName())) ||
-				FileUtil.isTempFile(filePath) || FileUtil.notExists(filePath) ||
+				FileUtil.isTempFile(filePath) || Files.notExists(filePath) ||
 				Files.isDirectory(filePath) || FileUtil.isHidden(filePath) ||
 				FileUtil.isShortcut(filePath)) {
 

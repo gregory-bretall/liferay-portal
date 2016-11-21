@@ -17,8 +17,6 @@ package com.liferay.portal.kernel.service;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.PortletPreferencesIds;
@@ -111,11 +109,6 @@ public class ServiceContextFactory {
 
 				// LPS-24160
 
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsue, nsue);
-				}
 			}
 
 			if (user != null) {
@@ -616,8 +609,5 @@ public class ServiceContextFactory {
 
 		return serviceContext;
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ServiceContextFactory.class);
 
 }

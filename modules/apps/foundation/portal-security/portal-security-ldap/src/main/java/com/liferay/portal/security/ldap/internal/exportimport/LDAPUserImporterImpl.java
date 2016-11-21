@@ -234,7 +234,8 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 						ldapServerId, companyId, binding));
 
 				return importUser(
-					ldapServerId, companyId, ldapContext, attributes, null);
+					ldapServerId, companyId, ldapContext, attributes,
+					StringPool.BLANK);
 			}
 			else {
 				return null;
@@ -340,7 +341,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 			ldapServerId, companyId, ldapContext, fullUserDN);
 
 		User user = importUser(
-			ldapServerId, companyId, ldapContext, attributes, null);
+			ldapServerId, companyId, ldapContext, attributes, StringPool.BLANK);
 
 		ldapContext.close();
 
@@ -505,13 +506,6 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 				companyId, ldapGroup.getGroupName());
 		}
 		catch (NoSuchRoleException nsre) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsre, nsre);
-			}
-
 			User defaultUser = _userLocalService.getDefaultUser(companyId);
 
 			Map<Locale, String> descriptionMap = new HashMap<>();
@@ -791,7 +785,8 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 					User user = importUser(
 						ldapServerId, companyId, userAttributes, userMappings,
 						userExpandoMappings, contactMappings,
-						contactExpandoMappings, null, ldapUserIgnoreAttributes);
+						contactExpandoMappings, StringPool.BLANK,
+						ldapUserIgnoreAttributes);
 
 					importGroups(
 						ldapServerId, companyId, ldapContext, userAttributes,
@@ -1073,13 +1068,6 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 			}
 		}
 		catch (NoSuchUserGroupException nsuge) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsuge, nsuge);
-			}
-
 			StopWatch stopWatch = new StopWatch();
 
 			if (_log.isDebugEnabled()) {
@@ -1166,7 +1154,8 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 				User user = importUser(
 					ldapServerId, companyId, userAttributes, userMappings,
 					userExpandoMappings, contactMappings,
-					contactExpandoMappings, null, ldapUserIgnoreAttributes);
+					contactExpandoMappings, StringPool.BLANK,
+					ldapUserIgnoreAttributes);
 
 				if (user != null) {
 					if (_log.isDebugEnabled()) {
@@ -1451,13 +1440,9 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 				modifiedDate = LDAPUtil.parseDate(modifyTimestamp);
 
 				if (modifiedDate.equals(user.getModifiedDate())) {
-					if (ldapUser.isUpdatePassword() ||
-						!ldapImportConfiguration.importUserPasswordEnabled()) {
-
-						updateUserPassword(
-							ldapImportConfiguration, user.getUserId(),
-							user.getScreenName(), password, passwordReset);
-					}
+					updateUserPassword(
+						ldapImportConfiguration, user.getUserId(),
+						ldapUser.getScreenName(), password, passwordReset);
 
 					if (_log.isDebugEnabled()) {
 						_log.debug(
@@ -1503,9 +1488,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 			ldapUser.setScreenName(user.getScreenName());
 		}
 
-		if (ldapUser.isUpdatePassword() ||
-			!ldapImportConfiguration.importUserPasswordEnabled()) {
-
+		if (ldapUser.isUpdatePassword()) {
 			password = updateUserPassword(
 				ldapImportConfiguration, user.getUserId(),
 				ldapUser.getScreenName(), password, passwordReset);
@@ -1530,7 +1513,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 			passwordReset, ldapUser.getReminderQueryQuestion(),
 			ldapUser.getReminderQueryAnswer(), ldapUser.getScreenName(),
 			ldapUser.getEmailAddress(), ldapUser.getFacebookId(),
-			ldapUser.getOpenId(), ldapUser.getPortraitId() > 0,
+			ldapUser.getOpenId(), (ldapUser.getPortraitId() > 0),
 			ldapUser.getPortraitBytes(), ldapUser.getLanguageId(),
 			ldapUser.getTimeZoneId(), ldapUser.getGreeting(),
 			ldapUser.getComments(), ldapUser.getFirstName(),

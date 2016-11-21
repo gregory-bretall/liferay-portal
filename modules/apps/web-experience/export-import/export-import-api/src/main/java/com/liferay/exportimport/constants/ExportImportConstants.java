@@ -14,12 +14,9 @@
 
 package com.liferay.exportimport.constants;
 
-import aQute.bnd.annotation.ProviderType;
-
 /**
  * @author Mate Thurzo
  */
-@ProviderType
 public class ExportImportConstants {
 
 	public static final String EXPORT_IMPORT_SCHEMA_VERSION = "1.0.0";

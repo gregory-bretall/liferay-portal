@@ -45,7 +45,8 @@ public class KaleoInstanceTokenLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(serviceContext.getGuestOrUserId());
+		User user = userPersistence.findByPrimaryKey(
+			serviceContext.getGuestOrUserId());
 		KaleoInstanceToken parentKaleoInstanceToken =
 			kaleoInstanceTokenPersistence.findByPrimaryKey(
 				parentKaleoInstanceTokenId);
@@ -187,7 +188,8 @@ public class KaleoInstanceTokenLocalServiceImpl
 
 		// Kaleo instance token
 
-		User user = userLocalService.getUser(serviceContext.getGuestOrUserId());
+		User user = userPersistence.findByPrimaryKey(
+			serviceContext.getGuestOrUserId());
 		Date now = new Date();
 
 		rootKaleoInstanceTokenId = counterLocalService.increment();

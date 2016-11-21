@@ -108,8 +108,7 @@ public class LayoutSetLocalServiceImpl extends LayoutSetLocalServiceBaseImpl {
 			catch (NoSuchImageException nsie) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
-						"Unable to delete image " + layoutSet.getLogoId(),
-						nsie);
+						"Unable to delete image " + layoutSet.getLogoId());
 				}
 			}
 		}
@@ -136,12 +135,6 @@ public class LayoutSetLocalServiceImpl extends LayoutSetLocalServiceBaseImpl {
 				layoutSet.getCompanyId(), layoutSet.getLayoutSetId());
 		}
 		catch (NoSuchVirtualHostException nsvhe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsvhe, nsvhe);
-			}
 		}
 	}
 
@@ -473,12 +466,6 @@ public class LayoutSetLocalServiceImpl extends LayoutSetLocalServiceBaseImpl {
 					layoutSet.getCompanyId(), layoutSet.getLayoutSetId());
 			}
 			catch (NoSuchVirtualHostException nsvhe) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsvhe, nsvhe);
-				}
 			}
 		}
 

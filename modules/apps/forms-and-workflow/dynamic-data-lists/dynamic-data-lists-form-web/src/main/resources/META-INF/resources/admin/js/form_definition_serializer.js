@@ -25,11 +25,6 @@ AUI.add(
 
 					fieldTypesDefinitions: {
 						value: {}
-					},
-
-					rules: {
-						validator: Array.isArray,
-						value: []
 					}
 				},
 
@@ -47,8 +42,7 @@ AUI.add(
 							{
 								availableLanguageIds: instance.get('availableLanguageIds'),
 								defaultLanguageId: instance.get('defaultLanguageId'),
-								fields: instance.get('fields'),
-								rules: instance.get('rules')
+								fields: instance.get('fields')
 							}
 						);
 

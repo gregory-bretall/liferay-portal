@@ -2668,7 +2668,7 @@ public class RatingsEntryPersistenceImpl extends BasePersistenceImpl<RatingsEntr
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((RatingsEntryModelImpl)ratingsEntry, true);
+		clearUniqueFindersCache((RatingsEntryModelImpl)ratingsEntry);
 	}
 
 	@Override
@@ -2680,11 +2680,42 @@ public class RatingsEntryPersistenceImpl extends BasePersistenceImpl<RatingsEntr
 			entityCache.removeResult(RatingsEntryModelImpl.ENTITY_CACHE_ENABLED,
 				RatingsEntryImpl.class, ratingsEntry.getPrimaryKey());
 
-			clearUniqueFindersCache((RatingsEntryModelImpl)ratingsEntry, true);
+			clearUniqueFindersCache((RatingsEntryModelImpl)ratingsEntry);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		RatingsEntryModelImpl ratingsEntryModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					ratingsEntryModelImpl.getUserId(),
+					ratingsEntryModelImpl.getClassNameId(),
+					ratingsEntryModelImpl.getClassPK()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_U_C_C, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_U_C_C, args,
+				ratingsEntryModelImpl);
+		}
+		else {
+			if ((ratingsEntryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_U_C_C.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						ratingsEntryModelImpl.getUserId(),
+						ratingsEntryModelImpl.getClassNameId(),
+						ratingsEntryModelImpl.getClassPK()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_U_C_C, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_U_C_C, args,
+					ratingsEntryModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		RatingsEntryModelImpl ratingsEntryModelImpl) {
 		Object[] args = new Object[] {
 				ratingsEntryModelImpl.getUserId(),
@@ -2692,28 +2723,12 @@ public class RatingsEntryPersistenceImpl extends BasePersistenceImpl<RatingsEntr
 				ratingsEntryModelImpl.getClassPK()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_U_C_C, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_U_C_C, args,
-			ratingsEntryModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		RatingsEntryModelImpl ratingsEntryModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					ratingsEntryModelImpl.getUserId(),
-					ratingsEntryModelImpl.getClassNameId(),
-					ratingsEntryModelImpl.getClassPK()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_C_C, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_U_C_C, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_U_C_C, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_U_C_C, args);
 
 		if ((ratingsEntryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_U_C_C.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					ratingsEntryModelImpl.getOriginalUserId(),
 					ratingsEntryModelImpl.getOriginalClassNameId(),
 					ratingsEntryModelImpl.getOriginalClassPK()
@@ -2981,8 +2996,8 @@ public class RatingsEntryPersistenceImpl extends BasePersistenceImpl<RatingsEntr
 			RatingsEntryImpl.class, ratingsEntry.getPrimaryKey(), ratingsEntry,
 			false);
 
-		clearUniqueFindersCache(ratingsEntryModelImpl, false);
-		cacheUniqueFindersCache(ratingsEntryModelImpl);
+		clearUniqueFindersCache(ratingsEntryModelImpl);
+		cacheUniqueFindersCache(ratingsEntryModelImpl, isNew);
 
 		ratingsEntry.resetOriginalValues();
 

@@ -142,7 +142,7 @@ public class WhipTaskExtension {
 			sb.append(',');
 		}
 
-		if (!includes.isEmpty()) {
+		if (includes.size() > 0) {
 			sb.setLength(sb.length() - 1);
 		}
 
@@ -155,7 +155,7 @@ public class WhipTaskExtension {
 			sb.append(',');
 		}
 
-		if (!excludes.isEmpty()) {
+		if (excludes.size() > 0) {
 			sb.setLength(sb.length() - 1);
 		}
 

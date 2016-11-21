@@ -25,6 +25,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.model.JournalFolderConstants;
 import com.liferay.journal.service.JournalFolderLocalService;
+import com.liferay.journal.service.persistence.JournalFolderUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -225,7 +226,7 @@ public class JournalFolderStagedModelDataHandler
 			int count)
 		throws Exception {
 
-		JournalFolder folder = _journalFolderLocalService.fetchFolder(
+		JournalFolder folder = JournalFolderUtil.fetchByG_P_N(
 			groupId, parentFolderId, name);
 
 		if (folder == null) {

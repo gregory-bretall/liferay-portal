@@ -7,10 +7,6 @@
 		_entry = blogsEntryModel
 	/>
 
-	<@insertFriendlyURL
-		_entry = blogsEntryModel
-	/>
-
 	<@insertAssetEntry
 		_entry = blogsEntryModel
 		_categoryAndTag = true

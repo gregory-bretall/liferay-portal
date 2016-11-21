@@ -89,7 +89,7 @@ public class AssetLinkLocalServiceTest {
 			QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 
 		Assert.assertNotNull(assetLinks);
-		Assert.assertTrue(!assetLinks.isEmpty());
+		Assert.assertTrue(assetLinks.size() > 0);
 
 		for (AssetLink assetLink : assetLinks) {
 			AssetEntry assetEntry = AssetEntryLocalServiceUtil.getEntry(

@@ -117,7 +117,7 @@ public class SoyMsgBundleBridge implements SoyMsgBundle {
 		for (String localizedTextPart : localizedTextParts) {
 			localizedSoyMsgParts.add(SoyMsgRawTextPart.of(localizedTextPart));
 
-			if (!placeholderParts.isEmpty()) {
+			if (placeholderParts.size() > 0) {
 				localizedSoyMsgParts.add(placeholderParts.poll());
 			}
 		}

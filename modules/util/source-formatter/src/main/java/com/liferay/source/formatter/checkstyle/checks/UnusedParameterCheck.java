@@ -60,7 +60,7 @@ public class UnusedParameterCheck extends AbstractCheck {
 		DetailAST statementsAST = detailAST.findFirstToken(TokenTypes.SLIST);
 
 		List<DetailAST> allIdentsAST = DetailASTUtil.getAllChildTokens(
-			statementsAST, true, TokenTypes.IDENT);
+			statementsAST, TokenTypes.IDENT, true);
 
 		parameterNameLoop:
 		for (String parameterName :

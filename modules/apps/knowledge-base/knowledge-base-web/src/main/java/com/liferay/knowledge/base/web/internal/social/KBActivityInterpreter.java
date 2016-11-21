@@ -27,9 +27,8 @@ import com.liferay.knowledge.base.service.permission.KBTemplatePermission;
 import com.liferay.knowledge.base.util.KnowledgeBaseUtil;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
+import com.liferay.portal.kernel.util.ClassResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
-import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -122,7 +121,7 @@ public class KBActivityInterpreter extends BaseSocialActivityInterpreter {
 
 			if (kbCommentClassName.equals(KBArticle.class.getName())) {
 				KBArticle kbArticle = _kbArticleLocalService.getLatestKBArticle(
-					kbComment.getClassPK(), WorkflowConstants.STATUS_APPROVED);
+					activity.getClassPK(), WorkflowConstants.STATUS_APPROVED);
 
 				return KnowledgeBaseUtil.getKBArticleURL(
 					serviceContext.getPlid(), kbArticle.getResourcePrimKey(),
@@ -262,18 +261,6 @@ public class KBActivityInterpreter extends BaseSocialActivityInterpreter {
 		_kbTemplateLocalService = kbTemplateLocalService;
 	}
 
-	@Reference(
-		target = "(bundle.symbolic.name=com.liferay.knowledge.base.web)",
-		unbind = "-"
-	)
-	protected void setResourceBundleLoader(
-		ResourceBundleLoader resourceBundleLoader) {
-
-		_resourceBundleLoader = new AggregateResourceBundleLoader(
-			resourceBundleLoader,
-			ResourceBundleLoaderUtil.getPortalResourceBundleLoader());
-	}
-
 	private static final String[] _CLASS_NAMES = {
 		KBArticle.class.getName(), KBComment.class.getName(),
 		KBTemplate.class.getName()
@@ -282,6 +269,8 @@ public class KBActivityInterpreter extends BaseSocialActivityInterpreter {
 	private KBArticleLocalService _kbArticleLocalService;
 	private KBCommentLocalService _kbCommentLocalService;
 	private KBTemplateLocalService _kbTemplateLocalService;
-	private ResourceBundleLoader _resourceBundleLoader;
+	private final ResourceBundleLoader _resourceBundleLoader =
+		new ClassResourceBundleLoader(
+			"content.Language", KBActivityInterpreter.class);
 
 }

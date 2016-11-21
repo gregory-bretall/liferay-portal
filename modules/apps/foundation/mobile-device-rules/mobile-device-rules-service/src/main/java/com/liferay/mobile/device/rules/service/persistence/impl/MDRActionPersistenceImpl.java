@@ -2056,7 +2056,7 @@ public class MDRActionPersistenceImpl extends BasePersistenceImpl<MDRAction>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((MDRActionModelImpl)mdrAction, true);
+		clearUniqueFindersCache((MDRActionModelImpl)mdrAction);
 	}
 
 	@Override
@@ -2068,37 +2068,51 @@ public class MDRActionPersistenceImpl extends BasePersistenceImpl<MDRAction>
 			entityCache.removeResult(MDRActionModelImpl.ENTITY_CACHE_ENABLED,
 				MDRActionImpl.class, mdrAction.getPrimaryKey());
 
-			clearUniqueFindersCache((MDRActionModelImpl)mdrAction, true);
+			clearUniqueFindersCache((MDRActionModelImpl)mdrAction);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		MDRActionModelImpl mdrActionModelImpl) {
-		Object[] args = new Object[] {
-				mdrActionModelImpl.getUuid(), mdrActionModelImpl.getGroupId()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-			mdrActionModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		MDRActionModelImpl mdrActionModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
+		MDRActionModelImpl mdrActionModelImpl, boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 					mdrActionModelImpl.getUuid(),
 					mdrActionModelImpl.getGroupId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+				mdrActionModelImpl);
 		}
+		else {
+			if ((mdrActionModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						mdrActionModelImpl.getUuid(),
+						mdrActionModelImpl.getGroupId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+					mdrActionModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
+		MDRActionModelImpl mdrActionModelImpl) {
+		Object[] args = new Object[] {
+				mdrActionModelImpl.getUuid(), mdrActionModelImpl.getGroupId()
+			};
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 
 		if ((mdrActionModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					mdrActionModelImpl.getOriginalUuid(),
 					mdrActionModelImpl.getOriginalGroupId()
 				};
@@ -2339,8 +2353,8 @@ public class MDRActionPersistenceImpl extends BasePersistenceImpl<MDRAction>
 		entityCache.putResult(MDRActionModelImpl.ENTITY_CACHE_ENABLED,
 			MDRActionImpl.class, mdrAction.getPrimaryKey(), mdrAction, false);
 
-		clearUniqueFindersCache(mdrActionModelImpl, false);
-		cacheUniqueFindersCache(mdrActionModelImpl);
+		clearUniqueFindersCache(mdrActionModelImpl);
+		cacheUniqueFindersCache(mdrActionModelImpl, isNew);
 
 		mdrAction.resetOriginalValues();
 

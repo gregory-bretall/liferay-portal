@@ -23,15 +23,20 @@ import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.persistence.ClassNameUtil;
 import com.liferay.portal.kernel.util.InfrastructureUtil;
 import com.liferay.portal.model.impl.ClassNameImpl;
-import com.liferay.portal.spring.hibernate.PortletTransactionManager;
+import com.liferay.portal.test.log.CaptureAppender;
+import com.liferay.portal.test.log.Log4JLoggerTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+
+import java.util.List;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.spi.LoggingEvent;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
-import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -49,57 +54,69 @@ public class TransactionInterceptorTest {
 
 	@Test
 	public void testFailOnCommit() {
-		CacheRegistryUtil.clear();
+		try (CaptureAppender captureAppender =
+				Log4JLoggerTestUtil.configureLog4JLogger(
+					DefaultTransactionExecutor.class.getName(), Level.ERROR)) {
 
-		long classNameId = CounterLocalServiceUtil.increment();
+			CacheRegistryUtil.clear();
 
-		ClassName className = ClassNameUtil.create(classNameId);
+			long classNameId = CounterLocalServiceUtil.increment();
 
-		HibernateTransactionManager hibernateTransactionManager =
-			(HibernateTransactionManager)
-				InfrastructureUtil.getTransactionManager();
+			ClassName className = ClassNameUtil.create(classNameId);
 
-		MockPlatformTransactionManager platformTransactionManagerWrapper =
-			new MockPlatformTransactionManager(hibernateTransactionManager);
+			PlatformTransactionManager platformTransactionManager =
+				(PlatformTransactionManager)
+					InfrastructureUtil.getTransactionManager();
 
-		TransactionInterceptor transactionInterceptor =
-			(TransactionInterceptor)PortalBeanLocatorUtil.locate(
-				"transactionAdvice");
+			MockPlatformTransactionManager platformTransactionManagerWrapper =
+				new MockPlatformTransactionManager(platformTransactionManager);
 
-		transactionInterceptor.setPlatformTransactionManager(
-			platformTransactionManagerWrapper);
+			TransactionInterceptor transactionInterceptor =
+				(TransactionInterceptor)PortalBeanLocatorUtil.locate(
+					"transactionAdvice");
 
-		try {
-			ClassNameLocalServiceUtil.addClassName(className);
-
-			Assert.fail();
-		}
-		catch (RuntimeException re) {
-			Assert.assertEquals(
-				"MockPlatformTransactionManager", re.getMessage());
-		}
-		finally {
 			transactionInterceptor.setPlatformTransactionManager(
-				hibernateTransactionManager);
+				platformTransactionManagerWrapper);
+
+			try {
+				ClassNameLocalServiceUtil.addClassName(className);
+
+				Assert.fail();
+			}
+			catch (RuntimeException re) {
+				Assert.assertEquals(
+					"MockPlatformTransactionManager", re.getMessage());
+			}
+			finally {
+				transactionInterceptor.setPlatformTransactionManager(
+					platformTransactionManager);
+			}
+
+			List<LoggingEvent> loggingEvents =
+				captureAppender.getLoggingEvents();
+
+			Assert.assertEquals(1, loggingEvents.size());
+
+			LoggingEvent loggingEvent = loggingEvents.get(0);
+
+			Assert.assertEquals(
+				"Application exception overridden by commit exception",
+				loggingEvent.getMessage());
+
+			ClassName cachedClassName = (ClassName)EntityCacheUtil.getResult(
+				true, ClassNameImpl.class, classNameId);
+
+			Assert.assertNull(cachedClassName);
 		}
-
-		ClassName cachedClassName = (ClassName)EntityCacheUtil.getResult(
-			true, ClassNameImpl.class, classNameId);
-
-		Assert.assertNull(cachedClassName);
 	}
 
 	private static class MockPlatformTransactionManager
-		extends PortletTransactionManager {
+		implements PlatformTransactionManager {
 
 		public MockPlatformTransactionManager(
-			HibernateTransactionManager hibernateTransactionManager) {
+			PlatformTransactionManager platformTransactionManager) {
 
-			super(
-				hibernateTransactionManager,
-				hibernateTransactionManager.getSessionFactory());
-
-			_platformTransactionManager = hibernateTransactionManager;
+			_platformTransactionManager = platformTransactionManager;
 		}
 
 		@Override

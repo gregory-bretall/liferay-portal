@@ -107,7 +107,7 @@ public class AddMenuTag extends IncludeTag {
 
 			showDivider = false;
 
-			if (!primaryMenuItems.isEmpty() && !favoriteMenuItems.isEmpty() &&
+			if ((primaryMenuItems.size() > 0) && !favoriteMenuItems.isEmpty() &&
 				(!recentMenuItems.isEmpty() || !defaultMenuItems.isEmpty())) {
 
 				showDivider = true;
@@ -127,7 +127,7 @@ public class AddMenuTag extends IncludeTag {
 
 			_numMenuItems = _maxItems;
 
-			if (!primaryMenuItems.isEmpty()) {
+			if (primaryMenuItems.size() > 0) {
 				_numMenuItems += primaryMenuItems.size();
 
 				_menuItemsCount -= primaryMenuItems.size();

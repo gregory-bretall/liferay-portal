@@ -377,7 +377,7 @@ public class ResourcePermissionLocalServiceImpl
 				}
 			}
 
-			if (!availableActionIds.isEmpty()) {
+			if (availableActionIds.size() > 0) {
 				roleIdsToActionIds.put(
 					resourcePermission.getRoleId(), availableActionIds);
 			}
@@ -1406,8 +1406,6 @@ public class ResourcePermissionLocalServiceImpl
 				resourcePermissionPersistence.findByC_N_S_P_R(
 					companyId, name, scope, primKey,
 					ArrayUtil.subset(roleIds, start, roleIds.length)));
-
-			roleIdsToActionIds = new HashMap<>(roleIdsToActionIds);
 
 			for (ResourcePermission resourcePermission : resourcePermissions) {
 				long roleId = resourcePermission.getRoleId();

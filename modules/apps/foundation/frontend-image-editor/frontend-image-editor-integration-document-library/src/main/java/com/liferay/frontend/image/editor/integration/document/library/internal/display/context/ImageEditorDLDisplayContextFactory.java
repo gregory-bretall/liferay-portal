@@ -18,6 +18,7 @@ import com.liferay.document.library.display.context.DLDisplayContextFactory;
 import com.liferay.document.library.display.context.DLEditFileEntryDisplayContext;
 import com.liferay.document.library.display.context.DLViewFileVersionDisplayContext;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
+import com.liferay.document.library.kernel.model.DLFileVersion;
 import com.liferay.document.library.kernel.service.DLAppService;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileShortcut;
@@ -70,9 +71,15 @@ public class ImageEditorDLDisplayContextFactory
 		HttpServletRequest request, HttpServletResponse response,
 		FileVersion fileVersion) {
 
-		return new ImageEditorDLViewFileVersionDisplayContext(
-			parentDLViewFileVersionDisplayContext, request, response,
-			fileVersion, _resourceBundleLoader);
+		Object model = fileVersion.getModel();
+
+		if (model instanceof DLFileVersion) {
+			return new ImageEditorDLViewFileVersionDisplayContext(
+				parentDLViewFileVersionDisplayContext, request, response,
+				fileVersion, _resourceBundleLoader);
+		}
+
+		return parentDLViewFileVersionDisplayContext;
 	}
 
 	@Reference(unbind = "-")

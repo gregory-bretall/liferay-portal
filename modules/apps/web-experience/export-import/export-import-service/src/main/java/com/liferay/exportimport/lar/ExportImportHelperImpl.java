@@ -14,8 +14,6 @@
 
 package com.liferay.exportimport.lar;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.exportimport.kernel.lar.DefaultConfigurationPortletDataHandler;
 import com.liferay.exportimport.kernel.lar.ExportImportDateUtil;
@@ -121,7 +119,6 @@ import org.xml.sax.XMLReader;
  * @author Mate Thurzo
  */
 @Component(immediate = true)
-@ProviderType
 public class ExportImportHelperImpl implements ExportImportHelper {
 
 	@Override
@@ -612,7 +609,7 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 	}
 
 	/**
-	 * @see com.liferay.exportimport.kernel.backgroundtask.LayoutRemoteStagingBackgroundTaskExecutor#getMissingRemoteParentLayouts(
+	 * @see om.liferay.exportimport.kernel.backgroundtask.LayoutRemoteStagingBackgroundTaskExecutor#getMissingRemoteParentLayouts(
 	 *      com.liferay.portal.kernel.security.auth.HttpPrincipal, Layout, long)
 	 */
 	@Override
@@ -639,13 +636,6 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 				break;
 			}
 			catch (NoSuchLayoutException nsle) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsle, nsle);
-				}
-
 				missingParentLayouts.add(parentLayout);
 
 				parentLayoutId = parentLayout.getParentLayoutId();

@@ -1,16 +1,9 @@
 .form-builder-field-settings-sidebar {
-	&.loading-data {
-		.lfr-ddm-form-container {
-			visibility: hidden;
-		}
-
-		.loading-icon {
-			display: block;
-		}
+	.invisible {
+		visibility: hidden;
 	}
 
 	.loading-icon {
-		display: none;
 		left: 50%;
 		margin-left: -32px;
 		position: absolute;

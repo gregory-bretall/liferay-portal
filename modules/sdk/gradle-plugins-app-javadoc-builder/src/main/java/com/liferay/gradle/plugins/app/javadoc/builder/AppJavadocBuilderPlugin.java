@@ -38,14 +38,11 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.internal.ConventionMapping;
-import org.gradle.api.invocation.Gradle;
-import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.ReportingBasePlugin;
 import org.gradle.api.reporting.ReportingExtension;
-import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.bundling.Jar;
@@ -76,43 +73,38 @@ public class AppJavadocBuilderPlugin implements Plugin<Project> {
 		ReportingExtension reportingExtension = GradleUtil.getExtension(
 			project, ReportingExtension.class);
 
-		final Javadoc appJavadocTask = _addTaskAppJavadoc(
+		final Javadoc appJavadocTask = addTaskAppJavadoc(
 			project, reportingExtension);
 
-		_addTaskJarAppJavadoc(appJavadocTask);
+		addTaskJarAppJavadoc(appJavadocTask);
 
-		Gradle gradle = project.getGradle();
+		for (Project subproject : project.getSubprojects()) {
+			subproject.afterEvaluate(
+				new Action<Project>() {
 
-		gradle.afterProject(
-			new Closure<Void>(project) {
-
-				@SuppressWarnings("unused")
-				public void doCall(Project subproject) {
-					Set<Project> subprojects =
-						appJavadocBuilderExtension.getSubprojects();
-
-					if (subprojects.contains(subproject)) {
-						_configureTaskAppJavadoc(
+					@Override
+					public void execute(Project subproject) {
+						configureTaskAppJavadoc(
 							appJavadocTask, appJavadocBuilderExtension,
 							subproject);
 					}
-				}
 
-			});
+				});
+		}
 
 		project.afterEvaluate(
 			new Action<Project>() {
 
 				@Override
 				public void execute(Project project) {
-					_configureTaskAppJavadoc(
+					configureTaskAppJavadoc(
 						appJavadocTask, appJavadocBuilderExtension);
 				}
 
 			});
 	}
 
-	private Javadoc _addTaskAppJavadoc(
+	protected Javadoc addTaskAppJavadoc(
 		Project project, final ReportingExtension reportingExtension) {
 
 		final Javadoc javadoc = GradleUtil.addTask(
@@ -161,7 +153,7 @@ public class AppJavadocBuilderPlugin implements Plugin<Project> {
 		return javadoc;
 	}
 
-	private Jar _addTaskJarAppJavadoc(Javadoc javadoc) {
+	protected Jar addTaskJarAppJavadoc(Javadoc javadoc) {
 		Jar jar = GradleUtil.addTask(
 			javadoc.getProject(), JAR_APP_JAVADOC_TASK_NAME, Jar.class);
 
@@ -175,7 +167,7 @@ public class AppJavadocBuilderPlugin implements Plugin<Project> {
 		return jar;
 	}
 
-	private void _configureTaskAppJavadoc(
+	protected void configureTaskAppJavadoc(
 		Javadoc javadoc,
 		AppJavadocBuilderExtension appJavadocBuilderExtension) {
 
@@ -187,35 +179,15 @@ public class AppJavadocBuilderPlugin implements Plugin<Project> {
 		}
 	}
 
-	private void _configureTaskAppJavadoc(
+	protected void configureTaskAppJavadoc(
 		Javadoc javadoc, AppJavadocBuilderExtension appJavadocBuilderExtension,
 		Project subproject) {
-
-		Logger logger = javadoc.getLogger();
 
 		TaskContainer taskContainer = subproject.getTasks();
 
 		Task task = taskContainer.findByName(JavaPlugin.JAVADOC_TASK_NAME);
 
 		if (!(task instanceof Javadoc)) {
-			if (logger.isInfoEnabled()) {
-				logger.info(
-					"Excluding {} from {} because it is not a valid Java " +
-						"project",
-					subproject, javadoc, JavaPlugin.JAVADOC_TASK_NAME);
-			}
-
-			return;
-		}
-
-		Spec<Project> spec = appJavadocBuilderExtension.getOnlyIf();
-
-		if (!spec.isSatisfiedBy(subproject)) {
-			if (logger.isInfoEnabled()) {
-				logger.info(
-					"Explicitly excluding {} from {}", subproject, javadoc);
-			}
-
 			return;
 		}
 
@@ -255,7 +227,7 @@ public class AppJavadocBuilderPlugin implements Plugin<Project> {
 
 			String groupName = closure.call(subproject);
 
-			Set<String> packageNames = _getPackageNames(
+			Set<String> packageNames = getPackageNames(
 				subprojectSource, sourceDirectorySet.getSrcDirs());
 
 			if (Validator.isNotNull(groupName) && !packageNames.isEmpty()) {
@@ -266,7 +238,7 @@ public class AppJavadocBuilderPlugin implements Plugin<Project> {
 		}
 	}
 
-	private String _getPackageName(File file, Set<File> srcDirs) {
+	protected String getPackageName(File file, Set<File> srcDirs) {
 		File dir = null;
 
 		for (File srcDir : srcDirs) {
@@ -289,13 +261,13 @@ public class AppJavadocBuilderPlugin implements Plugin<Project> {
 		return relativePath.replace(File.separatorChar, '.');
 	}
 
-	private Set<String> _getPackageNames(
+	protected Set<String> getPackageNames(
 		Iterable<File> files, Set<File> srcDirs) {
 
 		Set<String> packageNames = new HashSet<>();
 
 		for (File file : files) {
-			String packageName = _getPackageName(file, srcDirs);
+			String packageName = getPackageName(file, srcDirs);
 
 			if (Validator.isNotNull(packageName)) {
 				packageNames.add(packageName);

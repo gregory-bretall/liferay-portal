@@ -115,15 +115,6 @@ currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "sites"
 		var handleOnSelect = A.one('#<portlet:namespace />selectSiteLink').on(
 			'click',
 			function(event) {
-				var searchContainerData = searchContainer.getData();
-
-				if (!searchContainerData.length) {
-					searchContainerData = [];
-				}
-				else {
-					searchContainerData = searchContainerData.split(',');
-				}
-
 				Util.selectEntity(
 					{
 						dialog: {
@@ -136,7 +127,7 @@ currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "sites"
 						%>
 
 						id: '<%= eventName %>',
-						selectedData: searchContainerData,
+
 						title: '<liferay-ui:message arguments="site" key="select-x" />',
 
 						<%
@@ -152,21 +143,19 @@ currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "sites"
 						uri: '<%= groupSelectorURL.toString() %>'
 					},
 					function(event) {
-						var entityId = event.entityid;
-
 						var rowColumns = [];
 
-						rowColumns.push(event.entityname);
+						rowColumns.push(event.groupdescriptivename);
 						rowColumns.push('');
-						rowColumns.push('<a class="modify-link" data-rowId="' + entityId + '" href="javascript:;"><%= UnicodeFormatter.toString(removeGroupIcon) %></a>');
+						rowColumns.push('<a class="modify-link" data-rowId="' + event.groupid + '" href="javascript:;"><%= UnicodeFormatter.toString(removeGroupIcon) %></a>');
 
-						searchContainer.addRow(rowColumns, entityId);
+						searchContainer.addRow(rowColumns, event.groupid);
 
 						searchContainer.updateDataStore();
 
-						addGroupIds.push(entityId);
+						addGroupIds.push(event.groupid);
 
-						AArray.removeItem(deleteGroupIds, entityId);
+						AArray.removeItem(deleteGroupIds, event.groupid);
 
 						document.<portlet:namespace />fm.<portlet:namespace />addGroupIds.value = addGroupIds.join(',');
 						document.<portlet:namespace />fm.<portlet:namespace />deleteGroupIds.value = deleteGroupIds.join(',');
@@ -186,7 +175,7 @@ currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "sites"
 				var selectGroup = Util.getWindow('<portlet:namespace />selectGroup');
 
 				if (selectGroup) {
-					var selectButton = selectGroup.iframe.node.get('contentWindow.document').one('.selector-button[data-entityid="' + rowId + '"]');
+					var selectButton = selectGroup.iframe.node.get('contentWindow.document').one('.selector-button[data-groupid="' + rowId + '"]');
 
 					Util.toggleDisabled(selectButton, false);
 				}
@@ -208,7 +197,7 @@ currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "sites"
 			function(event) {
 				event.selectors.each(
 					function(item, index, collection) {
-						var groupId = item.attr('data-entityid');
+						var groupId = item.attr('data-groupid');
 
 						if (deleteGroupIds.indexOf(groupId) != -1) {
 							Util.toggleDisabled(item, false);

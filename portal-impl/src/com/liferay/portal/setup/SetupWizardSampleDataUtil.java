@@ -62,7 +62,7 @@ public class SetupWizardSampleDataUtil {
 			companyId, PropsValues.COMPANY_DEFAULT_NAME,
 			PropsValues.DEFAULT_ADMIN_FIRST_NAME,
 			PropsValues.DEFAULT_ADMIN_LAST_NAME,
-			PropsValues.ADMIN_EMAIL_FROM_ADDRESS, false);
+			PropsValues.ADMIN_EMAIL_FROM_NAME, false);
 	}
 
 	public static void addSampleData(
@@ -291,8 +291,7 @@ public class SetupWizardSampleDataUtil {
 				String screenName = sb.toString();
 
 				String emailAddress =
-					screenName + StringPool.AT +
-						defaultUserEmailAddressParts[1];
+					screenName + defaultUserEmailAddressParts[1];
 
 				String lastName = organizationPrefix + StringPool.SPACE + i;
 

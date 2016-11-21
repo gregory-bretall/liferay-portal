@@ -210,8 +210,7 @@ public class AssetCategoriesNavigationDisplayContext {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						"User does not have permission to access asset " +
-							"vocabulary " + assetVocabularyId,
-						pe);
+							"vocabulary " + assetVocabularyId);
 				}
 			}
 		}

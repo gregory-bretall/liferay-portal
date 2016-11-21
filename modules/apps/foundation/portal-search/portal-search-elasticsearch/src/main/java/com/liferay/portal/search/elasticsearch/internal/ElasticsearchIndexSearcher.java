@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BaseIndexSearcher;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.DocumentImpl;
+import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.GeoDistanceSort;
 import com.liferay.portal.kernel.search.GroupBy;
 import com.liferay.portal.kernel.search.Hits;
@@ -75,6 +76,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -569,7 +571,24 @@ public class ElasticsearchIndexSearcher extends BaseIndexSearcher {
 	protected Document processSearchHit(
 		SearchHit searchHit, QueryConfig queryConfig) {
 
-		Document document = searchHitDocumentTranslator.translate(searchHit);
+		Document document = new DocumentImpl();
+
+		Map<String, SearchHitField> searchHitFields = searchHit.getFields();
+
+		for (Map.Entry<String, SearchHitField> entry :
+				searchHitFields.entrySet()) {
+
+			SearchHitField searchHitField = entry.getValue();
+
+			Collection<Object> fieldValues = searchHitField.getValues();
+
+			Field field = new Field(
+				entry.getKey(),
+				ArrayUtil.toStringArray(
+					fieldValues.toArray(new Object[fieldValues.size()])));
+
+			document.add(field);
+		}
 
 		populateUID(document, queryConfig);
 
@@ -718,9 +737,6 @@ public class ElasticsearchIndexSearcher extends BaseIndexSearcher {
 
 	@Reference(target = "(search.engine.impl=Elasticsearch)")
 	protected QueryTranslator<QueryBuilder> queryTranslator;
-
-	@Reference
-	protected SearchHitDocumentTranslator searchHitDocumentTranslator;
 
 	@Reference
 	protected StatsTranslator statsTranslator;

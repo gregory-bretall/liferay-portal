@@ -67,9 +67,8 @@ public class BufferedIncrementRunnable implements Runnable {
 			}
 			catch (Throwable t) {
 				_log.error(
-					"Unable to persist buffered increment value: " +
-						bufferedIncreasableEntry,
-				t);
+					"Unable to write buffered increment value to the database",
+					t);
 			}
 
 			if (_bufferedIncrementConfiguration.isStandbyEnabled()) {

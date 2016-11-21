@@ -15,8 +15,6 @@
 package com.liferay.frontend.taglib.servlet.taglib;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -74,12 +72,6 @@ public class UserVerticalCardTag extends VerticalCardTag {
 					user.getPortraitURL(themeDisplay));
 			}
 			catch (PortalException pe) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(pe, pe);
-				}
 			}
 		}
 
@@ -91,9 +83,6 @@ public class UserVerticalCardTag extends VerticalCardTag {
 
 		request.setAttribute("liferay-frontend:card:userInitials", initials);
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		UserVerticalCardTag.class);
 
 	private long _userId;
 

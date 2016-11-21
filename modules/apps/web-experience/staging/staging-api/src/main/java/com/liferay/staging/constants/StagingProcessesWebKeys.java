@@ -14,12 +14,9 @@
 
 package com.liferay.staging.constants;
 
-import aQute.bnd.annotation.ProviderType;
-
 /**
  * @author Levente Hudák
  */
-@ProviderType
 public class StagingProcessesWebKeys {
 
 	public static final String BRANCHING_ENABLED = "BRANCHING_ENABLED";

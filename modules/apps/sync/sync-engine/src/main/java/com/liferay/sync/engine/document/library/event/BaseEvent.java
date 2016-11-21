@@ -147,16 +147,7 @@ public abstract class BaseEvent implements Event {
 	}
 
 	@Override
-	public final void run() {
-		try {
-			doRun();
-		}
-		catch (Exception e) {
-			_logger.error(e.getMessage(), e);
-		}
-	}
-
-	protected void doRun() {
+	public void run() {
 		if (!SyncEngine.isRunning()) {
 			return;
 		}

@@ -25,10 +25,6 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  */
 @ProviderType
 public class SocialActivitySetFinderUtil {
-	public static int countByOrganizationId(long organizationId) {
-		return getFinder().countByOrganizationId(organizationId);
-	}
-
 	public static int countByRelation(long userId) {
 		return getFinder().countByRelation(userId);
 	}

@@ -1899,7 +1899,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((StatusModelImpl)status, true);
+		clearUniqueFindersCache((StatusModelImpl)status);
 	}
 
 	@Override
@@ -1911,31 +1911,42 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 			entityCache.removeResult(StatusModelImpl.ENTITY_CACHE_ENABLED,
 				StatusImpl.class, status.getPrimaryKey());
 
-			clearUniqueFindersCache((StatusModelImpl)status, true);
+			clearUniqueFindersCache((StatusModelImpl)status);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(StatusModelImpl statusModelImpl) {
-		Object[] args = new Object[] { statusModelImpl.getUserId() };
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_USERID, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_USERID, args,
-			statusModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(StatusModelImpl statusModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
+	protected void cacheUniqueFindersCache(StatusModelImpl statusModelImpl,
+		boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] { statusModelImpl.getUserId() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_USERID, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_USERID, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_USERID, args,
+				statusModelImpl);
 		}
+		else {
+			if ((statusModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_USERID.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] { statusModelImpl.getUserId() };
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_USERID, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_USERID, args,
+					statusModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(StatusModelImpl statusModelImpl) {
+		Object[] args = new Object[] { statusModelImpl.getUserId() };
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_USERID, args);
 
 		if ((statusModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_USERID.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] { statusModelImpl.getOriginalUserId() };
+			args = new Object[] { statusModelImpl.getOriginalUserId() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_USERID, args);
@@ -2133,8 +2144,8 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		entityCache.putResult(StatusModelImpl.ENTITY_CACHE_ENABLED,
 			StatusImpl.class, status.getPrimaryKey(), status, false);
 
-		clearUniqueFindersCache(statusModelImpl, false);
-		cacheUniqueFindersCache(statusModelImpl);
+		clearUniqueFindersCache(statusModelImpl);
+		cacheUniqueFindersCache(statusModelImpl, isNew);
 
 		status.resetOriginalValues();
 

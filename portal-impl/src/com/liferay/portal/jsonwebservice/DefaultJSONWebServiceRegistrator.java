@@ -166,7 +166,7 @@ public class DefaultJSONWebServiceRegistrator
 	}
 
 	public void setWireViaUtil(boolean wireViaUtil) {
-		_wireViaUtil = wireViaUtil;
+		this._wireViaUtil = wireViaUtil;
 	}
 
 	protected Class<?> getTargetClass(Object service) throws Exception {

@@ -703,18 +703,6 @@ public class WebDriverHelper {
 		return text.contains(value);
 	}
 
-	public static boolean isPartialTextAceEditor(
-		WebDriver webDriver, String locator, String value) {
-
-		WebElement webElement = getWebElement(webDriver, locator, "1");
-
-		String text = webElement.getText();
-
-		text = text.replace("\n", "");
-
-		return text.contains(value);
-	}
-
 	public static boolean isSelectedLabel(
 		WebDriver webDriver, String selectLocator, String pattern) {
 

@@ -17,6 +17,7 @@ package com.liferay.portal.search.elasticsearch.internal.connection;
 import com.liferay.portal.search.elasticsearch.internal.index.LiferayDocumentTypeFactory;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.common.settings.Settings;
 
 /**
@@ -24,44 +25,30 @@ import org.elasticsearch.common.settings.Settings;
  */
 public class LiferayIndexCreationHelper implements IndexCreationHelper {
 
-	public LiferayIndexCreationHelper(
-		IndicesAdminClientSupplier indicesAdminClientSupplier) {
-
-		_indicesAdminClientSupplier = indicesAdminClientSupplier;
+	public LiferayIndexCreationHelper(IndicesAdminClient indicesAdminClient) {
+		_liferayDocumentTypeFactory = new LiferayDocumentTypeFactory(
+			indicesAdminClient);
 	}
 
 	@Override
 	public void contribute(
 		CreateIndexRequestBuilder createIndexRequestBuilder) {
 
-		LiferayDocumentTypeFactory liferayDocumentTypeFactory =
-			getLiferayDocumentTypeFactory();
-
-		liferayDocumentTypeFactory.createRequiredDefaultTypeMappings(
+		_liferayDocumentTypeFactory.createRequiredDefaultTypeMappings(
 			createIndexRequestBuilder);
 	}
 
 	@Override
 	public void contributeIndexSettings(Settings.Builder builder) {
-		LiferayDocumentTypeFactory liferayDocumentTypeFactory =
-			getLiferayDocumentTypeFactory();
-
-		liferayDocumentTypeFactory.createRequiredDefaultAnalyzers(builder);
+		_liferayDocumentTypeFactory.createRequiredDefaultAnalyzers(builder);
 	}
 
 	@Override
 	public void whenIndexCreated(String indexName) {
-		LiferayDocumentTypeFactory liferayDocumentTypeFactory =
-			getLiferayDocumentTypeFactory();
-
-		liferayDocumentTypeFactory.createOptionalDefaultTypeMappings(indexName);
+		_liferayDocumentTypeFactory.createOptionalDefaultTypeMappings(
+			indexName);
 	}
 
-	protected LiferayDocumentTypeFactory getLiferayDocumentTypeFactory() {
-		return new LiferayDocumentTypeFactory(
-			_indicesAdminClientSupplier.getIndicesAdminClient());
-	}
-
-	private final IndicesAdminClientSupplier _indicesAdminClientSupplier;
+	private final LiferayDocumentTypeFactory _liferayDocumentTypeFactory;
 
 }

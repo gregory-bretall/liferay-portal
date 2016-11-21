@@ -17,7 +17,6 @@ package com.liferay.mentions.internal.util.impl;
 import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.mentions.constants.MentionsConstants;
-import com.liferay.mentions.matcher.MentionsMatcher;
 import com.liferay.mentions.util.MentionsNotifier;
 import com.liferay.mentions.util.MentionsUserFinder;
 import com.liferay.mentions.web.constants.MentionsPortletKeys;
@@ -59,7 +58,7 @@ public class DefaultMentionsNotifier implements MentionsNotifier {
 		throws PortalException {
 
 		String[] mentionedUsersScreenNames = getMentionedUsersScreenNames(
-			userId, className, content);
+			userId, content);
 
 		if (ArrayUtil.isEmpty(mentionedUsersScreenNames)) {
 			return;
@@ -136,8 +135,7 @@ public class DefaultMentionsNotifier implements MentionsNotifier {
 		return StringPool.BLANK;
 	}
 
-	protected String[] getMentionedUsersScreenNames(
-			long userId, String className, String content)
+	protected String[] getMentionedUsersScreenNames(long userId, String content)
 		throws PortalException {
 
 		User user = _userLocalService.getUser(userId);
@@ -149,10 +147,7 @@ public class DefaultMentionsNotifier implements MentionsNotifier {
 
 		Set<String> mentionedUsersScreenNames = new HashSet<>();
 
-		MentionsMatcher mentionsMatcher =
-			_mentionsMatcherRegistry.getMentionsMatcher(className);
-
-		for (String mentionedUserScreenName : mentionsMatcher.match(content)) {
+		for (String mentionedUserScreenName : MentionsMatcher.match(content)) {
 			List<User> users = _mentionsUserFinder.getUsers(
 				user.getCompanyId(), userId, mentionedUserScreenName,
 				socialInteractionsConfiguration);
@@ -171,13 +166,6 @@ public class DefaultMentionsNotifier implements MentionsNotifier {
 	}
 
 	@Reference(unbind = "-")
-	protected void setMentionsMatcherRegistry(
-		MentionsMatcherRegistry mentionsMatcherRegistry) {
-
-		_mentionsMatcherRegistry = mentionsMatcherRegistry;
-	}
-
-	@Reference(unbind = "-")
 	protected void setMentionsUserFinder(
 		MentionsUserFinder mentionsUserFinder) {
 
@@ -189,7 +177,6 @@ public class DefaultMentionsNotifier implements MentionsNotifier {
 		_userLocalService = userLocalService;
 	}
 
-	private MentionsMatcherRegistry _mentionsMatcherRegistry;
 	private MentionsUserFinder _mentionsUserFinder;
 	private UserLocalService _userLocalService;
 

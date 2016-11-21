@@ -54,7 +54,8 @@ public class MDRRuleGroupLocalServiceImpl
 
 		// Rule group
 
-		User user = userLocalService.getUser(serviceContext.getUserId());
+		User user = userPersistence.findByPrimaryKey(
+			serviceContext.getUserId());
 
 		long ruleGroupId = counterLocalService.increment();
 
@@ -91,7 +92,7 @@ public class MDRRuleGroupLocalServiceImpl
 			MDRRuleGroup ruleGroup, long groupId, ServiceContext serviceContext)
 		throws PortalException {
 
-		Group group = groupLocalService.getGroup(groupId);
+		Group group = groupPersistence.findByPrimaryKey(groupId);
 
 		Map<Locale, String> nameMap = ruleGroup.getNameMap();
 

@@ -133,15 +133,7 @@ public interface PortletDataContext extends Serializable {
 
 	public void addLocks(String className, String key, Lock lock);
 
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #addPermissions(Class,
-	 *             Serializable)}
-	 */
-	@Deprecated
 	public void addPermissions(Class<?> clazz, long classPK)
-		throws PortalException;
-
-	public void addPermissions(Class<?> clazz, Serializable classPK)
 		throws PortalException;
 
 	public void addPermissions(String resourceName, long resourcePK)
@@ -228,14 +220,7 @@ public interface PortletDataContext extends Serializable {
 
 	public Object fromXML(String xml);
 
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #getAssetCategoryIds(Class,
-	 *             Serializable)}
-	 */
-	@Deprecated
 	public long[] getAssetCategoryIds(Class<?> clazz, long classPK);
-
-	public long[] getAssetCategoryIds(Class<?> clazz, Serializable classPK);
 
 	/**
 	 * @deprecated As of 7.0.0
@@ -257,23 +242,9 @@ public interface PortletDataContext extends Serializable {
 	@Deprecated
 	public Map<String, List<AssetLink>> getAssetLinksMap();
 
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #getAssetTagNames(Class,
-	 *             Serializable)}
-	 */
-	@Deprecated
 	public String[] getAssetTagNames(Class<?> clazz, long classPK);
 
-	public String[] getAssetTagNames(Class<?> clazz, Serializable classPK);
-
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #getAssetTagNames(String,
-	 *             Serializable)}
-	 */
-	@Deprecated
 	public String[] getAssetTagNames(String className, long classPK);
-
-	public String[] getAssetTagNames(String className, Serializable classPK);
 
 	public Map<String, String[]> getAssetTagNamesMap();
 
@@ -339,8 +310,6 @@ public interface PortletDataContext extends Serializable {
 	public Element getImportDataStagedModelElement(StagedModel stagedModel);
 
 	public long[] getLayoutIds();
-
-	public String getLayoutSetPrototypeUuid();
 
 	public Map<String, Lock> getLocks();
 
@@ -412,49 +381,19 @@ public interface PortletDataContext extends Serializable {
 	public List<Element> getReferenceDataElements(
 		StagedModel parentStagedModel, Class<?> clazz, String referenceType);
 
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #getReferenceElement(Class,
-	 *             Serializable)}
-	 */
-	@Deprecated
 	public Element getReferenceElement(Class<?> clazz, long classPK);
-
-	public Element getReferenceElement(Class<?> clazz, Serializable classPK);
 
 	public Element getReferenceElement(
 		Element parentElement, Class<?> clazz, long groupId, String uuid,
 		String referenceType);
 
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link
-	 *             #getReferenceElement(StagedModel, Class, Serializable)}
-	 */
-	@Deprecated
 	public Element getReferenceElement(
 		StagedModel parentStagedModel, Class<?> clazz, long classPK);
 
 	public Element getReferenceElement(
-		StagedModel parentStagedModel, Class<?> clazz, Serializable classPK);
-
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link
-	 *             #getReferenceElement(StagedModel, String, Serializable)}
-	 */
-	@Deprecated
-	public Element getReferenceElement(
 		StagedModel parentStagedModel, String className, long classPK);
 
-	public Element getReferenceElement(
-		StagedModel parentStagedModel, String className, Serializable classPK);
-
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #getReferenceElement(String,
-	 *             Serializable)}
-	 */
-	@Deprecated
 	public Element getReferenceElement(String className, long classPK);
-
-	public Element getReferenceElement(String className, Serializable classPK);
 
 	public List<Element> getReferenceElements(
 		StagedModel parentStagedModel, Class<?> clazz);
@@ -482,8 +421,6 @@ public interface PortletDataContext extends Serializable {
 	public long getSourceUserPersonalSiteGroupId();
 
 	public Date getStartDate();
-
-	public String getType();
 
 	public long getUserId(String userUuid);
 
@@ -549,16 +486,7 @@ public interface PortletDataContext extends Serializable {
 	public void importLocks(Class<?> clazz, String key, String newKey)
 		throws PortalException;
 
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #importPermissions(Class,
-	 *             Serializable, Serializable)}
-	 */
-	@Deprecated
 	public void importPermissions(Class<?> clazz, long classPK, long newClassPK)
-		throws PortalException;
-
-	public void importPermissions(
-			Class<?> clazz, Serializable classPK, Serializable newClassPK)
 		throws PortalException;
 
 	public void importPermissions(
@@ -591,14 +519,7 @@ public interface PortletDataContext extends Serializable {
 
 	public boolean isMissingReference(Element referenceElement);
 
-	/**
-	 * @deprecated As of 3.0.0, replaced by {@link #isModelCounted(String,
-	 *             Serializable)}
-	 */
-	@Deprecated
 	public boolean isModelCounted(String className, long classPK);
-
-	public boolean isModelCounted(String className, Serializable classPK);
 
 	public boolean isPathExportedInScope(String path);
 
@@ -640,8 +561,6 @@ public interface PortletDataContext extends Serializable {
 
 	public void setLayoutIds(long[] layoutIds);
 
-	public void setLayoutSetPrototypeUuid(String layoutSetPrototypeUuid);
-
 	public void setManifestSummary(ManifestSummary manifestSummary);
 
 	public void setMissingReferencesElement(Element missingReferencesElement);
@@ -681,8 +600,6 @@ public interface PortletDataContext extends Serializable {
 		long sourceUserPersonalSiteGroupId);
 
 	public void setStartDate(Date startDate);
-
-	public void setType(String type);
 
 	public void setUserIdStrategy(UserIdStrategy userIdStrategy);
 

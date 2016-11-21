@@ -17,6 +17,7 @@ package com.liferay.portal.store.s3.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.AssumeTestRule;
+import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -41,7 +42,8 @@ public class S3StoreTest extends BaseStoreTestCase {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
-			new AssumeTestRule("assume"), new LiferayIntegrationTestRule());
+			new AssumeTestRule("assume"), new LiferayIntegrationTestRule(),
+			TransactionalTestRule.INSTANCE);
 
 	public static void assume() {
 		String dlStoreImpl = PropsUtil.get(PropsKeys.DL_STORE_IMPL);

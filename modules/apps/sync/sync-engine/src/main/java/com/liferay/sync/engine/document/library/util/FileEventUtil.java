@@ -24,7 +24,6 @@ import com.liferay.sync.engine.document.library.event.DownloadFileEvent;
 import com.liferay.sync.engine.document.library.event.Event;
 import com.liferay.sync.engine.document.library.event.GetAllFolderSyncDLObjectsEvent;
 import com.liferay.sync.engine.document.library.event.GetSyncDLObjectUpdateEvent;
-import com.liferay.sync.engine.document.library.event.LanDownloadFileEvent;
 import com.liferay.sync.engine.document.library.event.MoveFileEntryEvent;
 import com.liferay.sync.engine.document.library.event.MoveFileEntryToTrashEvent;
 import com.liferay.sync.engine.document.library.event.MoveFolderEvent;
@@ -33,17 +32,13 @@ import com.liferay.sync.engine.document.library.event.PatchFileEntryEvent;
 import com.liferay.sync.engine.document.library.event.UpdateFileEntryEvent;
 import com.liferay.sync.engine.document.library.event.UpdateFolderEvent;
 import com.liferay.sync.engine.document.library.handler.GetAllFolderSyncDLObjectsHandler;
-import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.model.SyncSite;
-import com.liferay.sync.engine.service.SyncAccountService;
 import com.liferay.sync.engine.service.SyncFileService;
-import com.liferay.sync.engine.service.SyncPropService;
 import com.liferay.sync.engine.service.SyncSiteService;
 import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.IODeltaUtil;
 import com.liferay.sync.engine.util.PropsValues;
-import com.liferay.sync.engine.util.ReleaseInfo;
 import com.liferay.sync.engine.util.ServerInfo;
 
 import java.io.IOException;
@@ -56,8 +51,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +66,7 @@ public class FileEventUtil {
 
 		Map<String, Object> parameters = new HashMap<>();
 
-		parameters.put("changeLog", getChangeLog());
+		parameters.put("changeLog", "");
 		parameters.put("checksum", checksum);
 		parameters.put("description", "");
 		parameters.put("filePath", filePath);
@@ -218,12 +211,6 @@ public class FileEventUtil {
 	public static void downloadFile(
 		long syncAccountId, SyncFile syncFile, boolean batch) {
 
-		downloadFile(syncAccountId, syncFile, batch, true);
-	}
-
-	public static void downloadFile(
-		long syncAccountId, SyncFile syncFile, boolean batch, boolean lan) {
-
 		if (isDownloadInProgress(syncFile)) {
 			return;
 		}
@@ -234,23 +221,10 @@ public class FileEventUtil {
 		parameters.put("patch", false);
 		parameters.put("syncFile", syncFile);
 
-		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
-			syncAccountId);
+		DownloadFileEvent downloadFileEvent = new DownloadFileEvent(
+			syncAccountId, parameters);
 
-		if (lan && syncAccount.isLanEnabled() &&
-			SyncPropService.getBoolean("lanEnabled", true) &&
-			StringUtils.isNotEmpty(syncFile.getLanTokenKey()) &&
-			(syncFile.getSize() >= (syncAccount.getBatchFileMaxSize() / 10))) {
-
-			Event event = new LanDownloadFileEvent(syncAccountId, parameters);
-
-			event.run();
-		}
-		else {
-			Event event = new DownloadFileEvent(syncAccountId, parameters);
-
-			event.run();
-		}
+		downloadFileEvent.run();
 	}
 
 	public static void downloadPatch(
@@ -382,7 +356,7 @@ public class FileEventUtil {
 			syncAccountId, SyncFile.UI_EVENT_DELETED_LOCAL, "syncFileId", true);
 
 		for (SyncFile deletingSyncFile : deletingSyncFiles) {
-			if (!FileUtil.notExists(
+			if (!Files.notExists(
 					Paths.get(deletingSyncFile.getFilePathName()))) {
 
 				deletingSyncFile.setState(SyncFile.STATE_SYNCED);
@@ -416,7 +390,7 @@ public class FileEventUtil {
 		for (SyncFile uploadingSyncFile : uploadingSyncFiles) {
 			Path filePath = Paths.get(uploadingSyncFile.getFilePathName());
 
-			if (FileUtil.notExists(filePath)) {
+			if (Files.notExists(filePath)) {
 				if (uploadingSyncFile.getTypePK() == 0) {
 					SyncFileService.deleteSyncFile(uploadingSyncFile, false);
 				}
@@ -498,7 +472,7 @@ public class FileEventUtil {
 
 		Map<String, Object> parameters = new HashMap<>();
 
-		parameters.put("changeLog", getChangeLog());
+		parameters.put("changeLog", syncFile.getChangeLog());
 		parameters.put("checksum", targetChecksum);
 		parameters.put("description", syncFile.getDescription());
 		parameters.put("fileEntryId", syncFile.getTypePK());
@@ -551,10 +525,6 @@ public class FileEventUtil {
 			syncAccountId, parameters);
 
 		updateFolderEvent.run();
-	}
-
-	protected static String getChangeLog() {
-		return "Uploaded with Liferay Sync " + ReleaseInfo.getVersion();
 	}
 
 	protected static boolean isDownloadInProgress(SyncFile syncFile) {

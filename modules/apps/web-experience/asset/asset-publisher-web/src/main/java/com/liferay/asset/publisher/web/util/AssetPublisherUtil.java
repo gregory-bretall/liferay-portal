@@ -135,7 +135,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
  * @author Raymond Augé
  * @author Julio Camarero
  */
-@Component(service = AssetPublisherUtil.class)
+@Component
 @ProviderType
 public class AssetPublisherUtil {
 
@@ -165,7 +165,7 @@ public class AssetPublisherUtil {
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		Layout layout = _layoutLocalService.fetchLayout(themeDisplay.getPlid());
+		Layout layout = _layoutLocalService.getLayout(themeDisplay.getPlid());
 
 		PortletPreferences portletPreferences =
 			PortletPreferencesFactoryUtil.getStrictPortletSetup(
@@ -217,8 +217,7 @@ public class AssetPublisherUtil {
 			String assetEntryType)
 		throws Exception {
 
-		AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
-			assetEntryId);
+		AssetEntry assetEntry = _assetEntryLocalService.getEntry(assetEntryId);
 
 		String[] assetEntryXmls = portletPreferences.getValues(
 			"assetEntryXml", new String[0]);
@@ -244,17 +243,21 @@ public class AssetPublisherUtil {
 		catch (IOException ioe) {
 			throw new SystemException(ioe);
 		}
+		catch (PortletException pe) {
+			throw new SystemException(pe);
+		}
 	}
 
 	public static void addUserAttributes(
-		User user, String[] customUserAttributeNames,
-		AssetEntryQuery assetEntryQuery) {
+			User user, String[] customUserAttributeNames,
+			AssetEntryQuery assetEntryQuery)
+		throws Exception {
 
 		if ((user == null) || (customUserAttributeNames.length == 0)) {
 			return;
 		}
 
-		Group companyGroup = _groupLocalService.fetchCompanyGroup(
+		Group companyGroup = _groupLocalService.getCompanyGroup(
 			user.getCompanyId());
 
 		long[] allCategoryIds = assetEntryQuery.getAllCategoryIds();
@@ -267,8 +270,14 @@ public class AssetPublisherUtil {
 		for (String customUserAttributeName : customUserAttributeNames) {
 			ExpandoBridge userCustomAttributes = user.getExpandoBridge();
 
-			Serializable userCustomFieldValue =
-				userCustomAttributes.getAttribute(customUserAttributeName);
+			Serializable userCustomFieldValue = null;
+
+			try {
+				userCustomFieldValue = userCustomAttributes.getAttribute(
+					customUserAttributeName);
+			}
+			catch (Exception e) {
+			}
 
 			if (userCustomFieldValue == null) {
 				continue;
@@ -317,7 +326,8 @@ public class AssetPublisherUtil {
 	}
 
 	public static long[] getAssetCategoryIds(
-		PortletPreferences portletPreferences) {
+			PortletPreferences portletPreferences)
+		throws Exception {
 
 		long[] assetCategoryIds = new long[0];
 
@@ -783,7 +793,8 @@ public class AssetPublisherUtil {
 	}
 
 	public static String[] getAssetTagNames(
-		PortletPreferences portletPreferences) {
+			PortletPreferences portletPreferences)
+		throws Exception {
 
 		String[] allAssetTagNames = new String[0];
 
@@ -1134,11 +1145,13 @@ public class AssetPublisherUtil {
 		return ArrayUtil.toLongArray(groupIds);
 	}
 
-	public static String getScopeId(Group group, long scopeGroupId) {
+	public static String getScopeId(Group group, long scopeGroupId)
+		throws PortalException {
+
 		String key = null;
 
 		if (group.isLayout()) {
-			Layout layout = _layoutLocalService.fetchLayout(group.getClassPK());
+			Layout layout = _layoutLocalService.getLayout(group.getClassPK());
 
 			key = SCOPE_ID_LAYOUT_UUID_PREFIX + layout.getUuid();
 		}
@@ -1148,7 +1161,7 @@ public class AssetPublisherUtil {
 			key = SCOPE_ID_GROUP_PREFIX + GroupConstants.DEFAULT;
 		}
 		else {
-			Group scopeGroup = _groupLocalService.fetchGroup(scopeGroupId);
+			Group scopeGroup = _groupLocalService.getGroup(scopeGroupId);
 
 			if (scopeGroup.hasAncestor(group.getGroupId()) &&
 				SitesUtil.isContentSharingWithChildrenEnabled(group)) {
@@ -1255,8 +1268,9 @@ public class AssetPublisherUtil {
 	}
 
 	public static void notifySubscriber(
-		long userId, PortletPreferences portletPreferences,
-		List<AssetEntry> assetEntries) {
+			long userId, PortletPreferences portletPreferences,
+			List<AssetEntry> assetEntries)
+		throws PortalException {
 
 		assetEntries = _filterAssetEntries(userId, assetEntries);
 
@@ -1635,7 +1649,8 @@ public class AssetPublisherUtil {
 	}
 
 	protected static boolean isSearchWithIndex(
-		String portletName, AssetEntryQuery assetEntryQuery) {
+			String portletName, AssetEntryQuery assetEntryQuery)
+		throws Exception {
 
 		if (AssetPublisherWebConfigurationValues.SEARCH_WITH_INDEX &&
 			(assetEntryQuery.getLinkedAssetEntryId() == 0) &&
@@ -1650,7 +1665,8 @@ public class AssetPublisherUtil {
 	}
 
 	protected static boolean isShowAssetEntryResults(
-		String portletName, AssetEntryQuery assetEntryQuery) {
+			String portletName, AssetEntryQuery assetEntryQuery)
+		throws Exception {
 
 		if (!portletName.equals(AssetPublisherPortletKeys.RELATED_ASSETS) ||
 			(assetEntryQuery.getLinkedAssetEntryId() > 0)) {
@@ -1746,7 +1762,8 @@ public class AssetPublisherUtil {
 	}
 
 	private static List<AssetEntry> _filterAssetCategoriesAssetEntries(
-		List<AssetEntry> assetEntries, long[] assetCategoryIds) {
+			List<AssetEntry> assetEntries, long[] assetCategoryIds)
+		throws Exception {
 
 		List<AssetEntry> filteredAssetEntries = new ArrayList<>();
 
@@ -1781,43 +1798,35 @@ public class AssetPublisherUtil {
 	}
 
 	private static List<AssetEntry> _filterAssetEntries(
-		long userId, List<AssetEntry> assetEntries) {
-
-		User user = _userLocalService.fetchUser(userId);
-
-		if (user == null) {
-			return Collections.emptyList();
-		}
-
-		PermissionChecker permissionChecker = null;
-
-		try {
-			permissionChecker = PermissionCheckerFactoryUtil.create(user);
-		}
-		catch (Exception e) {
-			return Collections.emptyList();
-		}
+			long userId, List<AssetEntry> assetEntries)
+		throws PortalException {
 
 		List<AssetEntry> filteredAssetEntries = new ArrayList<>();
 
-		for (AssetEntry assetEntry : assetEntries) {
-			try {
+		User user = _userLocalService.getUser(userId);
+
+		try {
+			PermissionChecker permissionChecker =
+				PermissionCheckerFactoryUtil.create(user);
+
+			for (AssetEntry assetEntry : assetEntries) {
 				if (AssetEntryPermission.contains(
 						permissionChecker, assetEntry, ActionKeys.VIEW)) {
 
 					filteredAssetEntries.add(assetEntry);
 				}
 			}
-			catch (Exception e) {
-				continue;
-			}
+		}
+		catch (Exception e) {
+			throw new PortalException(e);
 		}
 
 		return filteredAssetEntries;
 	}
 
 	private static List<AssetEntry> _filterAssetTagNamesAssetEntries(
-		List<AssetEntry> assetEntries, String[] assetTagNames) {
+			List<AssetEntry> assetEntries, String[] assetTagNames)
+		throws Exception {
 
 		List<AssetEntry> filteredAssetEntries = new ArrayList<>();
 
@@ -1912,10 +1921,12 @@ public class AssetPublisherUtil {
 	}
 
 	private static void _notifySubscribers(
-		List<Subscription> subscriptions, PortletPreferences portletPreferences,
-		List<AssetEntry> assetEntries) {
+			List<Subscription> subscriptions,
+			PortletPreferences portletPreferences,
+			List<AssetEntry> assetEntries)
+		throws PortalException {
 
-		if (!getEmailAssetEntryAddedEnabled(portletPreferences)) {
+		if (getEmailAssetEntryAddedEnabled(portletPreferences)) {
 			return;
 		}
 
@@ -2028,7 +2039,7 @@ public class AssetPublisherUtil {
 					portletPreferencesModel.getPlid(),
 					portletPreferencesModel.getPortletId()));
 
-		_notifySubscribers(subscriptions, portletPreferences, newAssetEntries);
+		_notifySubscribers(subscriptions, portletPreferences, assetEntries);
 
 		try {
 			portletPreferences.setValues(

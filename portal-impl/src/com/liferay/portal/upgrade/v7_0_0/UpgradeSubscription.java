@@ -14,6 +14,7 @@
 
 package com.liferay.portal.upgrade.v7_0_0;
 
+import com.liferay.blogs.kernel.model.BlogsEntry;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.model.DLFolder;
@@ -69,7 +70,7 @@ public class UpgradeSubscription extends UpgradeProcess {
 			runSQL(
 				"delete from Subscription where classNameId = " + classNameId +
 					" and classPK not in (select portletPreferencesId from " +
-						"PortletPreferences)");
+						" PortletPreferences)");
 		}
 	}
 
@@ -221,6 +222,8 @@ public class UpgradeSubscription extends UpgradeProcess {
 
 	static {
 		_getGroupIdSQLPartsMap.put(
+			BlogsEntry.class.getName(), "BlogsEntry,groupId,entryId");
+		_getGroupIdSQLPartsMap.put(
 			DLFileEntry.class.getName(), "DLFileEntry,groupId,fileEntryId");
 		_getGroupIdSQLPartsMap.put(
 			DLFileEntryType.class.getName(),
@@ -236,9 +239,6 @@ public class UpgradeSubscription extends UpgradeProcess {
 		_getGroupIdSQLPartsMap.put(
 			WorkflowInstanceLink.class.getName(),
 			"WorkflowInstanceLink,groupId,workflowInstanceId");
-		_getGroupIdSQLPartsMap.put(
-			"com.liferay.blogs.kernel.model.BlogsEntry",
-			"BlogsEntry,groupId,entryId");
 		_getGroupIdSQLPartsMap.put(
 			"com.liferay.bookmarks.model.BookmarksEntry",
 			"BookmarksEntry,groupId,entryId");

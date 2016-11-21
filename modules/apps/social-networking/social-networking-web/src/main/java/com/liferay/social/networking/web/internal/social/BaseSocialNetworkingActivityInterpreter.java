@@ -17,15 +17,12 @@ package com.liferay.social.networking.web.internal.social;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
-import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.social.kernel.model.BaseSocialActivityInterpreter;
 import com.liferay.social.kernel.model.SocialActivity;
 import com.liferay.social.networking.friends.social.FriendsActivityKeys;
-
-import org.osgi.service.component.annotations.Reference;
+import com.liferay.social.networking.web.internal.util.SocialNetworkingResourceBundleLoader;
 
 /**
  * @author Adolfo Pérez
@@ -48,7 +45,7 @@ public abstract class BaseSocialNetworkingActivityInterpreter
 
 	@Override
 	protected ResourceBundleLoader getResourceBundleLoader() {
-		return _resourceBundleLoader;
+		return SocialNetworkingResourceBundleLoader.INSTANCE;
 	}
 
 	@Override
@@ -92,20 +89,6 @@ public abstract class BaseSocialNetworkingActivityInterpreter
 		return true;
 	}
 
-	@Reference(
-		target = "(bundle.symbolic.name=com.liferay.social.networking.web)",
-		unbind = "-"
-	)
-	protected void setResourceBundleLoader(
-		ResourceBundleLoader resourceBundleLoader) {
-
-		_resourceBundleLoader = new AggregateResourceBundleLoader(
-			resourceBundleLoader,
-			ResourceBundleLoaderUtil.getPortalResourceBundleLoader());
-	}
-
 	private static final String[] _CLASS_NAMES = {User.class.getName()};
-
-	private ResourceBundleLoader _resourceBundleLoader;
 
 }

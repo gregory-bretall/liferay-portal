@@ -19,6 +19,7 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 
 import java.net.URL;
 
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class LoggerUtil {
 		joranConfigurator.setContext(_loggerContext);
 
 		try {
-			if (FileUtil.exists(Paths.get(loggerConfigurationFilePathName))) {
+			if (Files.exists(Paths.get(loggerConfigurationFilePathName))) {
 				joranConfigurator.doConfigure(loggerConfigurationFilePathName);
 			}
 			else {

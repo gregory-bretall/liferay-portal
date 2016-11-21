@@ -42,7 +42,8 @@ public class KaleoTimerLocalServiceImpl extends KaleoTimerLocalServiceBaseImpl {
 
 		// Kaleo timer
 
-		User user = userLocalService.getUser(serviceContext.getGuestOrUserId());
+		User user = userPersistence.findByPrimaryKey(
+			serviceContext.getGuestOrUserId());
 		Date now = new Date();
 
 		long kaleoTimerId = counterLocalService.increment();

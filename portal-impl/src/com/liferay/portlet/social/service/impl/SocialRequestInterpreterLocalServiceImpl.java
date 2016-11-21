@@ -247,8 +247,7 @@ public class SocialRequestInterpreterLocalServiceImpl
 		}
 		catch (JSONException jsone) {
 			_log.error(
-				"Unable to create JSON object from " + request.getExtraData(),
-				jsone);
+				"Unable to create JSON object from " + request.getExtraData());
 
 			return StringPool.BLANK;
 		}

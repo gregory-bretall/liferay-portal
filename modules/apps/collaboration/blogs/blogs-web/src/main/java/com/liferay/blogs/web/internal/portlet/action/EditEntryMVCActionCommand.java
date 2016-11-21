@@ -16,24 +16,20 @@ package com.liferay.blogs.web.internal.portlet.action;
 
 import com.liferay.asset.kernel.exception.AssetCategoryException;
 import com.liferay.asset.kernel.exception.AssetTagException;
-import com.liferay.blogs.exception.EntryContentException;
-import com.liferay.blogs.exception.EntryCoverImageCropException;
-import com.liferay.blogs.exception.EntryDescriptionException;
-import com.liferay.blogs.exception.EntryDisplayDateException;
-import com.liferay.blogs.exception.EntrySmallImageNameException;
-import com.liferay.blogs.exception.EntrySmallImageScaleException;
-import com.liferay.blogs.exception.EntryTitleException;
 import com.liferay.blogs.exception.EntryUrlTitleException;
-import com.liferay.blogs.exception.NoSuchEntryException;
-import com.liferay.blogs.model.BlogsEntry;
+import com.liferay.blogs.kernel.exception.EntryContentException;
+import com.liferay.blogs.kernel.exception.EntryCoverImageCropException;
+import com.liferay.blogs.kernel.exception.EntryDescriptionException;
+import com.liferay.blogs.kernel.exception.EntryDisplayDateException;
+import com.liferay.blogs.kernel.exception.EntrySmallImageNameException;
+import com.liferay.blogs.kernel.exception.EntrySmallImageScaleException;
+import com.liferay.blogs.kernel.exception.EntryTitleException;
+import com.liferay.blogs.kernel.exception.NoSuchEntryException;
+import com.liferay.blogs.kernel.model.BlogsEntry;
 import com.liferay.blogs.service.BlogsEntryLocalService;
 import com.liferay.blogs.service.BlogsEntryService;
-import com.liferay.blogs.util.BlogsEntryAttachmentFileEntryReference;
-import com.liferay.blogs.util.BlogsEntryAttachmentFileEntryUtil;
-import com.liferay.blogs.util.BlogsEntryImageSelectorHelper;
 import com.liferay.blogs.web.constants.BlogsPortletKeys;
 import com.liferay.document.library.kernel.exception.FileSizeException;
-import com.liferay.friendly.url.exception.DuplicateFriendlyURLException;
 import com.liferay.portal.kernel.editor.EditorConstants;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -75,6 +71,9 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portlet.blogs.BlogsEntryAttachmentFileEntryHelper;
+import com.liferay.portlet.blogs.BlogsEntryAttachmentFileEntryReference;
+import com.liferay.portlet.blogs.BlogsEntryImageSelectorHelper;
 import com.liferay.trash.kernel.service.TrashEntryService;
 import com.liferay.trash.kernel.util.TrashUtil;
 
@@ -311,13 +310,12 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 
 			hideDefaultSuccessMessage(actionRequest);
 		}
-		catch (DuplicateFriendlyURLException | EntryContentException |
-			   EntryCoverImageCropException | EntryDescriptionException |
-			   EntryDisplayDateException | EntrySmallImageNameException |
-			   EntrySmallImageScaleException | EntryTitleException |
-			   EntryUrlTitleException | FileSizeException |
-			   LiferayFileItemException | SanitizerException |
-			   UploadRequestSizeException e) {
+		catch (EntryContentException | EntryCoverImageCropException |
+			   EntryDescriptionException | EntryDisplayDateException |
+			   EntrySmallImageNameException | EntrySmallImageScaleException |
+			   EntryTitleException | EntryUrlTitleException |
+			   FileSizeException | LiferayFileItemException |
+			   SanitizerException | UploadRequestSizeException e) {
 
 			SessionErrors.add(actionRequest, e.getClass());
 
@@ -523,8 +521,12 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 				coverImageImageSelector, smallImageImageSelector,
 				serviceContext);
 
+			BlogsEntryAttachmentFileEntryHelper
+				blogsEntryAttachmentFileEntryHelper =
+					new BlogsEntryAttachmentFileEntryHelper();
+
 			List<FileEntry> tempBlogsEntryAttachments =
-				BlogsEntryAttachmentFileEntryUtil.
+				blogsEntryAttachmentFileEntryHelper.
 					getTempBlogsEntryAttachmentFileEntries(content);
 
 			if (!tempBlogsEntryAttachments.isEmpty()) {
@@ -532,13 +534,13 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 					themeDisplay.getUserId(), entry.getGroupId());
 
 				blogsEntryAttachmentFileEntryReferences =
-					BlogsEntryAttachmentFileEntryUtil.
+					blogsEntryAttachmentFileEntryHelper.
 						addBlogsEntryAttachmentFileEntries(
 							entry.getGroupId(), themeDisplay.getUserId(),
 							entry.getEntryId(), folder.getFolderId(),
 							tempBlogsEntryAttachments);
 
-				content = BlogsEntryAttachmentFileEntryUtil.updateContent(
+				content = blogsEntryAttachmentFileEntryHelper.updateContent(
 					content, blogsEntryAttachmentFileEntryReferences);
 
 				entry.setContent(content);
@@ -571,8 +573,11 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 
 			entry = _blogsEntryLocalService.getEntry(entryId);
 
+			BlogsEntryAttachmentFileEntryHelper blogsEntryAttachmentHelper =
+				new BlogsEntryAttachmentFileEntryHelper();
+
 			List<FileEntry> tempBlogsEntryAttachmentFileEntries =
-				BlogsEntryAttachmentFileEntryUtil.
+				blogsEntryAttachmentHelper.
 					getTempBlogsEntryAttachmentFileEntries(content);
 
 			if (!tempBlogsEntryAttachmentFileEntries.isEmpty()) {
@@ -580,13 +585,13 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 					themeDisplay.getUserId(), entry.getGroupId());
 
 				blogsEntryAttachmentFileEntryReferences =
-					BlogsEntryAttachmentFileEntryUtil.
+					blogsEntryAttachmentHelper.
 						addBlogsEntryAttachmentFileEntries(
 							entry.getGroupId(), themeDisplay.getUserId(),
 							entry.getEntryId(), folder.getFolderId(),
 							tempBlogsEntryAttachmentFileEntries);
 
-				content = BlogsEntryAttachmentFileEntryUtil.updateContent(
+				content = blogsEntryAttachmentHelper.updateContent(
 					content, blogsEntryAttachmentFileEntryReferences);
 			}
 

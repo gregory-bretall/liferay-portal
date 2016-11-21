@@ -19,7 +19,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.security.ldap.LDAPSettings;
 import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
@@ -182,6 +181,10 @@ public class LDAPPropertiesVerifyProcess extends VerifyProcess {
 		Dictionary<String, Object> dictionary = new HashMapDictionary<>();
 
 		dictionary.put(
+			LDAPConstants.AUTH_REQUIRED,
+			_prefsProps.getBoolean(
+				companyId, LegacyLDAPPropsKeys.LDAP_AUTH_REQUIRED, false));
+		dictionary.put(
 			LDAPConstants.EXPORT_ENABLED,
 			_prefsProps.getBoolean(
 				companyId, LegacyLDAPPropsKeys.LDAP_EXPORT_ENABLED, false));
@@ -189,6 +192,17 @@ public class LDAPPropertiesVerifyProcess extends VerifyProcess {
 			LDAPConstants.EXPORT_GROUP_ENABLED,
 			_prefsProps.getBoolean(
 				companyId, LegacyLDAPPropsKeys.LDAP_EXPORT_GROUP_ENABLED,
+				false));
+		dictionary.put(
+			LDAPConstants.PASSWORD_ENCRYPTION_ALGORITHM,
+			_prefsProps.getString(
+				companyId,
+				LegacyLDAPPropsKeys.LDAP_AUTH_PASSWORD_ENCRYPTION_ALGORITHM,
+				"NONE"));
+		dictionary.put(
+			LDAPConstants.PASSWORD_POLICY_ENABLED,
+			_prefsProps.getBoolean(
+				companyId, LegacyLDAPPropsKeys.LDAP_PASSWORD_POLICY_ENABLED,
 				false));
 
 		if (_log.isInfoEnabled()) {
@@ -274,17 +288,13 @@ public class LDAPPropertiesVerifyProcess extends VerifyProcess {
 			for (Company company : companies) {
 				long companyId = company.getCompanyId();
 
-				long[] ldapServerIds = StringUtil.split(
-					_prefsProps.getString(companyId, "ldap.server.ids"), 0L);
-
-				if (ArrayUtil.isEmpty(ldapServerIds)) {
-					continue;
-				}
-
 				verifyLDAPAuthProperties(companyId);
 				verifyLDAPExportProperties(companyId);
 				verifyLDAPImportProperties(companyId);
 				verifySystemLDAPConfiguration(companyId);
+
+				long[] ldapServerIds = StringUtil.split(
+					_prefsProps.getString(companyId, "ldap.server.ids"), 0L);
 
 				Set<String> keys = new HashSet<>();
 

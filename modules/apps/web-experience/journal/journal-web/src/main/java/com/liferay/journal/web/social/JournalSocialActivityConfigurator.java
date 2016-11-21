@@ -15,17 +15,32 @@
 package com.liferay.journal.web.social;
 
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
+import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.social.kernel.util.SocialConfigurationUtil;
+
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eduardo Garcia
- * @deprecated As of 1.4.0, with no direct replacement
  */
-@Deprecated
+@Component(immediate = true, service = JournalSocialActivityConfigurator.class)
 public class JournalSocialActivityConfigurator {
 
-	protected void activate() {
+	@Activate
+	protected void activate() throws Exception {
+		Class<?> clazz = getClass();
+
+		String xml = new String(
+			FileUtil.getBytes(
+				getClass(), "/META-INF/social/liferay-social.xml"));
+
+		SocialConfigurationUtil.read(
+			clazz.getClassLoader(), new String[] {xml});
 	}
 
+	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
 	protected void setModuleServiceLifecycle(
 		ModuleServiceLifecycle moduleServiceLifecycle) {
 	}

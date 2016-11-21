@@ -21,6 +21,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormRule;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,7 +117,12 @@ public class DDLFormRulesToDDMFormRulesConverter {
 				StringUtil.quote(operand.getValue()));
 		}
 
-		return StringUtil.quote(operand.getValue());
+		if (Validator.isNumber(operand.getValue())) {
+			return operand.getValue();
+		}
+		else {
+			return StringUtil.quote(operand.getValue());
+		}
 	}
 
 	protected String convertOperands(

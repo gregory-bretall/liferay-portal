@@ -21,7 +21,6 @@ import com.liferay.project.templates.internal.Archetyper;
 import com.liferay.project.templates.internal.util.FileUtil;
 import com.liferay.project.templates.internal.util.StringUtil;
 import com.liferay.project.templates.internal.util.Validator;
-import com.liferay.project.templates.internal.util.WorkspaceUtil;
 
 import java.io.File;
 
@@ -74,9 +73,7 @@ public class ProjectTemplates {
 
 					template = template.replace('.', '-');
 
-					if (!template.startsWith(WorkspaceUtil.WORKSPACE)) {
-						templates.add(template);
-					}
+					templates.add(template);
 				}
 			}
 		}
@@ -87,7 +84,7 @@ public class ProjectTemplates {
 				while (enumeration.hasMoreElements()) {
 					JarEntry jarEntry = enumeration.nextElement();
 
-					if (jarEntry.isDirectory()) {
+					if (!jarEntry.isDirectory()) {
 						continue;
 					}
 
@@ -100,9 +97,7 @@ public class ProjectTemplates {
 
 						template = template.replace('.', '-');
 
-						if (!template.startsWith(WorkspaceUtil.WORKSPACE)) {
-							templates.add(template);
-						}
+						templates.add(template);
 					}
 				}
 			}
@@ -182,10 +177,7 @@ public class ProjectTemplates {
 		catch (UnsupportedOperationException uoe) {
 		}
 
-		if (WorkspaceUtil.isWorkspace(destinationDir)) {
-			FileUtil.deleteDir(templateDirPath.resolve("gradle"));
-			Files.delete(templateDirPath.resolve("gradlew"));
-			Files.delete(templateDirPath.resolve("gradlew.bat"));
+		if (projectTemplatesArgs.getWorkspaceDir() != null) {
 			Files.deleteIfExists(templateDirPath.resolve("settings.gradle"));
 		}
 
@@ -238,17 +230,9 @@ public class ProjectTemplates {
 	}
 
 	private void _checkArgs(ProjectTemplatesArgs projectTemplatesArgs) {
-		String template = projectTemplatesArgs.getTemplate();
-
-		if (Validator.isNull(projectTemplatesArgs.getTemplate())) {
-			throw new IllegalArgumentException("Template is required");
-		}
-
 		String name = projectTemplatesArgs.getName();
 
-		if (Validator.isNull(name) &&
-			!template.equals(WorkspaceUtil.WORKSPACE)) {
-
+		if (Validator.isNull(name)) {
 			throw new IllegalArgumentException("Name is required");
 		}
 
@@ -258,13 +242,9 @@ public class ProjectTemplates {
 			throw new IllegalArgumentException("Destination dir is required");
 		}
 
-		File dir = destinationDir;
+		File dir = new File(destinationDir, name);
 
-		if (Validator.isNotNull(name)) {
-			dir = new File(dir, name);
-		}
-
-		if (!projectTemplatesArgs.isForce() && dir.exists()) {
+		if (dir.exists()) {
 			String[] fileNames = dir.list();
 
 			if ((fileNames == null) || (fileNames.length > 0)) {
@@ -273,9 +253,15 @@ public class ProjectTemplates {
 			}
 		}
 
+		String template = projectTemplatesArgs.getTemplate();
+
+		if (Validator.isNull(projectTemplatesArgs.getTemplate())) {
+			throw new IllegalArgumentException("Template is required");
+		}
+
 		String className = projectTemplatesArgs.getClassName();
 
-		if (Validator.isNull(className) && Validator.isNotNull(name)) {
+		if (Validator.isNull(className)) {
 			className = _getClassName(name);
 		}
 
@@ -284,23 +270,15 @@ public class ProjectTemplates {
 		}
 		else if ((template.equals("mvc-portlet") ||
 				  template.equals("portlet")) &&
-				 (className.length() > 7) && className.endsWith("Portlet")) {
+				 className.endsWith("Portlet")) {
 
 			className = className.substring(0, className.length() - 7);
 		}
 
 		projectTemplatesArgs.setClassName(className);
 
-		if (Validator.isNull(projectTemplatesArgs.getPackageName()) &&
-			Validator.isNotNull(name)) {
-
+		if (Validator.isNull(projectTemplatesArgs.getPackageName())) {
 			projectTemplatesArgs.setPackageName(_getPackageName(name));
-		}
-
-		String contributorType = projectTemplatesArgs.getContributorType();
-
-		if (Validator.isNull(contributorType)) {
-			projectTemplatesArgs.setContributorType(name);
 		}
 	}
 

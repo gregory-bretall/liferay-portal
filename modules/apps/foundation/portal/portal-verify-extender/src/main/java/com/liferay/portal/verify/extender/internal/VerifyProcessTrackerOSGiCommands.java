@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.service.ReleaseLocalService;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.NotificationThreadLocal;
@@ -32,7 +33,6 @@ import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 import com.liferay.portal.output.stream.container.OutputStreamContainer;
 import com.liferay.portal.output.stream.container.OutputStreamContainerFactory;
 import com.liferay.portal.output.stream.container.OutputStreamContainerFactoryTracker;
-import com.liferay.portal.search.index.IndexStatusManager;
 import com.liferay.portal.verify.VerifyException;
 import com.liferay.portal.verify.VerifyProcess;
 import com.liferay.portal.verify.extender.internal.configuration.VerifyProcessTrackerConfiguration;
@@ -89,7 +89,7 @@ public class VerifyProcessTrackerOSGiCommands {
 
 	public void executeAll() {
 		OutputStreamContainerFactory outputStreamContainerFactory =
-			outputStreamContainerFactoryTracker.
+			_outputStreamContainerFactoryTracker.
 				getOutputStreamContainerFactory();
 
 		_runAllVerifiersWithFactory(outputStreamContainerFactory);
@@ -97,8 +97,9 @@ public class VerifyProcessTrackerOSGiCommands {
 
 	public void executeAll(String outputStreamContainerFactoryName) {
 		OutputStreamContainerFactory outputStreamContainerFactory =
-			outputStreamContainerFactoryTracker.getOutputStreamContainerFactory(
-				outputStreamContainerFactoryName);
+			_outputStreamContainerFactoryTracker.
+				getOutputStreamContainerFactory(
+					outputStreamContainerFactoryName);
 
 		_runAllVerifiersWithFactory(outputStreamContainerFactory);
 	}
@@ -125,7 +126,7 @@ public class VerifyProcessTrackerOSGiCommands {
 
 	public void showReports() {
 		Set<String> outputStreamContainerFactoryNames =
-			outputStreamContainerFactoryTracker.
+			_outputStreamContainerFactoryTracker.
 				getOutputStreamContainerFactoryNames();
 
 		for (String outputStreamContainerFactoryName :
@@ -200,9 +201,9 @@ public class VerifyProcessTrackerOSGiCommands {
 		List<VerifyProcess> verifyProcesses = getVerifyProcesses(
 			verifyProcessName);
 
-		boolean indexReadOnly = indexStatusManager.isIndexReadOnly();
+		boolean indexReadOnly = IndexWriterHelperUtil.isIndexReadOnly();
 
-		indexStatusManager.setIndexReadOnly(
+		IndexWriterHelperUtil.setIndexReadOnly(
 			_verifyProcessTrackerConfiguration.indexReadOnly());
 
 		NotificationThreadLocal.setEnabled(false);
@@ -210,7 +211,7 @@ public class VerifyProcessTrackerOSGiCommands {
 		WorkflowThreadLocal.setEnabled(false);
 
 		try {
-			Release release = releaseLocalService.fetchRelease(
+			Release release = _releaseLocalService.fetchRelease(
 				verifyProcessName);
 
 			if ((release != null) && release.isVerified()) {
@@ -226,8 +227,8 @@ public class VerifyProcessTrackerOSGiCommands {
 				// Verification state must be persisted even though not all
 				// verifiers are associated with a database service
 
-				release = releaseLocalService.createRelease(
-					counterLocalService.increment());
+				release = _releaseLocalService.createRelease(
+					_counterLocalService.increment());
 
 				release.setServletContextName(verifyProcessName);
 				release.setVerified(false);
@@ -252,13 +253,13 @@ public class VerifyProcessTrackerOSGiCommands {
 			if (verifyException == null) {
 				release.setVerified(true);
 
-				releaseLocalService.updateRelease(release);
+				_releaseLocalService.updateRelease(release);
 
 				_registerVerifyProcessCompletionMarker(verifyProcessName);
 			}
 		}
 		finally {
-			indexStatusManager.setIndexReadOnly(indexReadOnly);
+			IndexWriterHelperUtil.setIndexReadOnly(indexReadOnly);
 			NotificationThreadLocal.setEnabled(true);
 			StagingAdvicesThreadLocal.setEnabled(true);
 			WorkflowThreadLocal.setEnabled(true);
@@ -273,13 +274,13 @@ public class VerifyProcessTrackerOSGiCommands {
 
 		if (outputStreamContainerFactoryName != null) {
 			outputStreamContainerFactory =
-				outputStreamContainerFactoryTracker.
+				_outputStreamContainerFactoryTracker.
 					getOutputStreamContainerFactory(
 						outputStreamContainerFactoryName);
 		}
 		else {
 			outputStreamContainerFactory =
-				outputStreamContainerFactoryTracker.
+				_outputStreamContainerFactoryTracker.
 					getOutputStreamContainerFactory();
 		}
 
@@ -289,7 +290,7 @@ public class VerifyProcessTrackerOSGiCommands {
 		final OutputStream outputStream =
 			outputStreamContainer.getOutputStream();
 
-		outputStreamContainerFactoryTracker.runWithSwappedLog(
+		_outputStreamContainerFactoryTracker.runWithSwappedLog(
 			new Runnable() {
 
 				@Override
@@ -315,23 +316,33 @@ public class VerifyProcessTrackerOSGiCommands {
 		return verifyProcesses;
 	}
 
+	@Reference(unbind = "-")
+	protected void setCounterLocalService(
+		CounterLocalService counterLocalService) {
+
+		_counterLocalService = counterLocalService;
+	}
+
 	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
 	protected void setModuleServiceLifecycle(
 		ModuleServiceLifecycle moduleServiceLifecycle) {
 	}
 
-	@Reference
-	protected CounterLocalService counterLocalService;
+	@Reference(unbind = "-")
+	protected void setOutputStreamTracker(
+		OutputStreamContainerFactoryTracker
+			outputStreamContainerFactoryTracker) {
 
-	@Reference
-	protected IndexStatusManager indexStatusManager;
+		_outputStreamContainerFactoryTracker =
+			outputStreamContainerFactoryTracker;
+	}
 
-	@Reference
-	protected OutputStreamContainerFactoryTracker
-		outputStreamContainerFactoryTracker;
+	@Reference(unbind = "-")
+	protected void setReleaseLocalService(
+		ReleaseLocalService releaseLocalService) {
 
-	@Reference
-	protected ReleaseLocalService releaseLocalService;
+		_releaseLocalService = releaseLocalService;
+	}
 
 	private void _registerVerifyProcessCompletionMarker(
 		String verifyProcessName) {
@@ -357,7 +368,7 @@ public class VerifyProcessTrackerOSGiCommands {
 		final OutputStream outputStream =
 			outputStreamContainer.getOutputStream();
 
-		outputStreamContainerFactoryTracker.runWithSwappedLog(
+		_outputStreamContainerFactoryTracker.runWithSwappedLog(
 			new AllVerifiersRunnable(outputStream),
 			outputStreamContainer.getDescription(), outputStream);
 	}
@@ -366,6 +377,10 @@ public class VerifyProcessTrackerOSGiCommands {
 		VerifyProcessTrackerOSGiCommands.class);
 
 	private BundleContext _bundleContext;
+	private CounterLocalService _counterLocalService;
+	private OutputStreamContainerFactoryTracker
+		_outputStreamContainerFactoryTracker;
+	private ReleaseLocalService _releaseLocalService;
 	private Map<String, ServiceRegistration<VerifyProcessCompletionMarker>>
 		_serviceRegistrations;
 	private ServiceTrackerMap<String, List<VerifyProcess>> _verifyProcesses;

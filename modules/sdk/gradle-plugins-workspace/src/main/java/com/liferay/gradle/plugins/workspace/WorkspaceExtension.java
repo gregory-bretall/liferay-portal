@@ -14,12 +14,12 @@
 
 package com.liferay.gradle.plugins.workspace;
 
-import com.liferay.gradle.plugins.workspace.internal.configurators.ModulesProjectConfigurator;
-import com.liferay.gradle.plugins.workspace.internal.configurators.PluginsProjectConfigurator;
-import com.liferay.gradle.plugins.workspace.internal.configurators.RootProjectConfigurator;
-import com.liferay.gradle.plugins.workspace.internal.configurators.ThemesProjectConfigurator;
-import com.liferay.gradle.plugins.workspace.internal.configurators.WarsProjectConfigurator;
-import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.workspace.configurators.ModulesProjectConfigurator;
+import com.liferay.gradle.plugins.workspace.configurators.PluginsProjectConfigurator;
+import com.liferay.gradle.plugins.workspace.configurators.ProjectConfigurator;
+import com.liferay.gradle.plugins.workspace.configurators.RootProjectConfigurator;
+import com.liferay.gradle.plugins.workspace.configurators.ThemesProjectConfigurator;
+import com.liferay.gradle.plugins.workspace.util.GradleUtil;
 
 import groovy.lang.MissingPropertyException;
 
@@ -29,8 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
 
@@ -46,18 +44,18 @@ public class WorkspaceExtension {
 		_projectConfigurators.add(new ModulesProjectConfigurator(settings));
 		_projectConfigurators.add(new PluginsProjectConfigurator(settings));
 		_projectConfigurators.add(new ThemesProjectConfigurator(settings));
-		_projectConfigurators.add(new WarsProjectConfigurator(settings));
 
-		_bundleDistRootDirName = _getProperty(
-			settings, "bundle.dist.root.dir", _BUNDLE_DIST_ROOT_DIR_NAME);
-		_bundleUrl = _getProperty(settings, "bundle.url", _BUNDLE_URL);
-		_configsDir = _getProperty(settings, "configs.dir", _CONFIGS_DIR);
-		_environment = _getProperty(settings, "environment", _ENVIRONMENT);
-		_homeDir = _getProperty(settings, "home.dir", _HOME_DIR);
-	}
-
-	public String getBundleDistRootDirName() {
-		return GradleUtil.toString(_bundleDistRootDirName);
+		_bundleUrl = GradleUtil.getProperty(
+			settings, WorkspacePlugin.PROPERTY_PREFIX + "bundle.url",
+			_BUNDLE_URL);
+		_configsDir = GradleUtil.getProperty(
+			settings, WorkspacePlugin.PROPERTY_PREFIX + "configs.dir",
+			_CONFIGS_DIR);
+		_environment = GradleUtil.getProperty(
+			settings, WorkspacePlugin.PROPERTY_PREFIX + "environment",
+			_ENVIRONMENT);
+		_homeDir = GradleUtil.getProperty(
+			settings, WorkspacePlugin.PROPERTY_PREFIX + "home.dir", _HOME_DIR);
 	}
 
 	public String getBundleUrl() {
@@ -80,7 +78,7 @@ public class WorkspaceExtension {
 		return Collections.unmodifiableSet(_projectConfigurators);
 	}
 
-	public Plugin<Project> getRootProjectConfigurator() {
+	public RootProjectConfigurator getRootProjectConfigurator() {
 		return _rootProjectConfigurator;
 	}
 
@@ -92,10 +90,6 @@ public class WorkspaceExtension {
 		}
 
 		throw new MissingPropertyException(name, ProjectConfigurator.class);
-	}
-
-	public void setBundleDistRootDirName(Object bundleDistRootDirName) {
-		_bundleDistRootDirName = bundleDistRootDirName;
 	}
 
 	public void setBundleUrl(Object bundleUrl) {
@@ -114,15 +108,6 @@ public class WorkspaceExtension {
 		_homeDir = homeDir;
 	}
 
-	private String _getProperty(
-		Object object, String keySuffix, String defaultValue) {
-
-		return GradleUtil.getProperty(
-			object, WorkspacePlugin.PROPERTY_PREFIX + keySuffix, defaultValue);
-	}
-
-	private static final String _BUNDLE_DIST_ROOT_DIR_NAME = null;
-
 	private static final String _BUNDLE_URL =
 		"https://sourceforge.net/projects/lportal/files/Liferay Portal" +
 			"/7.0.2 GA3/liferay-ce-portal-tomcat-7.0-ga3-20160804222206210.zip";
@@ -133,7 +118,6 @@ public class WorkspaceExtension {
 
 	private static final String _HOME_DIR = "bundles";
 
-	private Object _bundleDistRootDirName;
 	private Object _bundleUrl;
 	private Object _configsDir;
 	private Object _environment;
@@ -141,7 +125,7 @@ public class WorkspaceExtension {
 	private Object _homeDir;
 	private final Set<ProjectConfigurator> _projectConfigurators =
 		new HashSet<>();
-	private final Plugin<Project> _rootProjectConfigurator =
+	private final RootProjectConfigurator _rootProjectConfigurator =
 		new RootProjectConfigurator();
 
 }

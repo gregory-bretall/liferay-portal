@@ -8,7 +8,6 @@ AUI.add(
 
 		FieldValidationSupport.ATTRS = {
 			required: {
-				state: true,
 				value: false
 			},
 

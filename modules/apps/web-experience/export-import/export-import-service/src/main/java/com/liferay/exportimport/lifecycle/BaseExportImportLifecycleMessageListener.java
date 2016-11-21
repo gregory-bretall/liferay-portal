@@ -14,8 +14,6 @@
 
 package com.liferay.exportimport.lifecycle;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleEvent;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleListener;
 import com.liferay.portal.kernel.log.Log;
@@ -28,7 +26,6 @@ import java.util.Set;
 /**
  * @author Daniel Kocsis
  */
-@ProviderType
 public abstract class BaseExportImportLifecycleMessageListener
 	extends BaseMessageListener {
 

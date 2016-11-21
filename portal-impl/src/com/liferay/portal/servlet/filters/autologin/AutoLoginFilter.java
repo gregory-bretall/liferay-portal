@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.security.pwd.PasswordEncryptorUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.ProtectedServletRequest;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StackTraceUtil;
@@ -124,23 +123,22 @@ public class AutoLoginFilter extends BasePortalFilter {
 		session.setAttribute("j_remoteuser", jUsername);
 
 		if (PropsValues.PORTAL_JAAS_ENABLE) {
-			String mainPath = PortalUtil.getPathMain();
-
-			String redirect = mainPath.concat("/portal/protected");
+			String redirect = PortalUtil.getPathMain().concat(
+				"/portal/protected");
 
 			if (PropsValues.AUTH_FORWARD_BY_LAST_PATH) {
-				redirect = redirect.concat("?redirect=");
-
 				String autoLoginRedirect = (String)request.getAttribute(
 					AutoLogin.AUTO_LOGIN_REDIRECT_AND_CONTINUE);
 
-				if (Validator.isNull(autoLoginRedirect)) {
-					autoLoginRedirect = PortalUtil.getCurrentCompleteURL(
-						request);
-				}
+				redirect = redirect.concat("?redirect=");
 
-				redirect = redirect.concat(
-					HttpUtil.encodeURL(autoLoginRedirect));
+				if (Validator.isNotNull(autoLoginRedirect)) {
+					redirect = redirect.concat(autoLoginRedirect);
+				}
+				else {
+					redirect = redirect.concat(
+						PortalUtil.getCurrentCompleteURL(request));
+				}
 			}
 
 			response.sendRedirect(redirect);

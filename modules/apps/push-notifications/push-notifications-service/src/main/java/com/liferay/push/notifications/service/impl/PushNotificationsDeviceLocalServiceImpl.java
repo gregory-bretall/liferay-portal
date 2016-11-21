@@ -51,7 +51,7 @@ public class PushNotificationsDeviceLocalServiceImpl
 			long userId, String platform, String token)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		long pushNotificationsDeviceId = counterLocalService.increment();
 

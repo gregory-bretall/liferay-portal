@@ -29,13 +29,10 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
-import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.service.impl.PortletLocalServiceImpl;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
 import com.liferay.portlet.util.test.PortletKeys;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 
 import java.util.List;
 
@@ -250,61 +247,46 @@ public class LayoutTypePortletTest {
 
 		_user = UserTestUtil.addUser(layout.getGroupId());
 
-		List<Portlet> initialPortlets = _layoutTypePortlet.getAllPortlets();
-
-		int initialPortletsSize = initialPortlets.size();
-
 		final String portletId = _layoutTypePortlet.addPortletId(
 			_user.getUserId(), PortletKeys.TEST);
 
 		List<Portlet> portlets = _layoutTypePortlet.getAllPortlets();
 
-		Assert.assertEquals(initialPortletsSize + 1, portlets.size());
+		Assert.assertEquals(1, portlets.size());
 
 		final long companyId = TestPropsValues.getCompanyId();
 
-		final PortletLocalService portletLocalService =
+		PortletLocalService portletLocalService =
 			PortletLocalServiceUtil.getService();
-
-		final Method getPortletByIdMethod = PortletLocalService.class.getMethod(
-			"getPortletById", long.class, String.class);
 
 		ReflectionTestUtil.setFieldValue(
 			PortletLocalServiceUtil.class, "_service",
-			ProxyUtil.newProxyInstance(
-				PortletLocalService.class.getClassLoader(),
-				new Class<?>[] {PortletLocalService.class},
-				new InvocationHandler() {
+			new PortletLocalServiceImpl() {
 
-					@Override
-					public Object invoke(
-							Object proxy, Method method, Object[] args)
-						throws Throwable {
+				@Override
+				public Portlet getPortletById(
+					long localCompanyId, String localPortletId) {
 
-						if (getPortletByIdMethod.equals(method)) {
-							Portlet portlet = (Portlet)method.invoke(
-								portletLocalService, args);
+					Portlet portlet = super.getPortletById(
+						localCompanyId, localPortletId);
 
-							if ((companyId == (long)args[0]) &&
-								portletId.equals(args[1])) {
+					if ((companyId == localCompanyId) &&
+						portletId.equals(localPortletId)) {
 
-								portlet = (Portlet)portlet.clone();
+						portlet = (Portlet)portlet.clone();
 
-								portlet.setUndeployedPortlet(true);
-							}
-
-							return portlet;
-						}
-
-						return method.invoke(portletLocalService, args);
+						portlet.setUndeployedPortlet(true);
 					}
 
-				}));
+					return portlet;
+				}
+
+			});
 
 		try {
 			portlets = _layoutTypePortlet.getAllPortlets();
 
-			Assert.assertEquals(initialPortletsSize + 1, portlets.size());
+			Assert.assertEquals(1, portlets.size());
 		}
 		finally {
 			ReflectionTestUtil.setFieldValue(
@@ -313,12 +295,10 @@ public class LayoutTypePortletTest {
 	}
 
 	@Test
-	public void testGetAllPortletsWithOnlyStaticPortlets() throws Exception {
+	public void testGetAllPortletsWithNoPortlets() throws Exception {
 		List<Portlet> portlets = _layoutTypePortlet.getAllPortlets();
 
-		for (Portlet portlet : portlets) {
-			Assert.assertTrue(portlet + " is not static", portlet.isStatic());
-		}
+		Assert.assertEquals(0, portlets.size());
 	}
 
 	@DeleteAfterTestRun

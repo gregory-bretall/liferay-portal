@@ -16,10 +16,6 @@ package com.liferay.portal.increment;
 
 import com.liferay.portal.kernel.concurrent.IncreasableEntry;
 import com.liferay.portal.kernel.increment.Increment;
-import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
-
-import java.util.Arrays;
 
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -54,14 +50,7 @@ public class BufferedIncreasableEntry<K, T>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler();
-
-		sb.append(_methodInvocation.toString());
-		sb.append(StringPool.OPEN_PARENTHESIS);
-		sb.append(Arrays.toString(_methodInvocation.getArguments()));
-		sb.append(StringPool.CLOSE_PARENTHESIS);
-
-		return sb.toString();
+		return _methodInvocation.toString();
 	}
 
 	private final MethodInvocation _methodInvocation;

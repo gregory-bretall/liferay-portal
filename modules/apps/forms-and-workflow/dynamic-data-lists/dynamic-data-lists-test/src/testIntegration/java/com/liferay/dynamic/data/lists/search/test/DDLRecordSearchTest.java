@@ -48,7 +48,6 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.SearchContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
-import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -88,12 +87,11 @@ public class DDLRecordSearchTest {
 		setUpPrincipalThreadLocal();
 
 		_group = GroupTestUtil.addGroup();
-		_user = UserTestUtil.addUser();
 
 		DDLRecordSet recordSet = addRecordSet();
 
 		_recordTestHelper = new DDLRecordTestHelper(_group, recordSet);
-		_searchContext = getSearchContext(_group, _user, recordSet);
+		_searchContext = getSearchContext(_group, recordSet);
 	}
 
 	@After
@@ -125,8 +123,7 @@ public class DDLRecordSearchTest {
 
 		DDLRecordSet recordSet = recordSetTestHelper.addRecordSet(ddmStructure);
 
-		final SearchContext searchContext = getSearchContext(
-			group, user, recordSet);
+		final SearchContext searchContext = getSearchContext(group, recordSet);
 
 		DDLRecordTestHelper recordTestHelper = new DDLRecordTestHelper(
 			group, recordSet);
@@ -288,7 +285,7 @@ public class DDLRecordSearchTest {
 	}
 
 	protected static SearchContext getSearchContext(
-			Group group, User user, DDLRecordSet recordSet)
+			Group group, DDLRecordSet recordSet)
 		throws Exception {
 
 		SearchContext searchContext = SearchContextTestUtil.getSearchContext(
@@ -296,7 +293,6 @@ public class DDLRecordSearchTest {
 
 		searchContext.setAttribute("recordSetId", recordSet.getRecordSetId());
 		searchContext.setAttribute("status", WorkflowConstants.STATUS_ANY);
-		searchContext.setUserId(user.getUserId());
 
 		return searchContext;
 	}
@@ -446,8 +442,5 @@ public class DDLRecordSearchTest {
 	private PermissionChecker _originalPermissionChecker;
 	private DDLRecordTestHelper _recordTestHelper;
 	private SearchContext _searchContext;
-
-	@DeleteAfterTestRun
-	private User _user;
 
 }

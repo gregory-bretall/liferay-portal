@@ -69,7 +69,7 @@ public class PollsVoteLocalServiceImpl extends PollsVoteLocalServiceBaseImpl {
 
 		PollsVote vote = null;
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.fetchByPrimaryKey(userId);
 
 		if (!user.isDefaultUser()) {
 			vote = fetchQuestionUserVote(questionId, userId);

@@ -56,18 +56,16 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		Configuration tlddocConfiguration = addConfigurationTLDDoc(project);
 
-		ValidateSchemaTask validateTLDTask = _addTaskValidateTLD(project);
+		ValidateSchemaTask validateTLDTask = addTaskValidateTLD(project);
 
-		Copy copyTLDDocResourcesTask = _addTaskCopyTLDDocResources(project);
+		Copy copyTLDDocResourcesTask = addTaskCopyTLDDocResources(project);
 
-		_addTaskTLDDoc(copyTLDDocResourcesTask, validateTLDTask);
+		addTaskTLDDoc(project, copyTLDDocResourcesTask, validateTLDTask);
 
-		_configureTasksTLDDoc(project, tlddocConfiguration);
+		configureTasksTLDDoc(project, tlddocConfiguration);
 	}
 
-	protected static Configuration addConfigurationTLDDoc(
-		final Project project) {
-
+	protected Configuration addConfigurationTLDDoc(final Project project) {
 		Configuration configuration = GradleUtil.addConfiguration(
 			project, CONFIGURATION_NAME);
 
@@ -76,7 +74,7 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(DependencySet dependencySet) {
-					_addDependenciesTLDDoc(project);
+					addDependenciesTLDDoc(project);
 				}
 
 			});
@@ -88,12 +86,12 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 		return configuration;
 	}
 
-	private static void _addDependenciesTLDDoc(Project project) {
+	protected void addDependenciesTLDDoc(Project project) {
 		GradleUtil.addDependency(
 			project, CONFIGURATION_NAME, "taglibrarydoc", "tlddoc", "1.3");
 	}
 
-	private Copy _addTaskCopyTLDDocResources(final Project project) {
+	protected Copy addTaskCopyTLDDocResources(final Project project) {
 		Copy copy = GradleUtil.addTask(
 			project, COPY_TLDDOC_RESOURCES_TASK_NAME, Copy.class);
 
@@ -112,21 +110,20 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 
 			});
 
-		copy.setDescription("Copies tag library documentation resources.");
+		copy.setDescription("Copies Tag Library documentation resources.");
 
 		return copy;
 	}
 
-	private TLDDocTask _addTaskTLDDoc(
-		Copy copyTLDDocResourcesTask, ValidateSchemaTask validateTLDTask) {
-
-		Project project = copyTLDDocResourcesTask.getProject();
+	protected TLDDocTask addTaskTLDDoc(
+		Project project, Copy copyTLDDocResourcesTask,
+		ValidateSchemaTask validateTLDTask) {
 
 		final TLDDocTask tlddocTask = GradleUtil.addTask(
 			project, TLDDOC_TASK_NAME, TLDDocTask.class);
 
 		tlddocTask.dependsOn(copyTLDDocResourcesTask, validateTLDTask);
-		tlddocTask.setDescription("Generates tag library documentation.");
+		tlddocTask.setDescription("Generates Tag Library documentation.");
 		tlddocTask.setGroup(JavaBasePlugin.DOCUMENTATION_GROUP);
 
 		PluginContainer pluginContainer = project.getPlugins();
@@ -137,7 +134,7 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(JavaPlugin javaPlugin) {
-					_configureTaskTLDDocForJavaPlugin(tlddocTask);
+					configureTaskTLDDocForJavaPlugin(tlddocTask);
 				}
 
 			});
@@ -145,7 +142,7 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 		return tlddocTask;
 	}
 
-	private ValidateSchemaTask _addTaskValidateTLD(Project project) {
+	protected ValidateSchemaTask addTaskValidateTLD(Project project) {
 		final ValidateSchemaTask validateSchemaTask = GradleUtil.addTask(
 			project, VALIDATE_TLD_TASK_NAME, ValidateSchemaTask.class);
 
@@ -159,7 +156,7 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(JavaPlugin javaPlugin) {
-					_configureTaskValidateSchemaForJavaPlugin(
+					configureTaskValidateSchemaForJavaPlugin(
 						validateSchemaTask);
 				}
 
@@ -168,7 +165,7 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 		return validateSchemaTask;
 	}
 
-	private void _configureTasksTLDDoc(
+	protected void configureTasksTLDDoc(
 		Project project, final Configuration tlddocConfiguration) {
 
 		TaskContainer taskContainer = project.getTasks();
@@ -179,20 +176,20 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(TLDDocTask tlddocTask) {
-					_configureTaskTLDDocClasspath(
+					configureTaskTLDDocClasspath(
 						tlddocTask, tlddocConfiguration);
 				}
 
 			});
 	}
 
-	private void _configureTaskTLDDocClasspath(
+	protected void configureTaskTLDDocClasspath(
 		TLDDocTask tlddocTask, FileCollection fileCollection) {
 
 		tlddocTask.setClasspath(fileCollection);
 	}
 
-	private void _configureTaskTLDDocForJavaPlugin(TLDDocTask tlddocTask) {
+	protected void configureTaskTLDDocForJavaPlugin(TLDDocTask tlddocTask) {
 		final Project project = tlddocTask.getProject();
 
 		tlddocTask.setDestinationDir(
@@ -216,13 +213,13 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 			new Callable<Iterable<File>>() {
 
 				public Iterable<File> call() throws Exception {
-					return _getResourceDirs(project);
+					return getResourceDirs(project);
 				}
 
 			});
 	}
 
-	private void _configureTaskValidateSchemaForJavaPlugin(
+	protected void configureTaskValidateSchemaForJavaPlugin(
 		ValidateSchemaTask validateSchemaTask) {
 
 		final Project project = validateSchemaTask.getProject();
@@ -233,13 +230,13 @@ public class TLDDocBuilderPlugin implements Plugin<Project> {
 			new Callable<Iterable<File>>() {
 
 				public Iterable<File> call() throws Exception {
-					return _getResourceDirs(project);
+					return getResourceDirs(project);
 				}
 
 			});
 	}
 
-	private Iterable<File> _getResourceDirs(Project project) {
+	protected Iterable<File> getResourceDirs(Project project) {
 		SourceSet sourceSet = GradleUtil.getSourceSet(
 			project, SourceSet.MAIN_SOURCE_SET_NAME);
 

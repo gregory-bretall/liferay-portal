@@ -18,7 +18,6 @@ import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.document.library.kernel.service.DLFileVersionLocalService;
 import com.liferay.document.library.kernel.service.DLFolderLocalService;
-import com.liferay.dynamic.data.mapping.expression.DDMExpressionFactory;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeCompanyId;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeDynamicDataMapping;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeKernelPackage;
@@ -26,9 +25,6 @@ import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeLastPubli
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_0.UpgradeSchema;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_1.UpgradeResourcePermission;
 import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_2.UpgradeCheckboxFieldToCheckboxMultipleField;
-import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_2.UpgradeDataProviderInstance;
-import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_3.UpgradeDDMStructureVersion;
-import com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_3.UpgradeDDMTemplate;
 import com.liferay.dynamic.data.mapping.io.DDMFormJSONDeserializer;
 import com.liferay.dynamic.data.mapping.io.DDMFormJSONSerializer;
 import com.liferay.dynamic.data.mapping.io.DDMFormLayoutJSONSerializer;
@@ -89,18 +85,7 @@ public class DDMServiceUpgrade implements UpgradeStepRegistrator {
 			"com.liferay.dynamic.data.mapping.service", "1.0.1", "1.0.2",
 			new UpgradeCheckboxFieldToCheckboxMultipleField(
 				_ddmFormJSONDeserializer, _ddmFormValuesJSONDeserializer,
-				_ddmFormValuesJSONSerializer, _jsonFactory),
-			new com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_2.
-				UpgradeDDMStructure(
-					_ddmExpressionFactory, _ddmFormJSONDeserializer,
-					_ddmFormJSONSerializer),
-			new UpgradeDataProviderInstance(_jsonFactory));
-
-		registry.register(
-			"com.liferay.dynamic.data.mapping.service", "1.0.2", "1.0.3",
-			new com.liferay.dynamic.data.mapping.internal.upgrade.v1_0_3.
-				UpgradeDDMStructure(),
-			new UpgradeDDMStructureVersion(), new UpgradeDDMTemplate());
+				_ddmFormValuesJSONSerializer, _jsonFactory));
 	}
 
 	@Reference
@@ -108,9 +93,6 @@ public class DDMServiceUpgrade implements UpgradeStepRegistrator {
 
 	@Reference
 	private DDM _ddm;
-
-	@Reference
-	private DDMExpressionFactory _ddmExpressionFactory;
 
 	@Reference
 	private DDMFormJSONDeserializer _ddmFormJSONDeserializer;

@@ -2,50 +2,6 @@ AUI.add(
 	'liferay-workflow-tasks',
 	function(A) {
 		var WorkflowTasks = {
-			moveFormDataFromDialog: function(form) {
-				var children = form.get('children');
-
-				var entryActionColumn;
-				var updatedComments;
-				var updatedContent;
-
-				if (form && form.hasChildNodes() && children.size() >= 2) {
-					updatedContent = children.item(0);
-					updatedComments = children.item(1);
-				}
-
-				if (updatedContent) {
-					var contentId = updatedContent.attr('id');
-
-					var originalColumnId = contentId.substring(0, 4);
-
-					if (contentId.search('[a-zA-Z]{4}update(Asignee|AsigneeToMe)') != -1) {
-						originalColumnId += 'updateDueDate';
-					}
-					else if (contentId.search('[a-zA-Z]{4}updateDueDate') != -1) {
-						originalColumnId += 'updateAsignee';
-					}
-
-					if (originalColumnId) {
-						var originalColumnNode = A.one('#' + originalColumnId);
-
-						if (originalColumnNode) {
-							entryActionColumn = originalColumnNode.get('parentNode');
-
-							entryActionColumn.append(updatedContent);
-
-							updatedContent.attr('hidden', true);
-						}
-					}
-				}
-
-				if (updatedComments && entryActionColumn) {
-					entryActionColumn.append(updatedComments);
-
-					updatedComments.attr('hidden', true);
-				}
-			},
-
 			onTaskClick: function(event, randomId) {
 				var instance = this;
 
@@ -78,8 +34,6 @@ AUI.add(
 			},
 
 			showPopup: function(url, content, title, randomId, height) {
-				var instance = this;
-
 				var form = A.Node.create('<form />');
 
 				form.setAttribute('action', url);
@@ -101,17 +55,11 @@ AUI.add(
 					{
 						dialog: {
 							bodyContent: form,
-							destroyOnHide: true,
 							height: height,
-							on: {
-								destroy: function() {
-									instance.moveFormDataFromDialog(form);
-								}
-							},
 							toolbars: {
 								footer: [
 									{
-										cssClass: 'btn-lg btn-primary',
+										cssClass: "btn-lg btn-primary",
 										label: Liferay.Language.get('done'),
 										on: {
 											click: function() {
@@ -120,7 +68,7 @@ AUI.add(
 										}
 									},
 									{
-										cssClass: 'btn-cancel btn-lg btn-link',
+										cssClass: "btn-lg btn-cancel btn-link",
 										label: Liferay.Language.get('cancel'),
 										on: {
 											click: function() {
@@ -149,6 +97,7 @@ AUI.add(
 				);
 			}
 		};
+
 		Liferay.WorkflowTasks = WorkflowTasks;
 	},
 	'',

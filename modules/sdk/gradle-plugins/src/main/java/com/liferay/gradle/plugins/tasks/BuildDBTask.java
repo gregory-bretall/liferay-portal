@@ -57,7 +57,7 @@ public class BuildDBTask extends JavaExec {
 
 	@Override
 	public void exec() {
-		setArgs(_getCompleteArgs());
+		setArgs(getCompleteArgs());
 
 		super.exec();
 	}
@@ -104,7 +104,7 @@ public class BuildDBTask extends JavaExec {
 		_sqlDir = sqlDir;
 	}
 
-	private List<String> _getCompleteArgs() {
+	protected List<String> getCompleteArgs() {
 		List<String> args = new ArrayList<>(getArgs());
 
 		args.add("db.database.name=" + getDatabaseName());

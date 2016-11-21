@@ -29,8 +29,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.MembershipRequestConstants;
 import com.liferay.portal.kernel.model.User;
@@ -84,12 +82,6 @@ public class MemberRequestLocalServiceImpl
 			receiverUserId = receiverUser.getUserId();
 		}
 		catch (NoSuchUserException nsue) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsue, nsue);
-			}
 		}
 
 		Date now = new Date();
@@ -382,14 +374,14 @@ public class MemberRequestLocalServiceImpl
 		if (memberRequest.getReceiverUserId() > 0) {
 			body = StringUtil.read(
 				getClassLoader(),
-				"com/liferay/invitation/invite/members/dependencies" +
-					"/existing_user_body.tmpl");
+				"com/liferay/invitation/invite/members/dependencies/" +
+					"existing_user_body.tmpl");
 		}
 		else {
 			body = StringUtil.read(
 				getClassLoader(),
-				"com/liferay/invitation/invite/members/dependencies" +
-					"/new_user_body.tmpl");
+				"com/liferay/invitation/invite/members/dependencies/" +
+					"new_user_body.tmpl");
 		}
 
 		subject = StringUtil.replace(
@@ -483,8 +475,5 @@ public class MemberRequestLocalServiceImpl
 	@BeanReference(type = WorkflowDefinitionLinkLocalService.class)
 	protected WorkflowDefinitionLinkLocalService
 		workflowDefinitionLinkLocalService;
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		MemberRequestLocalServiceImpl.class);
 
 }

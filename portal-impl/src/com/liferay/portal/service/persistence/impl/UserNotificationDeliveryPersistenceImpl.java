@@ -1016,8 +1016,7 @@ public class UserNotificationDeliveryPersistenceImpl extends BasePersistenceImpl
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((UserNotificationDeliveryModelImpl)userNotificationDelivery,
-			true);
+		clearUniqueFindersCache((UserNotificationDeliveryModelImpl)userNotificationDelivery);
 	}
 
 	@Override
@@ -1031,12 +1030,47 @@ public class UserNotificationDeliveryPersistenceImpl extends BasePersistenceImpl
 				UserNotificationDeliveryImpl.class,
 				userNotificationDelivery.getPrimaryKey());
 
-			clearUniqueFindersCache((UserNotificationDeliveryModelImpl)userNotificationDelivery,
-				true);
+			clearUniqueFindersCache((UserNotificationDeliveryModelImpl)userNotificationDelivery);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		UserNotificationDeliveryModelImpl userNotificationDeliveryModelImpl,
+		boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					userNotificationDeliveryModelImpl.getUserId(),
+					userNotificationDeliveryModelImpl.getPortletId(),
+					userNotificationDeliveryModelImpl.getClassNameId(),
+					userNotificationDeliveryModelImpl.getNotificationType(),
+					userNotificationDeliveryModelImpl.getDeliveryType()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_U_P_C_N_D, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_U_P_C_N_D, args,
+				userNotificationDeliveryModelImpl);
+		}
+		else {
+			if ((userNotificationDeliveryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_U_P_C_N_D.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						userNotificationDeliveryModelImpl.getUserId(),
+						userNotificationDeliveryModelImpl.getPortletId(),
+						userNotificationDeliveryModelImpl.getClassNameId(),
+						userNotificationDeliveryModelImpl.getNotificationType(),
+						userNotificationDeliveryModelImpl.getDeliveryType()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_U_P_C_N_D, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_U_P_C_N_D, args,
+					userNotificationDeliveryModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		UserNotificationDeliveryModelImpl userNotificationDeliveryModelImpl) {
 		Object[] args = new Object[] {
 				userNotificationDeliveryModelImpl.getUserId(),
@@ -1046,31 +1080,12 @@ public class UserNotificationDeliveryPersistenceImpl extends BasePersistenceImpl
 				userNotificationDeliveryModelImpl.getDeliveryType()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_U_P_C_N_D, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_U_P_C_N_D, args,
-			userNotificationDeliveryModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		UserNotificationDeliveryModelImpl userNotificationDeliveryModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					userNotificationDeliveryModelImpl.getUserId(),
-					userNotificationDeliveryModelImpl.getPortletId(),
-					userNotificationDeliveryModelImpl.getClassNameId(),
-					userNotificationDeliveryModelImpl.getNotificationType(),
-					userNotificationDeliveryModelImpl.getDeliveryType()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_P_C_N_D, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_U_P_C_N_D, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_U_P_C_N_D, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_U_P_C_N_D, args);
 
 		if ((userNotificationDeliveryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_U_P_C_N_D.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					userNotificationDeliveryModelImpl.getOriginalUserId(),
 					userNotificationDeliveryModelImpl.getOriginalPortletId(),
 					userNotificationDeliveryModelImpl.getOriginalClassNameId(),
@@ -1249,8 +1264,8 @@ public class UserNotificationDeliveryPersistenceImpl extends BasePersistenceImpl
 			userNotificationDelivery.getPrimaryKey(), userNotificationDelivery,
 			false);
 
-		clearUniqueFindersCache(userNotificationDeliveryModelImpl, false);
-		cacheUniqueFindersCache(userNotificationDeliveryModelImpl);
+		clearUniqueFindersCache(userNotificationDeliveryModelImpl);
+		cacheUniqueFindersCache(userNotificationDeliveryModelImpl, isNew);
 
 		userNotificationDelivery.resetOriginalValues();
 

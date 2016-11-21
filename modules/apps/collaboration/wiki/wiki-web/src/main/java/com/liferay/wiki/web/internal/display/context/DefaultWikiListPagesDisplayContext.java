@@ -22,8 +22,6 @@ import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
@@ -276,12 +274,6 @@ public class DefaultWikiListPagesDisplayContext
 							curPage.getResourcePrimKey(), false);
 					}
 					catch (PortalException pe) {
-
-						// LPS-52675
-
-						if (_log.isDebugEnabled()) {
-							_log.debug(pe, pe);
-						}
 					}
 
 					if ((lastPage != null) &&
@@ -431,8 +423,7 @@ public class DefaultWikiListPagesDisplayContext
 			List<MenuItem> menuItems, WikiPage wikiPage)
 		throws PortalException {
 
-		if (Validator.isNull(wikiPage.getContent()) ||
-			!WikiNodePermissionChecker.contains(
+		if (!WikiNodePermissionChecker.contains(
 				_wikiRequestHelper.getPermissionChecker(), wikiPage.getNodeId(),
 				ActionKeys.ADD_PAGE)) {
 
@@ -807,9 +798,6 @@ public class DefaultWikiListPagesDisplayContext
 
 	private static final UUID _UUID = UUID.fromString(
 		"628C435B-DB39-4E46-91DF-CEA763CF79F5");
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		DefaultWikiListPagesDisplayContext.class);
 
 	private final HttpServletRequest _request;
 	private final WikiNode _wikiNode;

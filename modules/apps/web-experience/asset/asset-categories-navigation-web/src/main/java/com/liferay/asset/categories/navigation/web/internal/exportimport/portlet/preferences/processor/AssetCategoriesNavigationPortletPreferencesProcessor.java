@@ -17,6 +17,7 @@ package com.liferay.asset.categories.navigation.web.internal.exportimport.portle
 import com.liferay.asset.categories.navigation.web.constants.AssetCategoriesNavigationPortletKeys;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
+import com.liferay.asset.kernel.service.persistence.AssetVocabularyUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.portlet.preferences.processor.Capability;
@@ -169,9 +170,8 @@ public class AssetCategoriesNavigationPortletPreferencesProcessor
 		}
 
 		if (className.equals(AssetVocabulary.class.getName())) {
-			AssetVocabulary assetVocabulary =
-				_assetVocabularyLocalService.
-					fetchAssetVocabularyByUuidAndGroupId(uuid, groupId);
+			AssetVocabulary assetVocabulary = AssetVocabularyUtil.fetchByUUID_G(
+				uuid, groupId);
 
 			if (assetVocabulary != null) {
 				return assetVocabulary.getVocabularyId();

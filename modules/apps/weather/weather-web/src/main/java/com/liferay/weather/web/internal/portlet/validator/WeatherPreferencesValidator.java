@@ -60,7 +60,7 @@ public class WeatherPreferencesValidator implements PreferencesValidator {
 			}
 		}
 
-		if (!badZips.isEmpty()) {
+		if (badZips.size() > 0) {
 			throw new ValidatorException("Failed to retrieve zips", badZips);
 		}
 	}

@@ -14,8 +14,6 @@
 
 package com.liferay.exportimport.lifecycle;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleEventListenerRegistryUtil;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleListener;
 import com.liferay.portal.kernel.messaging.Destination;
@@ -36,7 +34,6 @@ import org.osgi.service.component.annotations.Reference;
 	property = {"destination.name=" + DestinationNames.EXPORT_IMPORT_LIFECYCLE_EVENT_ASYNC},
 	service = MessageListener.class
 )
-@ProviderType
 public class AsyncExportImportLifecycleMessageListener
 	extends BaseExportImportLifecycleMessageListener {
 

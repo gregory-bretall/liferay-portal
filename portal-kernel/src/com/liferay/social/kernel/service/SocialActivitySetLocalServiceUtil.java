@@ -174,10 +174,6 @@ public class SocialActivitySetLocalServiceUtil {
 		return getService().getGroupActivitySetsCount(groupId);
 	}
 
-	public static int getOrganizationActivitySetsCount(long organizationId) {
-		return getService().getOrganizationActivitySetsCount(organizationId);
-	}
-
 	public static int getRelationActivitySetsCount(long userId) {
 		return getService().getRelationActivitySetsCount(userId);
 	}

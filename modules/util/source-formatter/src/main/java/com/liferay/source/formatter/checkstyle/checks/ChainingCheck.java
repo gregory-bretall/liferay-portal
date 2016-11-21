@@ -61,12 +61,12 @@ public class ChainingCheck extends AbstractCheck {
 		}
 
 		List<DetailAST> methodCallASTList = DetailASTUtil.getAllChildTokens(
-			detailAST, true, TokenTypes.METHOD_CALL);
+			detailAST, TokenTypes.METHOD_CALL, true);
 
 		for (DetailAST methodCallAST : methodCallASTList) {
 			List<DetailAST> childMethodCallASTList =
 				DetailASTUtil.getAllChildTokens(
-					methodCallAST, true, TokenTypes.METHOD_CALL);
+					methodCallAST, TokenTypes.METHOD_CALL, true);
 
 			// Only check the method that is first in the chain
 

@@ -114,9 +114,16 @@ themes = ListUtil.sort(themes, new ThemeNameComparator(orderByType.equals("asc")
 						colspan="<%= 2 %>"
 					>
 						<h5>
-							<aui:a cssClass="selector-button" data="<%= data %>" href="javascript:;">
-								<%= theme.getName() %>
-							</aui:a>
+							<c:choose>
+								<c:when test="<%= !themeId.equals(theme.getThemeId()) %>">
+									<aui:a cssClass="selector-button" data="<%= data %>" href="javascript:;">
+										<%= theme.getName() %>
+									</aui:a>
+								</c:when>
+								<c:otherwise>
+									<%= theme.getName() %>
+								</c:otherwise>
+							</c:choose>
 						</h5>
 
 						<c:if test="<%= (selPluginPackage != null) && Validator.isNotNull(selPluginPackage.getAuthor()) %>">
@@ -140,7 +147,7 @@ themes = ListUtil.sort(themes, new ThemeNameComparator(orderByType.equals("asc")
 
 					<liferay-ui:search-container-column-text>
 						<liferay-frontend:vertical-card
-							cssClass="selector-button"
+							cssClass='<%= themeId.equals(theme.getThemeId()) ? StringPool.BLANK : "selector-button" %>'
 							data="<%= data %>"
 							imageCSSClass="aspect-ratio-4-to-3"
 							imageUrl='<%= theme.getStaticResourcePath() + theme.getImagesPath() + "/thumbnail.png" %>'
@@ -154,9 +161,16 @@ themes = ListUtil.sort(themes, new ThemeNameComparator(orderByType.equals("asc")
 						name="name"
 						truncate="<%= true %>"
 					>
-						<aui:a cssClass="selector-button" data="<%= data %>" href="javascript:;">
-							<%= theme.getName() %>
-						</aui:a>
+						<c:choose>
+							<c:when test="<%= !themeId.equals(theme.getThemeId()) %>">
+								<aui:a cssClass="selector-button" data="<%= data %>" href="javascript:;">
+									<%= theme.getName() %>
+								</aui:a>
+							</c:when>
+							<c:otherwise>
+								<%= theme.getName() %>
+							</c:otherwise>
+						</c:choose>
 					</liferay-ui:search-container-column-text>
 
 					<%

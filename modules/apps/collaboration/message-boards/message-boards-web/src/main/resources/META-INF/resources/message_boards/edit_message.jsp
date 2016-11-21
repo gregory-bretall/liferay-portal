@@ -40,11 +40,11 @@ if (threadId > 0) {
 		curParentMessage = MBMessageLocalServiceUtil.getMessage(parentMessageId);
 
 		if (Validator.isNull(subject)) {
-			if (curParentMessage.getSubject().startsWith(MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE)) {
+			if (curParentMessage.getSubject().startsWith("RE: ")) {
 				subject = curParentMessage.getSubject();
 			}
 			else {
-				subject = MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE + curParentMessage.getSubject();
+				subject = "RE: " + curParentMessage.getSubject();
 			}
 		}
 	}
@@ -349,8 +349,6 @@ if (portletTitleBasedNavigation) {
 				<c:if test="<%= curParentMessage == null %>">
 
 					<%
-					MBCategory category = MBCategoryLocalServiceUtil.getCategory(categoryId);
-
 					boolean disabled = false;
 					boolean question = threadAsQuestionByDefault;
 
@@ -359,15 +357,15 @@ if (portletTitleBasedNavigation) {
 
 						if (thread.isQuestion() || message.isAnswer()) {
 							question = true;
-
-							if ((category != null) && category.getDisplayStyle().equals("question")) {
-								disabled = true;
-							}
 						}
 					}
-					else if ((category != null) && category.getDisplayStyle().equals("question")) {
-						disabled = true;
-						question = true;
+					else {
+						MBCategory category = MBCategoryLocalServiceUtil.getCategory(categoryId);
+
+						if ((category != null) && category.getDisplayStyle().equals("question")) {
+							disabled = true;
+							question = true;
+						}
 					}
 					%>
 

@@ -20,8 +20,7 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.elasticsearch.index.IndexNameBuilder;
 import com.liferay.portal.search.elasticsearch.internal.connection.ElasticsearchFixture;
-import com.liferay.portal.search.elasticsearch.internal.connection.IndexCreator;
-import com.liferay.portal.search.elasticsearch.internal.connection.IndexName;
+import com.liferay.portal.search.elasticsearch.internal.connection.ElasticsearchFixture.IndexName;
 
 import java.util.Collections;
 
@@ -62,17 +61,14 @@ public class ReplicasManagerImplTest {
 
 		ElasticsearchFixture elasticsearchFixture0 = createNode(0);
 
-		IndexCreator indexCreator0 = new IndexCreator(elasticsearchFixture0);
-
-		indexCreator0.createIndex(getTestIndexName(CompanyConstants.SYSTEM));
+		elasticsearchFixture0.createIndex(
+			getTestIndexName(CompanyConstants.SYSTEM));
 
 		ElasticsearchFixture elasticsearchFixture1 = createNode(1);
 
 		ClusterAssert.assert1PrimaryShardAnd2Nodes(elasticsearchFixture0);
 
-		IndexCreator indexCreator1 = new IndexCreator(elasticsearchFixture1);
-
-		indexCreator1.createIndex(getTestIndexName(companyId));
+		elasticsearchFixture1.createIndex(getTestIndexName(companyId));
 
 		ClusterAssert.assert2PrimaryShardsAnd2Nodes(elasticsearchFixture1);
 
@@ -109,9 +105,7 @@ public class ReplicasManagerImplTest {
 
 			@Override
 			public String getIndexName(long companyId) {
-				IndexName indexName = getTestIndexName(companyId);
-
-				return indexName.getName();
+				return getTestIndexName(companyId);
 			}
 
 		};
@@ -119,8 +113,11 @@ public class ReplicasManagerImplTest {
 		return elasticsearchCluster.new ReplicasClusterContextImpl();
 	}
 
-	protected IndexName getTestIndexName(long companyId) {
-		return new IndexName(testName.getMethodName() + "-" + companyId);
+	protected String getTestIndexName(long companyId) {
+		IndexName indexName = new IndexName(
+			testName.getMethodName() + "-" + companyId);
+
+		return indexName.getName();
 	}
 
 	protected void setUpCompanyLocalService(long companyId) {

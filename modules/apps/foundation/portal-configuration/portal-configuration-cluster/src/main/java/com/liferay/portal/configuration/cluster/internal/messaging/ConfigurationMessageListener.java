@@ -51,34 +51,32 @@ public class ConfigurationMessageListener extends BaseMessageListener {
 
 	@Override
 	protected void doReceive(Message message) throws Exception {
-		if (message.contains(ConfigurationAdmin.SERVICE_FACTORYPID)) {
-			reloadConfiguration(
-				message.getString(ConfigurationAdmin.SERVICE_FACTORYPID),
-				ConfigurationAdmin.SERVICE_FACTORYPID,
-				message.getInteger("configuration.event.type"));
-		}
-
-		if (message.contains(Constants.SERVICE_PID)) {
-			reloadConfiguration(
-				message.getString(Constants.SERVICE_PID), Constants.SERVICE_PID,
-				message.getInteger("configuration.event.type"));
-		}
-	}
-
-	protected void reloadConfiguration(String pid, String filter, int type)
-		throws Exception {
-
 		StringBundler sb = new StringBundler(5);
 
 		sb.append("(");
-		sb.append(filter);
-		sb.append("=");
-		sb.append(pid);
+
+		String pid = null;
+
+		if (message.contains(ConfigurationAdmin.SERVICE_FACTORYPID)) {
+			pid = message.getString(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+			sb.append(ConfigurationAdmin.SERVICE_FACTORYPID);
+			sb.append("=");
+			sb.append(pid);
+		}
+		else {
+			pid = message.getString(Constants.SERVICE_PID);
+
+			sb.append(Constants.SERVICE_PID);
+			sb.append("=");
+			sb.append(pid);
+		}
+
 		sb.append(")");
 
 		_reloadablePersistenceManager.reload(pid);
 
-		Dictionary<String, ?> dictionary = _reloadablePersistenceManager.load(
+		Dictionary<String, ?> properties = _reloadablePersistenceManager.load(
 			pid);
 
 		try {
@@ -91,17 +89,14 @@ public class ConfigurationMessageListener extends BaseMessageListener {
 				return;
 			}
 
+			int type = message.getInteger("configuration.event.type");
+
 			for (Configuration configuration : configurations) {
 				if (type == ConfigurationEvent.CM_DELETED) {
 					configuration.delete();
 				}
 				else {
-					if (dictionary == null) {
-						configuration.update();
-					}
-					else {
-						configuration.update(dictionary);
-					}
+					configuration.update(properties);
 				}
 			}
 		}

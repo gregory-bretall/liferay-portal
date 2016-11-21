@@ -723,15 +723,11 @@ public class FolderPersistenceImpl extends BasePersistenceImpl<Folder>
 						list);
 				}
 				else {
-					if (list.size() > 1) {
-						Collections.sort(list, Collections.reverseOrder());
-
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								"FolderPersistenceImpl.fetchByA_F(long, String, boolean) with parameters (" +
-								StringUtil.merge(finderArgs) +
-								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
-						}
+					if ((list.size() > 1) && _log.isWarnEnabled()) {
+						_log.warn(
+							"FolderPersistenceImpl.fetchByA_F(long, String, boolean) with parameters (" +
+							StringUtil.merge(finderArgs) +
+							") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
 					}
 
 					Folder folder = list.get(0);
@@ -925,7 +921,7 @@ public class FolderPersistenceImpl extends BasePersistenceImpl<Folder>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((FolderModelImpl)folder, true);
+		clearUniqueFindersCache((FolderModelImpl)folder);
 	}
 
 	@Override
@@ -937,36 +933,50 @@ public class FolderPersistenceImpl extends BasePersistenceImpl<Folder>
 			entityCache.removeResult(FolderModelImpl.ENTITY_CACHE_ENABLED,
 				FolderImpl.class, folder.getPrimaryKey());
 
-			clearUniqueFindersCache((FolderModelImpl)folder, true);
+			clearUniqueFindersCache((FolderModelImpl)folder);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(FolderModelImpl folderModelImpl) {
-		Object[] args = new Object[] {
-				folderModelImpl.getAccountId(), folderModelImpl.getFullName()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_A_F, args, Long.valueOf(1),
-			false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_A_F, args, folderModelImpl,
-			false);
-	}
-
-	protected void clearUniqueFindersCache(FolderModelImpl folderModelImpl,
-		boolean clearCurrent) {
-		if (clearCurrent) {
+	protected void cacheUniqueFindersCache(FolderModelImpl folderModelImpl,
+		boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 					folderModelImpl.getAccountId(),
 					folderModelImpl.getFullName()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_A_F, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_A_F, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_A_F, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_A_F, args,
+				folderModelImpl);
 		}
+		else {
+			if ((folderModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_A_F.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						folderModelImpl.getAccountId(),
+						folderModelImpl.getFullName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_A_F, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_A_F, args,
+					folderModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(FolderModelImpl folderModelImpl) {
+		Object[] args = new Object[] {
+				folderModelImpl.getAccountId(), folderModelImpl.getFullName()
+			};
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_A_F, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_A_F, args);
 
 		if ((folderModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_A_F.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					folderModelImpl.getOriginalAccountId(),
 					folderModelImpl.getOriginalFullName()
 				};
@@ -1155,8 +1165,8 @@ public class FolderPersistenceImpl extends BasePersistenceImpl<Folder>
 		entityCache.putResult(FolderModelImpl.ENTITY_CACHE_ENABLED,
 			FolderImpl.class, folder.getPrimaryKey(), folder, false);
 
-		clearUniqueFindersCache(folderModelImpl, false);
-		cacheUniqueFindersCache(folderModelImpl);
+		clearUniqueFindersCache(folderModelImpl);
+		cacheUniqueFindersCache(folderModelImpl, isNew);
 
 		folder.resetOriginalValues();
 

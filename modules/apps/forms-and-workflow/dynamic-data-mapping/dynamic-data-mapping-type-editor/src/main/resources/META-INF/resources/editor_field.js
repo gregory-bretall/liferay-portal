@@ -61,12 +61,6 @@ AUI.add(
 						return value;
 					},
 
-					hasFocus: function() {
-						var instance = this;
-
-						return EditorField.superclass.hasFocus.apply(instance, arguments) || instance._hasAlloyEditorFocus();
-					},
-
 					render: function() {
 						var instance = this;
 
@@ -106,8 +100,6 @@ AUI.add(
 									textMode: false
 								}
 							).render();
-
-							instance._alloyEditor.getNativeEditor().on('actionPerformed', A.bind(instance._onActionPerformed, instance));
 						}
 
 						return instance;
@@ -123,28 +115,6 @@ AUI.add(
 						}
 					},
 
-					_findAncestor: function(node, ancestorClass) {
-						var child = node;
-
-						while (child && !child.classList.contains(ancestorClass)) {
-							child = child.parentElement;
-						}
-
-						return child;
-					},
-
-					_hasAlloyEditorFocus: function() {
-						var instance = this;
-
-						return !!instance._findAncestor(document.activeElement, 'ae-ui');
-					},
-
-					_onActionPerformed: function() {
-						var instance = this;
-
-						instance._onChangeEditor(instance.getValue());
-					},
-
 					_onChangeEditor: function(value) {
 						var instance = this;
 
@@ -153,7 +123,13 @@ AUI.add(
 						if (inputNode && !Util.compare(value, inputNode.val())) {
 							inputNode.val(value);
 
-							instance.set('value', value);
+							instance.fire(
+								'valueChanged',
+								{
+									field: instance,
+									value: value
+								}
+							);
 						}
 					}
 				}

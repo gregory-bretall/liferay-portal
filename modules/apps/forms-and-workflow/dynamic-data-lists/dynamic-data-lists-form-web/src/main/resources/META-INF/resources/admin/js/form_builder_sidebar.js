@@ -26,10 +26,6 @@ AUI.add(
 						value: ''
 					},
 
-					open: {
-						value: false
-					},
-
 					skin: {
 						value: 'sidebar-default'
 					},
@@ -188,14 +184,12 @@ AUI.add(
 
 								instance._isOpen = true;
 								instance._isClose = false;
-								instance.set('open', true);
 							}
 							else {
 								instance.fire('close');
 
 								instance._isClose = true;
 								instance._isOpen = false;
-								instance.set('open', false);
 							}
 						}
 					},

@@ -296,8 +296,6 @@
 			<var name="portlet" value="Web Content" />
 		</execute>
 
-		<execute macro="WebContentNavigator#gotoManageTemplates" />
-
 		<execute macro="WebContentTemplates#addCP">
 			<var name="templateFieldNames" value="Text" />
 			<var name="templateLanguage" value="ftl" />
@@ -372,8 +370,6 @@
 		<execute macro="ProductMenu#gotoSitesContent">
 			<var name="portlet" value="Web Content" />
 		</execute>
-
-		<execute macro="WebContentNavigator#gotoManageTemplates" />
 
 		<execute macro="WebContentTemplates#addCP">
 			<var name="templateFieldNames" value="Content,Content,Content" />
@@ -573,7 +569,7 @@
 	</command>
 
 	<command name="SelectWebContent" priority="5">
-		<property name="portal.acceptance" value="quarantine" />
+		<property name="portal.acceptance" value="true" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -835,12 +831,12 @@
 		<execute macro="Role#viewPermissionPG">
 			<var name="permissionDefinitionKey" value="CONTENT_PERMISSIONS_VIEW_CHECKBOX" />
 			<var name="permissionFlagged" value="true" />
-			<var name="roleTitle" value="guest" />
+			<var name="roleName" value="guest" />
 		</execute>
 
 		<execute macro="Role#removePermissionPG">
 			<var name="permissionDefinitionKey" value="CONTENT_PERMISSIONS_VIEW_CHECKBOX" />
-			<var name="roleTitle" value="guest" />
+			<var name="roleName" value="guest" />
 		</execute>
 
 		<execute macro="User#logoutPG" />
@@ -866,7 +862,7 @@
 
 		<execute macro="Role#definePermissionPG">
 			<var name="permissionDefinitionKey" value="CONTENT_PERMISSIONS_VIEW_CHECKBOX" />
-			<var name="roleTitle" value="guest" />
+			<var name="roleName" value="guest" />
 		</execute>
 
 		<execute macro="Navigator#openURL" />
@@ -886,12 +882,12 @@
 		<execute macro="Role#viewPermissionPG">
 			<var name="permissionDefinitionKey" value="CONTENT_PERMISSIONS_VIEW_CHECKBOX" />
 			<var name="permissionFlagged" value="true" />
-			<var name="roleTitle" value="guest" />
+			<var name="roleName" value="guest" />
 		</execute>
 
 		<execute macro="Role#removePermissionPG">
 			<var name="permissionDefinitionKey" value="CONTENT_PERMISSIONS_VIEW_CHECKBOX" />
-			<var name="roleTitle" value="guest" />
+			<var name="roleName" value="guest" />
 		</execute>
 
 		<execute macro="User#logoutPG" />

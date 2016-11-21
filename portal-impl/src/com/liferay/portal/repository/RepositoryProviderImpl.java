@@ -30,8 +30,6 @@ import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.exception.NoSuchRepositoryException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.RepositoryEntry;
 import com.liferay.portal.kernel.repository.InvalidRepositoryIdException;
@@ -376,12 +374,6 @@ public class RepositoryProviderImpl implements RepositoryProvider {
 						repository.getDlFolderId(), ActionKeys.VIEW);
 				}
 				catch (NoSuchFolderException nsfe) {
-
-					// LPS-52675
-
-					if (_log.isDebugEnabled()) {
-						_log.debug(nsfe, nsfe);
-					}
 				}
 
 				return;
@@ -517,8 +509,5 @@ public class RepositoryProviderImpl implements RepositoryProvider {
 
 	@BeanReference(type = RepositoryLocalService.class)
 	protected RepositoryLocalService repositoryLocalService;
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		RepositoryProviderImpl.class);
 
 }

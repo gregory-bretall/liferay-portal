@@ -1,4 +1,4 @@
-create table IM_MemberRequest (
+create table SO_MemberRequest (
 	memberRequestId LONG not null primary key,
 	groupId LONG,
 	companyId LONG,

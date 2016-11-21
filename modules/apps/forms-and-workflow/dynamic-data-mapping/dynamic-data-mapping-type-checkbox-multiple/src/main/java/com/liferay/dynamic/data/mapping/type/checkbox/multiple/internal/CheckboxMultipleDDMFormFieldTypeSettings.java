@@ -48,7 +48,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormFieldValidation;
 			}
 		),
 		@DDMFormLayoutPage(
-			title = "properties",
+			title = "advanced",
 			value = {
 				@DDMFormLayoutRow(
 					{

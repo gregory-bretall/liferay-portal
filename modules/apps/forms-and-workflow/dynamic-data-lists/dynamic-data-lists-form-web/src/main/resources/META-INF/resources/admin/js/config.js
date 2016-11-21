@@ -24,7 +24,6 @@
 								'liferay-ddl-form-builder-layout-deserializer',
 								'liferay-ddl-form-builder-layout-visitor',
 								'liferay-ddl-form-builder-pages-manager',
-								'liferay-ddl-form-builder-rule',
 								'liferay-ddl-form-builder-rule-builder',
 								'liferay-ddl-form-builder-util',
 								'liferay-ddm-form-field-types',
@@ -75,7 +74,7 @@
 						},
 						'liferay-ddl-form-builder-field-settings-sidebar': {
 							path: 'form_builder_field_settings_sidebar.js',
-							requires: ['aui-tabview', 'liferay-ddl-form-builder-sidebar', 'liferay-ddm-form-renderer-types']
+							requires: ['aui-tabview', 'liferay-ddl-form-builder-sidebar']
 						},
 						'liferay-ddl-form-builder-field-support': {
 							path: 'form_builder_field_support.js',
@@ -131,22 +130,12 @@
 								'liferay-ddm-form-renderer-wizard'
 							]
 						},
-						'liferay-ddl-form-builder-rule': {
-							path: 'form_builder_rule.js',
-							requires: ['liferay-ddl-form-builder-rule-template', 'liferay-ddm-form-renderer-field']
-						},
 						'liferay-ddl-form-builder-rule-builder': {
 							path: 'form_builder_rule_builder.js',
-							requires: ['liferay-ddl-form-builder-rule-builder-template']
+							requires: ['aui-popover', 'liferay-ddl-form-builder-rule-builder-template']
 						},
 						'liferay-ddl-form-builder-rule-builder-template': {
 							path: '../templates/rule_builder.soy.js',
-							requires: [
-								'soyutils'
-							]
-						},
-						'liferay-ddl-form-builder-rule-template': {
-							path: '../templates/rule.soy.js',
 							requires: [
 								'soyutils'
 							]

@@ -58,7 +58,8 @@ public class KaleoInstanceLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.fetchUser(serviceContext.getUserId());
+		User user = userPersistence.fetchByPrimaryKey(
+			serviceContext.getUserId());
 
 		if (user == null) {
 			user = userLocalService.getDefaultUser(

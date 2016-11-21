@@ -69,7 +69,7 @@ public class BuildCSSTask extends JavaExec {
 
 	@Override
 	public void exec() {
-		setArgs(_getCompleteArgs());
+		setArgs(getCompleteArgs());
 
 		super.exec();
 	}
@@ -274,21 +274,7 @@ public class BuildCSSTask extends JavaExec {
 		_sassCompilerClassName = sassCompilerClassName;
 	}
 
-	private String _addTrailingSlash(String path) {
-		if (Validator.isNull(path)) {
-			return path;
-		}
-
-		path = path.replace('\\', '/');
-
-		if (path.charAt(path.length() - 1) != '/') {
-			path += '/';
-		}
-
-		return path;
-	}
-
-	private List<String> _getCompleteArgs() {
+	protected List<String> getCompleteArgs() {
 		List<String> args = new ArrayList<>(getArgs());
 
 		List<String> dirNames = getDirNames();
@@ -331,6 +317,20 @@ public class BuildCSSTask extends JavaExec {
 		}
 
 		return args;
+	}
+
+	private String _addTrailingSlash(String path) {
+		if (Validator.isNull(path)) {
+			return path;
+		}
+
+		path = path.replace('\\', '/');
+
+		if (path.charAt(path.length() - 1) != '/') {
+			path += '/';
+		}
+
+		return path;
 	}
 
 	private String _removeLeadingSlash(String path) {

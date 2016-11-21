@@ -19,7 +19,6 @@ import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.test.randomizerbumpers.RandomizerBumper;
-import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 
@@ -47,7 +46,7 @@ public class TikaSafeRandomizerBumper implements RandomizerBumper<byte[]> {
 		try {
 			ParseContext parserContext = new ParseContext();
 
-			Parser parser = new AutoDetectParser(_tikaConfig);
+			Parser parser = new AutoDetectParser(new TikaConfig());
 
 			parserContext.set(Parser.class, parser);
 
@@ -103,21 +102,6 @@ public class TikaSafeRandomizerBumper implements RandomizerBumper<byte[]> {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		TikaSafeRandomizerBumper.class);
-
-	private static final TikaConfig _tikaConfig;
-
-	static {
-		String tikaConfig = System.getProperty("tika.config");
-
-		ClassLoader classLoader = PortalClassLoaderUtil.getClassLoader();
-
-		try {
-			_tikaConfig = new TikaConfig(classLoader.getResource(tikaConfig));
-		}
-		catch (Exception e) {
-			throw new ExceptionInInitializerError(e);
-		}
-	}
 
 	private final String _contentType;
 

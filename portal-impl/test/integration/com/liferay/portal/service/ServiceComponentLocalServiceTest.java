@@ -19,9 +19,7 @@ import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.db.DBProcessContext;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
-import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.model.ServiceComponent;
-import com.liferay.portal.kernel.service.ReleaseLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceComponentLocalServiceUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
@@ -65,9 +63,6 @@ public class ServiceComponentLocalServiceTest {
 
 		_serviceComponent1 = addServiceComponent(_SERVICE_COMPONENT_1, 1);
 		_serviceComponent2 = addServiceComponent(_SERVICE_COMPONENT_2, 1);
-
-		_release = ReleaseLocalServiceUtil.addRelease(
-			"ServiceComponentLocalServiceTest", "0.0.0");
 	}
 
 	@Test
@@ -126,8 +121,6 @@ public class ServiceComponentLocalServiceTest {
 
 		Map<String, Object> properties = new HashMap<>();
 
-		properties.put(
-			"upgrade.bundle.symbolic.name", "ServiceComponentLocalServiceTest");
 		properties.put("upgrade.from.schema.version", "0.0.0");
 		properties.put("upgrade.initial.database.creation", true);
 
@@ -135,7 +128,7 @@ public class ServiceComponentLocalServiceTest {
 
 		ServiceRegistration<UpgradeStep> upgradeStepServiceRegistration =
 			registry.registerService(
-				UpgradeStep.class, new TestUpgradeStep(db), properties);
+				UpgradeStep.class, new SimpleUpgradeStep(db), properties);
 
 		String tableName = _TEST_TABLE;
 
@@ -169,8 +162,6 @@ public class ServiceComponentLocalServiceTest {
 
 		Map<String, Object> properties = new HashMap<>();
 
-		properties.put(
-			"upgrade.bundle.symbolic.name", "ServiceComponentLocalServiceTest");
 		properties.put("upgrade.from.schema.version", "0.0.0");
 		properties.put("upgrade.initial.database.creation", false);
 
@@ -178,7 +169,7 @@ public class ServiceComponentLocalServiceTest {
 
 		ServiceRegistration<UpgradeStep> upgradeStepServiceRegistration =
 			registry.registerService(
-				UpgradeStep.class, new TestUpgradeStep(db), properties);
+				UpgradeStep.class, new SimpleUpgradeStep(db), properties);
 
 		try {
 			ServiceComponentLocalServiceUtil.verifyDB();
@@ -208,8 +199,6 @@ public class ServiceComponentLocalServiceTest {
 
 		Map<String, Object> properties = new HashMap<>();
 
-		properties.put(
-			"upgrade.bundle.symbolic.name", "ServiceComponentLocalServiceTest");
 		properties.put("upgrade.from.schema.version", "0.0.1");
 		properties.put("upgrade.initial.database.creation", true);
 
@@ -217,7 +206,7 @@ public class ServiceComponentLocalServiceTest {
 
 		ServiceRegistration<UpgradeStep> upgradeStepServiceRegistration =
 			registry.registerService(
-				UpgradeStep.class, new TestUpgradeStep(db), properties);
+				UpgradeStep.class, new SimpleUpgradeStep(db), properties);
 
 		try {
 			ServiceComponentLocalServiceUtil.verifyDB();
@@ -239,27 +228,25 @@ public class ServiceComponentLocalServiceTest {
 		}
 	}
 
-	public class TestUpgradeStep implements UpgradeStep {
+	public class SimpleUpgradeStep implements UpgradeStep {
 
-		public TestUpgradeStep(DB db) {
+		public SimpleUpgradeStep(DB db) {
 			_db = db;
 		}
 
 		@Override
 		public String toString() {
-			return "Test Upgrade Step";
+			return "Testing Verify DB";
 		}
 
 		@Override
-		public void upgrade(DBProcessContext dbProcessContext)
-			throws UpgradeException {
-
+		public void upgrade(DBProcessContext dbProcessContext) {
 			try {
 				_db.runSQL(
 					"create table " + _TEST_TABLE + " (name VARCHAR(20))");
 			}
 			catch (Exception e) {
-				throw new UpgradeException(e);
+				new UpgradeException(e);
 			}
 		}
 
@@ -314,9 +301,6 @@ public class ServiceComponentLocalServiceTest {
 	private static final String _SERVICE_COMPONENT_2 = "SERVICE_COMPONENT_2";
 
 	private static final String _TEST_TABLE = "TestVerifyDB";
-
-	@DeleteAfterTestRun
-	private Release _release;
 
 	@DeleteAfterTestRun
 	private ServiceComponent _serviceComponent1;

@@ -17,7 +17,6 @@ package com.liferay.directory.web.internal.asset;
 import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.model.BaseAssetRendererFactory;
-import com.liferay.directory.web.internal.constants.DirectoryPortletKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -26,8 +25,6 @@ import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.permission.UserPermissionUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
-
-import javax.servlet.ServletContext;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -63,7 +60,6 @@ public class UserAssetRendererFactory extends BaseAssetRendererFactory<User> {
 		UserAssetRenderer userAssetRenderer = new UserAssetRenderer(user);
 
 		userAssetRenderer.setAssetRendererType(type);
-		userAssetRenderer.setServletContext(_servletContext);
 
 		return userAssetRenderer;
 	}
@@ -91,11 +87,6 @@ public class UserAssetRendererFactory extends BaseAssetRendererFactory<User> {
 	}
 
 	@Override
-	public String getPortletId() {
-		return DirectoryPortletKeys.SITE_MEMBERS_DIRECTORY;
-	}
-
-	@Override
 	public String getType() {
 		return TYPE;
 	}
@@ -109,14 +100,6 @@ public class UserAssetRendererFactory extends BaseAssetRendererFactory<User> {
 			permissionChecker, classPK, actionId);
 	}
 
-	@Reference(
-		target = "(osgi.web.symbolicname=com.liferay.directory.web)",
-		unbind = "-"
-	)
-	public void setServletContext(ServletContext servletContext) {
-		_servletContext = servletContext;
-	}
-
 	@Reference(unbind = "-")
 	protected void setGroupLocalService(GroupLocalService groupLocalService) {
 		_groupLocalService = groupLocalService;
@@ -128,7 +111,6 @@ public class UserAssetRendererFactory extends BaseAssetRendererFactory<User> {
 	}
 
 	private GroupLocalService _groupLocalService;
-	private ServletContext _servletContext;
 	private UserLocalService _userLocalService;
 
 }

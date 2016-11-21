@@ -2876,7 +2876,7 @@ public class MDRRuleGroupPersistenceImpl extends BasePersistenceImpl<MDRRuleGrou
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((MDRRuleGroupModelImpl)mdrRuleGroup, true);
+		clearUniqueFindersCache((MDRRuleGroupModelImpl)mdrRuleGroup);
 	}
 
 	@Override
@@ -2888,38 +2888,52 @@ public class MDRRuleGroupPersistenceImpl extends BasePersistenceImpl<MDRRuleGrou
 			entityCache.removeResult(MDRRuleGroupModelImpl.ENTITY_CACHE_ENABLED,
 				MDRRuleGroupImpl.class, mdrRuleGroup.getPrimaryKey());
 
-			clearUniqueFindersCache((MDRRuleGroupModelImpl)mdrRuleGroup, true);
+			clearUniqueFindersCache((MDRRuleGroupModelImpl)mdrRuleGroup);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		MDRRuleGroupModelImpl mdrRuleGroupModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					mdrRuleGroupModelImpl.getUuid(),
+					mdrRuleGroupModelImpl.getGroupId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+				mdrRuleGroupModelImpl);
+		}
+		else {
+			if ((mdrRuleGroupModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						mdrRuleGroupModelImpl.getUuid(),
+						mdrRuleGroupModelImpl.getGroupId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+					mdrRuleGroupModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		MDRRuleGroupModelImpl mdrRuleGroupModelImpl) {
 		Object[] args = new Object[] {
 				mdrRuleGroupModelImpl.getUuid(),
 				mdrRuleGroupModelImpl.getGroupId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-			mdrRuleGroupModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		MDRRuleGroupModelImpl mdrRuleGroupModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					mdrRuleGroupModelImpl.getUuid(),
-					mdrRuleGroupModelImpl.getGroupId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 
 		if ((mdrRuleGroupModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					mdrRuleGroupModelImpl.getOriginalUuid(),
 					mdrRuleGroupModelImpl.getOriginalGroupId()
 				};
@@ -3160,8 +3174,8 @@ public class MDRRuleGroupPersistenceImpl extends BasePersistenceImpl<MDRRuleGrou
 			MDRRuleGroupImpl.class, mdrRuleGroup.getPrimaryKey(), mdrRuleGroup,
 			false);
 
-		clearUniqueFindersCache(mdrRuleGroupModelImpl, false);
-		cacheUniqueFindersCache(mdrRuleGroupModelImpl);
+		clearUniqueFindersCache(mdrRuleGroupModelImpl);
+		cacheUniqueFindersCache(mdrRuleGroupModelImpl, isNew);
 
 		mdrRuleGroup.resetOriginalValues();
 

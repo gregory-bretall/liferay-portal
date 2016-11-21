@@ -417,7 +417,7 @@ public class DLFileShortcutLocalServiceImpl
 	}
 
 	@Override
-	public DLFileShortcut updateStatus(
+	public void updateStatus(
 			long userId, long fileShortcutId, int status,
 			ServiceContext serviceContext)
 		throws PortalException {
@@ -432,7 +432,7 @@ public class DLFileShortcutLocalServiceImpl
 		fileShortcut.setStatusByUserName(user.getFullName());
 		fileShortcut.setStatusDate(serviceContext.getModifiedDate(null));
 
-		return dlFileShortcutPersistence.update(fileShortcut);
+		dlFileShortcutPersistence.update(fileShortcut);
 	}
 
 	protected void copyAssetTags(

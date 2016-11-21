@@ -46,13 +46,14 @@ public class CustomServletContextHelper
 	extends ServletContextHelper implements ServletContextListener {
 
 	public CustomServletContextHelper(
-		Bundle bundle,
+		Bundle bundle, Boolean wabShapedBundle,
 		List<WebResourceCollectionDefinition>
 			webResourceCollectionDefinitions) {
 
 		super(bundle);
 
 		_bundle = bundle;
+		_wabShapedBundle = wabShapedBundle;
 		_webResourceCollectionDefinitions = webResourceCollectionDefinitions;
 
 		Class<?> clazz = getClass();
@@ -90,7 +91,7 @@ public class CustomServletContextHelper
 
 		URL url = BundleUtil.getResourceInBundleOrFragments(_bundle, name);
 
-		if (url == null) {
+		if ((url == null) && !_wabShapedBundle) {
 			return BundleUtil.getResourceInBundleOrFragments(
 				_bundle, "/META-INF/resources" + name);
 		}
@@ -257,6 +258,7 @@ public class CustomServletContextHelper
 	private final Bundle _bundle;
 	private ServletContext _servletContext;
 	private final String _string;
+	private final boolean _wabShapedBundle;
 	private final List<WebResourceCollectionDefinition>
 		_webResourceCollectionDefinitions;
 

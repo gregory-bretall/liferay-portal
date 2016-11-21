@@ -16,8 +16,6 @@ package com.liferay.users.admin.web.portlet.configuration.icon;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.configuration.icon.BaseJSPPortletConfigurationIcon;
 import com.liferay.portal.kernel.portlet.configuration.icon.PortletConfigurationIcon;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -95,12 +93,6 @@ public class ExportUsersPortletConfigurationIcon
 				ActionKeys.EXPORT_USER);
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
 		}
 
 		return false;
@@ -114,8 +106,5 @@ public class ExportUsersPortletConfigurationIcon
 	public void setServletContext(ServletContext servletContext) {
 		super.setServletContext(servletContext);
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ExportUsersPortletConfigurationIcon.class);
 
 }

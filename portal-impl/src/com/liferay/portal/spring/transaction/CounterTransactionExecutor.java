@@ -14,6 +14,9 @@
 
 package com.liferay.portal.spring.transaction;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.transaction.PlatformTransactionManager;
@@ -30,8 +33,21 @@ public class CounterTransactionExecutor
 		TransactionAttributeAdapter transactionAttributeAdapter,
 		TransactionStatusAdapter transactionStatusAdapter) {
 
-		platformTransactionManager.commit(
-			transactionStatusAdapter.getTransactionStatus());
+		try {
+			platformTransactionManager.commit(
+				transactionStatusAdapter.getTransactionStatus());
+		}
+		catch (RuntimeException re) {
+			_log.error(
+				"Application exception overridden by commit exception", re);
+
+			throw re;
+		}
+		catch (Error e) {
+			_log.error("Application exception overridden by commit error", e);
+
+			throw e;
+		}
 	}
 
 	@Override
@@ -75,22 +91,28 @@ public class CounterTransactionExecutor
 				platformTransactionManager.rollback(
 					transactionStatusAdapter.getTransactionStatus());
 			}
-			catch (Throwable t) {
-				t.addSuppressed(throwable);
+			catch (RuntimeException re) {
+				re.addSuppressed(throwable);
 
-				throw t;
+				_log.error(
+					"Application exception overridden by rollback exception",
+					re);
+
+				throw re;
+			}
+			catch (Error e) {
+				e.addSuppressed(throwable);
+
+				_log.error(
+					"Application exception overridden by rollback error", e);
+
+				throw e;
 			}
 		}
 		else {
-			try {
-				platformTransactionManager.commit(
-					transactionStatusAdapter.getTransactionStatus());
-			}
-			catch (Throwable t) {
-				t.addSuppressed(throwable);
-
-				throw t;
-			}
+			commit(
+				platformTransactionManager, transactionAttributeAdapter,
+				transactionStatusAdapter);
 		}
 
 		throw throwable;
@@ -102,9 +124,11 @@ public class CounterTransactionExecutor
 		TransactionAttributeAdapter transactionAttributeAdapter) {
 
 		return new TransactionStatusAdapter(
-			platformTransactionManager,
 			platformTransactionManager.getTransaction(
 				transactionAttributeAdapter));
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		CounterTransactionExecutor.class);
 
 }

@@ -14,8 +14,6 @@
 
 package com.liferay.portlet.exportimport.staging;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 
@@ -25,7 +23,6 @@ import java.util.Map;
 /**
  * @author Sergio Sánchez
  */
-@ProviderType
 public class ProxiedLayoutsThreadLocal {
 
 	public static void clearProxiedLayouts() {

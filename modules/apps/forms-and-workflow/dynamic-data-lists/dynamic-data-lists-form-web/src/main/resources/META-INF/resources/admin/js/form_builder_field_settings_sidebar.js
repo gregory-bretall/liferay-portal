@@ -7,8 +7,6 @@ AUI.add(
 
 		var TPL_NAVBAR_WRAPER = '<nav class="navbar navbar-default navbar-no-collapse"></nav>';
 
-		var FieldTypes = Liferay.DDM.Renderer.FieldTypes;
-
 		var FormBuilderFieldsSettingsSidebar = A.Component.create(
 			{
 				ATTRS: {
@@ -48,11 +46,14 @@ AUI.add(
 					initializer: function() {
 						var instance = this;
 
-						instance._eventHandlers = [
-							A.getDoc().on('click', A.bind(instance._onClickDocument, instance)),
+						var eventHandlers;
+
+						eventHandlers = [
 							instance.after('open', instance._afterSidebarOpen),
 							instance.after('open:start', instance._afterOpenStart)
 						];
+
+						instance._eventHandlers = eventHandlers;
 					},
 
 					destructor: function() {
@@ -82,7 +83,9 @@ AUI.add(
 
 						var settingsForm = instance.settingsForm;
 
-						return field.getSettings(settingsForm);
+						var settings = field.getSettings(settingsForm);
+
+						return settings;
 					},
 
 					getPreviousContext: function() {
@@ -99,16 +102,6 @@ AUI.add(
 						var currentFieldSettings = instance.getFieldSettings();
 
 						return JSON.stringify(previousContext) !== JSON.stringify(currentFieldSettings.context);
-					},
-
-					hasFocus: function(node) {
-						var instance = this;
-
-						var activeElement = A.one(node || document.activeElement);
-
-						var settingsForm = instance.settingsForm;
-
-						return (settingsForm && settingsForm.hasFocus()) || instance._containsNode(activeElement) || instance._isFieldNode(activeElement);
 					},
 
 					_afterOpenStart: function() {
@@ -134,29 +127,18 @@ AUI.add(
 
 						var toolbar = instance.get('toolbar');
 
-						var fieldType = FieldTypes.get(field.get('type'));
+						if (instance.settingsForm) {
+							instance._hideSettingsForm();
+						}
 
-						instance.set('description', fieldType.get('label'));
-						instance.set('title', field.get('context.label'));
+						instance._showLoading();
+
+						instance.set('description', field.get('type'));
+						instance.set('title', field.get('context').label);
 
 						instance._loadFieldSettingsForm(field);
 
 						toolbar.set('field', field);
-					},
-
-					_bindSettingsFormEvents: function() {
-						var instance = this;
-
-						var settingsForm = instance.settingsForm;
-
-						var labelField = settingsForm.getField('label');
-
-						labelField.after(
-							'valueChange',
-							function() {
-								instance.set('title', labelField.getValue());
-							}
-						);
 					},
 
 					_configureSideBar: function() {
@@ -175,17 +157,18 @@ AUI.add(
 							}
 						);
 
-						instance._bindSettingsFormEvents();
+						var evaluator = settingsForm.get('evaluator');
+
+						evaluator.after(
+							'evaluationStarted',
+							function() {
+								instance.set('title', settingsForm.getField('label').getValue());
+							}
+						);
 
 						settingsForm.render();
 
 						settingsForm.getFirstPageField().focus();
-					},
-
-					_containsNode: function(node) {
-						var instance = this;
-
-						return instance.get('boundingBox').contains(node);
 					},
 
 					_createToolbar: function() {
@@ -200,10 +183,12 @@ AUI.add(
 						return toolbar;
 					},
 
-					_isFieldNode: function(node) {
+					_hideSettingsForm: function() {
 						var instance = this;
 
-						return node.ancestorsByClassName('.ddm-form-field-container').size();
+						var container = instance.settingsForm.get('container');
+
+						container.addClass('invisible');
 					},
 
 					_loadFieldSettingsForm: function(field) {
@@ -217,6 +202,7 @@ AUI.add(
 
 								settingsForm.evaluate(
 									function() {
+										instance._showSettingsForm();
 										instance._removeLoading();
 									}
 								);
@@ -236,20 +222,12 @@ AUI.add(
 						);
 					},
 
-					_onClickDocument: function(event) {
-						var instance = this;
-
-						if (instance.get('open') && !instance.hasFocus(event.target)) {
-							instance.close();
-						}
-					},
-
 					_removeLoading: function() {
 						var instance = this;
 
 						var boundingBox = instance.get('boundingBox');
 
-						boundingBox.removeClass('loading-data');
+						boundingBox.one('.loading-icon').remove();
 					},
 
 					_saveCurrentContext: function() {
@@ -279,14 +257,19 @@ AUI.add(
 					_showLoading: function() {
 						var instance = this;
 
-						var boundingBox = instance.get('boundingBox');
 						var contentBox = instance.get('contentBox');
 
 						if (!contentBox.one('.loading-icon')) {
 							contentBox.append(TPL_LOADING);
 						}
+					},
 
-						boundingBox.addClass('loading-data');
+					_showSettingsForm: function() {
+						var instance = this;
+
+						var container = instance.settingsForm.get('container');
+
+						container.removeClass('invisible');
 					}
 				}
 			}
@@ -296,6 +279,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-tabview', 'liferay-ddl-form-builder-sidebar', 'liferay-ddm-form-renderer-types']
+		requires: ['aui-tabview', 'liferay-ddl-form-builder-sidebar']
 	}
 );

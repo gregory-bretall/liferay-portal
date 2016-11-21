@@ -19,8 +19,7 @@ taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %>
 
 <%@ page import="com.liferay.frontend.js.spa.web.internal.constants.SPAWebKeys" %><%@
 page import="com.liferay.frontend.js.spa.web.internal.servlet.taglib.util.SPAUtil" %><%@
-page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
-page import="com.liferay.portal.kernel.util.HtmlUtil" %>
+page import="com.liferay.portal.kernel.language.LanguageUtil" %>
 
 <liferay-theme:defineObjects />
 
@@ -34,8 +33,7 @@ SPAUtil spaUtil = (SPAUtil)request.getAttribute(SPAWebKeys.SPA_UTIL);
 	Liferay.SPA.cacheExpirationTime = <%= spaUtil.getCacheExpirationTime(themeDisplay.getCompanyId()) %>;
 	Liferay.SPA.clearScreensCache = <%= spaUtil.isClearScreensCache(request, session) %>;
 	Liferay.SPA.excludedPaths = <%= spaUtil.getExcludedPaths() %>;
-	Liferay.SPA.loginRedirect = '<%= HtmlUtil.escapeJS(spaUtil.getLoginRedirect(request)) %>';
-	Liferay.SPA.navigationExceptionSelectors = '<%= spaUtil.getNavigationExceptionSelectors() %>';
+	Liferay.SPA.loginRedirect = '<%= spaUtil.getLoginRedirect(request) %>';
 	Liferay.SPA.requestTimeout = <%= spaUtil.getRequestTimeout() %>;
 	Liferay.SPA.userNotification = {
 		message: '<%= LanguageUtil.get(spaUtil.getLanguageResourceBundle(themeDisplay.getLocale()), "it-looks-like-this-is-taking-longer-than-expected") %>',

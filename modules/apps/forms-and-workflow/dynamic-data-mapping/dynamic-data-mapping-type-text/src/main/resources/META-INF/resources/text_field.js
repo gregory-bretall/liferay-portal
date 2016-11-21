@@ -46,16 +46,20 @@ AUI.add(
 						var instance = this;
 
 						instance._eventHandlers.push(
-							instance.after('optionsChange', instance._afterOptionsChange),
-							instance.after('valueChange', instance._onTextFieldValueChange)
+							instance.after('optionsChange', instance._afterOptionsChange)
 						);
 
-						instance.evaluate = A.debounce(
-							function() {
-								TextField.superclass.evaluate.apply(instance, arguments);
-							},
-							300
-						);
+						instance.bindInputEvent('focus', instance._onFocusInput);
+					},
+
+					bindInputEvent: function(eventName, callback, volatile) {
+						var instance = this;
+
+						if (eventName === instance.getChangeEventName()) {
+							callback = A.debounce(callback, 300, instance);
+						}
+
+						return TextField.superclass.bindInputEvent.apply(instance, [eventName, callback, volatile]);
 					},
 
 					getAutoComplete: function() {
@@ -69,8 +73,21 @@ AUI.add(
 							autoComplete.set('inputNode', inputNode);
 						}
 						else {
-							instance._createAutocomplete();
-							autoComplete = instance._autoComplete;
+							autoComplete = new A.AutoComplete(
+								{
+									after: {
+										select: A.bind(instance.evaluate, instance)
+									},
+									inputNode: inputNode,
+									maxResults: 10,
+									render: true,
+									resultFilters: ['charMatch', 'subWordMatch'],
+									resultHighlighter: 'subWordMatch',
+									resultTextLocator: 'label'
+								}
+							);
+
+							instance._autoComplete = autoComplete;
 						}
 
 						return autoComplete;
@@ -80,14 +97,6 @@ AUI.add(
 						return 'input';
 					},
 
-					getTextHeight: function() {
-						var instance = this;
-
-						var text = instance.getValue();
-
-						return text.split('\n').length;
-					},
-
 					render: function() {
 						var instance = this;
 
@@ -95,12 +104,10 @@ AUI.add(
 
 						var options = instance.get('options');
 
-						if (options.length && instance.get('visible')) {
-							instance._createAutocomplete();
-						}
+						if (options.length) {
+							var autoComplete = instance.getAutoComplete();
 
-						if (instance.get('displayStyle') === 'multiline') {
-							instance.syncInputHeight();
+							autoComplete.set('source', instance.get('options'));
 						}
 
 						return instance;
@@ -116,21 +123,6 @@ AUI.add(
 						var inputGroup = container.one('.input-group-container');
 
 						inputGroup.insert(container.one('.help-block'), 'after');
-					},
-
-					syncInputHeight: function() {
-						var instance = this;
-
-						var inputNode = instance.getInputNode();
-
-						var height = instance.getTextHeight();
-
-						if (height < 2) {
-							inputNode.set('rows', 2);
-						}
-						else {
-							inputNode.set('rows', height);
-						}
 					},
 
 					_afterOptionsChange: function(event) {
@@ -152,36 +144,18 @@ AUI.add(
 						}
 					},
 
-					_createAutocomplete: function() {
-						var instance = this;
-
-						var inputNode = instance.getInputNode();
-
-						if (instance._autoComplete) {
-							instance._autoComplete.destroy();
-						}
-
-						instance._autoComplete = new A.AutoComplete(
-							{
-								after: {
-									select: A.bind(instance.evaluate, instance)
-								},
-								inputNode: inputNode,
-								maxResults: 10,
-								render: true,
-								resultFilters: ['charMatch', 'subWordMatch'],
-								resultHighlighter: 'subWordMatch',
-								resultTextLocator: 'label',
-								source: instance.get('options')
-							}
-						);
-					},
-
-					_onTextFieldValueChange: function() {
+					_onFocusInput: function() {
 						var instance = this;
 
 						if (instance.get('displayStyle') === 'multiline') {
-							instance.syncInputHeight();
+							var textAreaNode = instance.getInputNode();
+
+							if (!textAreaNode.autosize) {
+								textAreaNode.plug(A.Plugin.Autosize);
+								textAreaNode.height(textAreaNode.get('scrollHeight'));
+							}
+
+							textAreaNode.autosize._uiAutoSize();
 						}
 					}
 				}

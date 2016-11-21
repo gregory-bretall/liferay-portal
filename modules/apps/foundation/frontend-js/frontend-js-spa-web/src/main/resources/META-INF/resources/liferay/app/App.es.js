@@ -3,9 +3,8 @@
 import App from 'senna/src/app/App';
 import core from 'metal/src/core';
 import dom from 'metal-dom/src/dom';
-import LiferaySurface from '../surface/Surface.es';
 import Utils from '../util/Utils.es';
-import {CancellablePromise} from 'metal-promise/src/promise/Promise';
+import LiferaySurface from '../surface/Surface.es';
 
 class LiferayApp extends App {
 	constructor() {
@@ -19,7 +18,7 @@ class LiferayApp extends App {
 		this.timeout = Math.max(Liferay.SPA.requestTimeout, 0) || Utils.getMaxTimeout();
 		this.timeoutAlert = null;
 
-		var exceptionsSelector = Liferay.SPA.navigationExceptionSelectors;
+		var exceptionsSelector = ':not([target="_blank"]):not([data-senna-off]):not([data-resource-href])';
 
 		this.setFormSelector('form' + exceptionsSelector);
 		this.setLinkSelector('a' + exceptionsSelector);
@@ -124,13 +123,12 @@ class LiferayApp extends App {
 
 		if (event.error) {
 			if (event.error.invalidStatus || event.error.requestError || event.error.timeout) {
-				this._createNotification(
-					{
-						message: Liferay.Language.get('there-was-an-unexpected-error.-please-refresh-the-current-page'),
-						title: Liferay.Language.get('error'),
-						type: 'danger'
-					}
-				);
+				if (event.form) {
+					event.form.submit();
+				}
+				else {
+					window.location.href = event.path;
+				}
 			}
 		}
 		else if (Liferay.Layout && Liferay.Data.layoutConfig) {
@@ -172,30 +170,25 @@ class LiferayApp extends App {
 		}
 	}
 
-	_createNotification(config) {
-		return new CancellablePromise(
-			(resolve) => {
-				AUI().use(
-					'liferay-notification',
-					() => {
-						resolve(
-							new Liferay.Notification(
-								Object.assign(
-									{
-										closeable: true,
-										delay: {
-											hide: 0,
-											show: 0
-										},
-										duration: 500,
-										type: 'warning'
-									},
-									config
-								)
-							).render('body')
-						);
+	_createTimeoutNotification() {
+		var instance = this;
+
+		AUI().use(
+			'liferay-notification',
+			() => {
+				instance.timeoutAlert = new Liferay.Notification(
+					{
+						closeable: true,
+						delay: {
+							hide: 0,
+							show: 0
+						},
+						duration: 500,
+						message: Liferay.SPA.userNotification.message,
+						title: Liferay.SPA.userNotification.title,
+						type: 'warning'
 					}
-				);
+				).render('body');
 			}
 		);
 	}
@@ -220,17 +213,7 @@ class LiferayApp extends App {
 					);
 
 					if (!this.timeoutAlert) {
-						this._createNotification(
-							{
-								message: Liferay.SPA.userNotification.message,
-								title: Liferay.SPA.userNotification.title,
-								type: 'warning'
-							}
-						).then(
-							(alert) => {
-								this.timeoutAlert = alert;
-							}
-						);
+						this._createTimeoutNotification();
 					}
 					else {
 						this.timeoutAlert.show();

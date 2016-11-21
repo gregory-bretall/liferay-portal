@@ -97,23 +97,23 @@ public abstract class BasePermissionChecker implements PermissionChecker {
 		this.user = user;
 
 		if (user.isDefaultUser()) {
-			defaultUserId = user.getUserId();
-			signedIn = false;
+			this.defaultUserId = user.getUserId();
+			this.signedIn = false;
 		}
 		else {
 			try {
-				defaultUserId = UserLocalServiceUtil.getDefaultUserId(
+				this.defaultUserId = UserLocalServiceUtil.getDefaultUserId(
 					user.getCompanyId());
 			}
 			catch (Exception e) {
 				_log.error(e, e);
 			}
 
-			signedIn = true;
+			this.signedIn = true;
 		}
 
 		try {
-			ownerRole = RoleLocalServiceUtil.getRole(
+			this.ownerRole = RoleLocalServiceUtil.getRole(
 				user.getCompanyId(), RoleConstants.OWNER);
 		}
 		catch (Exception e) {

@@ -115,7 +115,7 @@ public class SingleVMEhcachePortalCacheManager<K extends Serializable, V>
 		SingleVMEhcachePortalCacheManagerConfigurator
 			singleVMEhcachePortalCacheManagerConfigurator) {
 
-		baseEhcachePortalCacheManagerConfigurator =
+		this.baseEhcachePortalCacheManagerConfigurator =
 			singleVMEhcachePortalCacheManagerConfigurator;
 	}
 

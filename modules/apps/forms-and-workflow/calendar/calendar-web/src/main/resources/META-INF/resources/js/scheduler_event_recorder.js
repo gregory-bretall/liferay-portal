@@ -361,23 +361,7 @@ AUI.add(
 						if (schedulerEvent && linkEnabled) {
 							var remoteServices = instance.get('remoteServices');
 
-							if (schedulerEvent.get('recurrence')) {
-								Liferay.RecurrenceUtil.openConfirmationPanel(
-									'invokeTransition',
-									function() {
-										remoteServices.invokeTransition(schedulerEvent, schedulerEvent.get('instanceIndex'), statusData, true, false);
-									},
-									function() {
-										remoteServices.invokeTransition(schedulerEvent, schedulerEvent.get('instanceIndex'), statusData, true, true);
-									},
-									function() {
-										remoteServices.invokeTransition(schedulerEvent, schedulerEvent.get('instanceIndex'), statusData, false, false);
-									}
-								);
-							}
-							else {
-								remoteServices.invokeTransition(schedulerEvent, 0, statusData, false, false);
-							}
+							remoteServices.invokeTransition(schedulerEvent, statusData);
 						}
 					},
 

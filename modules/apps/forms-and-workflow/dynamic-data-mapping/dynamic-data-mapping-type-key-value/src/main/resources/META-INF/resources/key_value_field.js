@@ -48,10 +48,9 @@ AUI.add(
 						instance._eventHandlers.push(
 							instance.after('keyChange', instance._afterKeyChange),
 							instance.after('keyInputEnabledChange', instance._afterKeyInputEnabledChange),
-							instance.after('valueChange', instance._afterValueChangeInput),
-							instance.bindContainerEvent('blur', instance._onBlurKeyInput, '.key-value-input'),
 							instance.bindContainerEvent('keyup', instance._onKeyUpKeyInput, '.key-value-input'),
-							instance.bindContainerEvent('valuechange', instance._onValueChangeKeyInput, '.key-value-input')
+							instance.bindContainerEvent('valuechange', instance._onValueChangeKeyInput, '.key-value-input'),
+							instance.bindInputEvent('valuechange', instance._onValueChangeInput)
 						);
 					},
 
@@ -150,14 +149,6 @@ AUI.add(
 						instance._uiSetKey(instance.get('key'));
 					},
 
-					_afterValueChangeInput: function(event) {
-						var instance = this;
-
-						if (!instance.get('generationLocked')) {
-							instance.set('key', instance.normalizeKey(event.newVal));
-						}
-					},
-
 					_getKeyInputSize: function(str) {
 						var instance = this;
 
@@ -177,18 +168,6 @@ AUI.add(
 						return size + 1;
 					},
 
-					_onBlurKeyInput: function(event) {
-						var instance = this;
-
-						var inputNode = event.target;
-
-						var value = inputNode.val();
-
-						if (value === '') {
-							instance._updateInputValue(inputNode, instance.normalizeKey(value));
-						}
-					},
-
 					_onKeyUpKeyInput: function(event) {
 						var instance = this;
 
@@ -202,6 +181,16 @@ AUI.add(
 
 						if (newValue !== value) {
 							instance._updateInputValue(inputNode, newValue);
+						}
+					},
+
+					_onValueChangeInput: function(event) {
+						var instance = this;
+
+						if (!instance.get('generationLocked')) {
+							var value = instance.getValue();
+
+							instance.set('key', instance.normalizeKey(value));
 						}
 					},
 

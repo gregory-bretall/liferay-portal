@@ -320,6 +320,12 @@ public class ExportImportDateUtil {
 		StagedGroupedModel stagedGroupedModel, DateRange dateRange,
 		Date lastPublishDate) {
 
+		Date originalLastPublishDate = stagedGroupedModel.getLastPublishDate();
+
+		if (!isValidDateRange(dateRange, originalLastPublishDate)) {
+			return;
+		}
+
 		if (lastPublishDate == null) {
 			lastPublishDate = new Date();
 		}

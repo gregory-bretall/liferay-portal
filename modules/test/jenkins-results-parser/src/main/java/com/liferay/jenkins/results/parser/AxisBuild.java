@@ -32,22 +32,14 @@ public class AxisBuild extends BaseBuild {
 
 	@Override
 	public String getBuildURL() {
-		try {
-			String jobURL = getJobURL();
-			int buildNumber = getBuildNumber();
+		String jobURL = getJobURL();
+		int buildNumber = getBuildNumber();
 
-			if ((jobURL == null) || (buildNumber == -1)) {
-				return null;
-			}
-
-			jobURL = JenkinsResultsParserUtil.decode(jobURL);
-
-			return JenkinsResultsParserUtil.encode(
-				jobURL + "/" + axisVariable + "/" + buildNumber + "/");
+		if ((jobURL == null) || (buildNumber == -1)) {
+			return null;
 		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+
+		return jobURL + "/" + axisVariable + "/" + buildNumber + "/";
 	}
 
 	@Override
@@ -61,10 +53,6 @@ public class AxisBuild extends BaseBuild {
 
 	protected AxisBuild(String url, BatchBuild parentBuild) throws Exception {
 		super(JenkinsResultsParserUtil.getLocalURL(url), parentBuild);
-	}
-
-	@Override
-	protected void checkForReinvocation() {
 	}
 
 	@Override

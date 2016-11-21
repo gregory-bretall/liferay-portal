@@ -16,8 +16,6 @@ package com.liferay.portal.service.impl;
 
 import com.liferay.portal.kernel.exception.NoSuchWebDAVPropsException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.WebDAVProps;
 import com.liferay.portal.kernel.webdav.WebDAVException;
 import com.liferay.portal.service.base.WebDAVPropsLocalServiceBaseImpl;
@@ -38,12 +36,6 @@ public class WebDAVPropsLocalServiceImpl
 			webDAVPropsPersistence.removeByC_C(classNameId, classPK);
 		}
 		catch (NoSuchWebDAVPropsException nswdavpe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nswdavpe, nswdavpe);
-			}
 		}
 	}
 
@@ -87,8 +79,5 @@ public class WebDAVPropsLocalServiceImpl
 
 		webDAVPropsPersistence.update(webDavProps);
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		WebDAVPropsLocalServiceImpl.class);
 
 }

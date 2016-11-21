@@ -1513,9 +1513,6 @@ public interface UserLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getUsersCount();
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getUsersCount(long companyId, boolean defaultUser, int status);
-
 	/**
 	* Returns the number of users with the status, and whose first name, middle
 	* name, last name, screen name, and email address match the keywords
@@ -1853,10 +1850,6 @@ public interface UserLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<User> getUsers(int start, int end);
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<User> getUsers(long companyId, boolean defaultUser, int status,
-		int start, int end, OrderByComparator<User> obc);
-
 	/**
 	* Returns an ordered range of all the users with the status, and whose
 	* first name, middle name, last name, screen name, and email address match
@@ -2167,16 +2160,9 @@ public interface UserLocalService extends BaseLocalService,
 	*/
 	public void addDefaultUserGroups(long userId) throws PortalException;
 
-	/**
-	* @throws PortalException
-	*/
-	public void addGroupUser(long groupId, User user) throws PortalException;
+	public void addGroupUser(long groupId, User user);
 
-	/**
-	* @throws PortalException
-	*/
-	public void addGroupUser(long groupId, long userId)
-		throws PortalException;
+	public void addGroupUser(long groupId, long userId);
 
 	/**
 	* @throws PortalException
@@ -2190,17 +2176,9 @@ public interface UserLocalService extends BaseLocalService,
 	public void addGroupUsers(long groupId, long[] userIds)
 		throws PortalException;
 
-	/**
-	* @throws PortalException
-	*/
-	public void addOrganizationUser(long organizationId, User user)
-		throws PortalException;
+	public void addOrganizationUser(long organizationId, User user);
 
-	/**
-	* @throws PortalException
-	*/
-	public void addOrganizationUser(long organizationId, long userId)
-		throws PortalException;
+	public void addOrganizationUser(long organizationId, long userId);
 
 	/**
 	* @throws PortalException
@@ -2223,15 +2201,9 @@ public interface UserLocalService extends BaseLocalService,
 	*/
 	public void addPasswordPolicyUsers(long passwordPolicyId, long[] userIds);
 
-	/**
-	* @throws PortalException
-	*/
-	public void addRoleUser(long roleId, User user) throws PortalException;
+	public void addRoleUser(long roleId, User user);
 
-	/**
-	* @throws PortalException
-	*/
-	public void addRoleUser(long roleId, long userId) throws PortalException;
+	public void addRoleUser(long roleId, long userId);
 
 	/**
 	* @throws PortalException
@@ -2245,15 +2217,9 @@ public interface UserLocalService extends BaseLocalService,
 	public void addRoleUsers(long roleId, long[] userIds)
 		throws PortalException;
 
-	/**
-	* @throws PortalException
-	*/
-	public void addTeamUser(long teamId, User user) throws PortalException;
+	public void addTeamUser(long teamId, User user);
 
-	/**
-	* @throws PortalException
-	*/
-	public void addTeamUser(long teamId, long userId) throws PortalException;
+	public void addTeamUser(long teamId, long userId);
 
 	/**
 	* @throws PortalException
@@ -2267,17 +2233,9 @@ public interface UserLocalService extends BaseLocalService,
 	public void addTeamUsers(long teamId, long[] userIds)
 		throws PortalException;
 
-	/**
-	* @throws PortalException
-	*/
-	public void addUserGroupUser(long userGroupId, User user)
-		throws PortalException;
+	public void addUserGroupUser(long userGroupId, User user);
 
-	/**
-	* @throws PortalException
-	*/
-	public void addUserGroupUser(long userGroupId, long userId)
-		throws PortalException;
+	public void addUserGroupUser(long userGroupId, long userId);
 
 	/**
 	* @throws PortalException

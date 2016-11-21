@@ -14,14 +14,11 @@
 
 package com.liferay.exportimport.kernel.xstream;
 
-import aQute.bnd.annotation.ProviderType;
-
 import java.util.Iterator;
 
 /**
  * @author Daniel Kocsis
  */
-@ProviderType
 public interface XStreamMarshallingContext {
 
 	public void convertAnother(Object object);

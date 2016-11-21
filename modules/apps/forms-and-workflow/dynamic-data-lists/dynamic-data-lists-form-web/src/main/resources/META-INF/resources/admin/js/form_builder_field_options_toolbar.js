@@ -28,10 +28,6 @@ AUI.add(
 								label: Liferay.Language.get('move-field')
 							},
 							{
-								handler: 'duplicateField',
-								label: Liferay.Language.get('duplicate-field')
-							},
-							{
 								handler: 'removeField',
 								label: Liferay.Language.get('remove-field')
 							},

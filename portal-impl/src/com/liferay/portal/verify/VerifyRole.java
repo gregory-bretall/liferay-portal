@@ -15,8 +15,6 @@
 package com.liferay.portal.verify;
 
 import com.liferay.portal.kernel.exception.NoSuchRoleException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
@@ -89,12 +87,6 @@ public class VerifyRole extends VerifyProcess {
 				deleteImplicitAssociations(organizationUserRole);
 			}
 			catch (NoSuchRoleException nsre) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsre);
-				}
 			}
 
 			try {
@@ -104,12 +96,6 @@ public class VerifyRole extends VerifyProcess {
 				addViewSiteAdministrationPermission(powerUserRole);
 			}
 			catch (NoSuchRoleException nsre) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsre);
-				}
 			}
 
 			try {
@@ -119,16 +105,8 @@ public class VerifyRole extends VerifyProcess {
 				deleteImplicitAssociations(siteMemberRole);
 			}
 			catch (NoSuchRoleException nsre) {
-
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsre);
-				}
 			}
 		}
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(VerifyRole.class);
 
 }

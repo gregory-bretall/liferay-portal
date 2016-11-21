@@ -14,7 +14,6 @@
 
 package com.liferay.sync.engine.model;
 
-import com.liferay.sync.engine.lan.server.LanEngine;
 import com.liferay.sync.engine.session.rate.limiter.RateLimiterManager;
 
 import java.util.Map;
@@ -37,24 +36,7 @@ public class SyncPropModelListener implements ModelListener<SyncProp> {
 	public void onUpdate(
 		SyncProp syncProp, Map<String, Object> originalValues) {
 
-		updateLanSync(syncProp);
-
 		updateRateLimits(syncProp);
-	}
-
-	protected void updateLanSync(SyncProp syncProp) {
-		String key = syncProp.getKey();
-
-		if (!key.equals(SyncProp.KEY_LAN_ENABLED)) {
-			return;
-		}
-
-		if (Boolean.valueOf(syncProp.getValue())) {
-			LanEngine.start();
-		}
-		else {
-			LanEngine.stop();
-		}
 	}
 
 	protected void updateRateLimits(SyncProp syncProp) {

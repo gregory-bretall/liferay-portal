@@ -45,11 +45,6 @@ public class RouterImpl implements Router {
 	}
 
 	@Override
-	public List<Route> getRoutes() {
-		return new ArrayList<>(_routes);
-	}
-
-	@Override
 	public String parametersToUrl(Map<String, String> parameters) {
 		for (Route route : _routes) {
 			String url = route.parametersToUrl(parameters);

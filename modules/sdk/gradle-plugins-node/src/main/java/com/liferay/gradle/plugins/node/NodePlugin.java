@@ -20,7 +20,6 @@ import com.liferay.gradle.plugins.node.tasks.DownloadNodeTask;
 import com.liferay.gradle.plugins.node.tasks.ExecuteNodeTask;
 import com.liferay.gradle.plugins.node.tasks.ExecuteNpmTask;
 import com.liferay.gradle.plugins.node.tasks.NpmInstallTask;
-import com.liferay.gradle.plugins.node.tasks.NpmShrinkwrapTask;
 import com.liferay.gradle.plugins.node.tasks.PublishNodeModuleTask;
 
 import groovy.json.JsonSlurper;
@@ -50,8 +49,6 @@ public class NodePlugin implements Plugin<Project> {
 
 	public static final String NPM_INSTALL_TASK_NAME = "npmInstall";
 
-	public static final String NPM_SHRINKWRAP_TASK_NAME = "npmShrinkwrap";
-
 	@Override
 	public void apply(Project project) {
 		final NodeExtension nodeExtension = GradleUtil.addExtension(
@@ -61,8 +58,6 @@ public class NodePlugin implements Plugin<Project> {
 			project, nodeExtension);
 
 		NpmInstallTask npmInstallTask = _addTaskNpmInstall(project);
-
-		_addTaskNpmShrinkwrap(project, npmInstallTask);
 
 		_configureTasksDownloadNodeModule(project, npmInstallTask);
 
@@ -146,23 +141,9 @@ public class NodePlugin implements Plugin<Project> {
 			project, NPM_INSTALL_TASK_NAME, NpmInstallTask.class);
 
 		npmInstallTask.setDescription(
-			"Installs Node packages from package.json.");
+			"Install Node packages from package.json.");
 
 		return npmInstallTask;
-	}
-
-	private NpmShrinkwrapTask _addTaskNpmShrinkwrap(
-		Project project, NpmInstallTask npmInstallTask) {
-
-		NpmShrinkwrapTask npmShrinkwrapTask = GradleUtil.addTask(
-			project, NPM_SHRINKWRAP_TASK_NAME, NpmShrinkwrapTask.class);
-
-		npmShrinkwrapTask.dependsOn(npmInstallTask);
-		npmShrinkwrapTask.setDescription(
-			"Locks down the versions of a package's dependencies in order to " +
-				"control which versions of each dependency will be used.");
-
-		return npmShrinkwrapTask;
 	}
 
 	private void _configureTaskDownloadNodeGlobal(

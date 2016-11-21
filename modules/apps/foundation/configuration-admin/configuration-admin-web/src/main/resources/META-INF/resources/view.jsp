@@ -30,7 +30,7 @@ portletURL.setParameter("configurationCategory", configurationCategory);
 
 String keywords = renderRequest.getParameter("keywords");
 
-if (keywords != null) {
+if (Validator.isNotNull(keywords)) {
 	portletDisplay.setShowBackIcon(true);
 	portletDisplay.setURLBack(redirect);
 
@@ -64,11 +64,9 @@ if (keywords != null) {
 	</c:if>
 
 	<aui:nav-bar-search>
-		<portlet:renderURL var="redirectURL" />
-
 		<portlet:renderURL var="searchURL">
 			<portlet:param name="mvcRenderCommandName" value="/search" />
-			<portlet:param name="redirect" value="<%= redirectURL %>" />
+			<portlet:param name="redirect" value="<%= currentURL %>" />
 		</portlet:renderURL>
 
 		<aui:form action="<%= searchURL %>" name="searchFm">
@@ -194,7 +192,7 @@ if (keywords != null) {
 
 								<liferay-ui:icon
 									message="export"
-									method="get"
+									method="post"
 									url="<%= exportURL %>"
 								/>
 							</c:if>

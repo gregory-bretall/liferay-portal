@@ -409,10 +409,6 @@ public class JournalUtil {
 		return layout;
 	}
 
-	/**
-	 * @deprecated As of 4.0.0, with no direct replacement
-	 */
-	@Deprecated
 	public static List<JournalArticle> getArticles(Hits hits)
 		throws PortalException {
 
@@ -423,8 +419,7 @@ public class JournalUtil {
 
 		for (com.liferay.portal.kernel.search.Document document : documents) {
 			String articleId = document.get(Field.ARTICLE_ID);
-			long groupId = GetterUtil.getLong(
-				document.get(Field.SCOPE_GROUP_ID));
+			long groupId = GetterUtil.getLong(document.get(Field.GROUP_ID));
 
 			JournalArticle article =
 				JournalArticleLocalServiceUtil.fetchLatestArticle(

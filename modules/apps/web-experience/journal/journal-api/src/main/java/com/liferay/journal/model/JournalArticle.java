@@ -93,9 +93,11 @@ public interface JournalArticle extends JournalArticleModel, PersistedModel,
 
 	public java.lang.String getContentByLocale(java.lang.String languageId);
 
-	public com.liferay.dynamic.data.mapping.model.DDMStructure getDDMStructure();
+	public com.liferay.dynamic.data.mapping.model.DDMStructure getDDMStructure()
+		throws com.liferay.portal.kernel.exception.PortalException;
 
-	public com.liferay.dynamic.data.mapping.model.DDMTemplate getDDMTemplate();
+	public com.liferay.dynamic.data.mapping.model.DDMTemplate getDDMTemplate()
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	@com.liferay.portal.kernel.json.JSON()
 	public java.lang.String getDescription();

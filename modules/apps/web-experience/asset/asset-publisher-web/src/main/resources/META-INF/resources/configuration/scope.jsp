@@ -44,7 +44,6 @@ List<Group> selectedGroups = GroupLocalServiceUtil.getGroups(assetPublisherDispl
 
 	<liferay-ui:search-container-row
 		className="com.liferay.portal.kernel.model.Group"
-		keyProperty="groupId"
 		modelVar="group"
 	>
 		<liferay-ui:search-container-column-text
@@ -112,6 +111,7 @@ List<Group> selectedGroups = GroupLocalServiceUtil.getGroups(assetPublisherDispl
 		data = new HashMap<String, Object>();
 
 		layoutSiteBrowserURL.setParameter("groupId", String.valueOf(layout.getGroupId()));
+		layoutSiteBrowserURL.setParameter("selectedGroupIds", StringUtil.merge(assetPublisherDisplayContext.getGroupIds()));
 		layoutSiteBrowserURL.setParameter("privateLayout", String.valueOf(layout.isPrivateLayout()));
 		layoutSiteBrowserURL.setParameter("type", "layoutScopes");
 		layoutSiteBrowserURL.setParameter("eventName", eventName);
@@ -159,6 +159,7 @@ List<Group> selectedGroups = GroupLocalServiceUtil.getGroups(assetPublisherDispl
 		data = new HashMap<String, Object>();
 
 		siteBrowserURL.setParameter("groupId", String.valueOf(layout.getGroupId()));
+		siteBrowserURL.setParameter("selectedGroupIds", StringUtil.merge(assetPublisherDisplayContext.getGroupIds()));
 		siteBrowserURL.setParameter("types", StringUtil.merge(types));
 		siteBrowserURL.setParameter("filter", "contentSharingWithChildrenEnabled");
 		siteBrowserURL.setParameter("includeCurrentGroup", Boolean.FALSE.toString());
@@ -193,19 +194,6 @@ List<Group> selectedGroups = GroupLocalServiceUtil.getGroups(assetPublisherDispl
 
 			var currentTarget = $(event.currentTarget);
 
-			var searchContainerName = '<portlet:namespace/>groupsSearchContainer';
-
-			var searchContainer = Liferay.SearchContainer.get(searchContainerName);
-
-			var searchContainerData = searchContainer.getData();
-
-			if (!searchContainerData.length) {
-				searchContainerData = [];
-			}
-			else {
-				searchContainerData = searchContainerData.split(',');
-			}
-
 			Liferay.Util.selectEntity(
 				{
 					dialog: {
@@ -215,13 +203,12 @@ List<Group> selectedGroups = GroupLocalServiceUtil.getGroups(assetPublisherDispl
 					},
 					eventName: '<%= eventName %>',
 					id: '<%= eventName %>' + currentTarget.attr('id'),
-					selectedData: searchContainerData,
 					title: currentTarget.data('title'),
 					uri: currentTarget.data('href')
 				},
 				function(event) {
 					form.<portlet:namespace /><%= Constants.CMD %>.value = 'add-scope';
-					form.<portlet:namespace />groupId.value = event.entityid;
+					form.<portlet:namespace />groupId.value = event.groupid;
 
 					submitForm(form);
 				}

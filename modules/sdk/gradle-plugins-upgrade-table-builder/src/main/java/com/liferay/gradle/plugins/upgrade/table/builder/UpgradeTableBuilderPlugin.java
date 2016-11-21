@@ -20,7 +20,6 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.tasks.TaskContainer;
@@ -38,44 +37,39 @@ public class UpgradeTableBuilderPlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
 		Configuration upgradeTableBuilderConfiguration =
-			_addConfigurationUpgradeTableBuilder(project);
+			addConfigurationUpgradeTableBuilder(project);
 
-		_addTaskBuildUpgradeTable(project);
+		addTaskBuildUpgradeTable(project);
 
-		_configureTasksBuildUpgradeTable(
+		configureTasksBuildUpgradeTable(
 			project, upgradeTableBuilderConfiguration);
 	}
 
-	private Configuration _addConfigurationUpgradeTableBuilder(
+	protected Configuration addConfigurationUpgradeTableBuilder(
 		final Project project) {
 
 		Configuration configuration = GradleUtil.addConfiguration(
 			project, CONFIGURATION_NAME);
 
-		configuration.defaultDependencies(
-			new Action<DependencySet>() {
-
-				@Override
-				public void execute(DependencySet dependencySet) {
-					_addDependenciesUpgradeTableBuilder(project);
-				}
-
-			});
-
 		configuration.setDescription(
 			"Configures Liferay Upgrade Table Builder for this project.");
 		configuration.setVisible(false);
 
+		GradleUtil.executeIfEmpty(
+			configuration,
+			new Action<Configuration>() {
+
+				@Override
+				public void execute(Configuration configuration) {
+					addUpgradeTableBuilderDependencies(project);
+				}
+
+			});
+
 		return configuration;
 	}
 
-	private void _addDependenciesUpgradeTableBuilder(Project project) {
-		GradleUtil.addDependency(
-			project, CONFIGURATION_NAME, "com.liferay",
-			"com.liferay.portal.tools.upgrade.table.builder", "latest.release");
-	}
-
-	private BuildUpgradeTableTask _addTaskBuildUpgradeTable(Project project) {
+	protected BuildUpgradeTableTask addTaskBuildUpgradeTable(Project project) {
 		BuildUpgradeTableTask buildUpgradeTableTask = GradleUtil.addTask(
 			project, BUILD_UPGRADE_TABLE_TASK_NAME,
 			BuildUpgradeTableTask.class);
@@ -88,14 +82,20 @@ public class UpgradeTableBuilderPlugin implements Plugin<Project> {
 		return buildUpgradeTableTask;
 	}
 
-	private void _configureTaskBuildUpgradeTableClasspath(
+	protected void addUpgradeTableBuilderDependencies(Project project) {
+		GradleUtil.addDependency(
+			project, CONFIGURATION_NAME, "com.liferay",
+			"com.liferay.portal.tools.upgrade.table.builder", "latest.release");
+	}
+
+	protected void configureTaskBuildUpgradeTableClasspath(
 		BuildUpgradeTableTask buildUpgradeTableTask,
 		FileCollection fileCollection) {
 
 		buildUpgradeTableTask.setClasspath(fileCollection);
 	}
 
-	private void _configureTasksBuildUpgradeTable(
+	protected void configureTasksBuildUpgradeTable(
 		Project project, final Configuration upgradeTableBuilderConfiguration) {
 
 		TaskContainer taskContainer = project.getTasks();
@@ -108,7 +108,7 @@ public class UpgradeTableBuilderPlugin implements Plugin<Project> {
 				public void execute(
 					BuildUpgradeTableTask buildUpgradeTableTask) {
 
-					_configureTaskBuildUpgradeTableClasspath(
+					configureTaskBuildUpgradeTableClasspath(
 						buildUpgradeTableTask,
 						upgradeTableBuilderConfiguration);
 				}

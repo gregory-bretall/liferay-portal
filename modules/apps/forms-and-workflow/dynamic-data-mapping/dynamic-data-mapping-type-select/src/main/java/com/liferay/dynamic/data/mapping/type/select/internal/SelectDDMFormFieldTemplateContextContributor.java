@@ -17,8 +17,6 @@ package com.liferay.dynamic.data.mapping.type.select.internal;
 import com.liferay.dynamic.data.mapping.data.provider.DDMDataProvider;
 import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderContext;
 import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderContextContributor;
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderRequest;
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderResponse;
 import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderTracker;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTemplateContextContributor;
 import com.liferay.dynamic.data.mapping.io.DDMFormValuesJSONDeserializer;
@@ -36,6 +34,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -44,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -128,67 +126,46 @@ public class SelectDDMFormFieldTemplateContextContributor
 			ddmFormFieldOptions.setDefaultLocale(
 				ddmFormFieldRenderingContext.getLocale());
 
-			try {
-				String ddmDataProviderInstanceId = GetterUtil.getString(
-					ddmFormField.getProperty("ddmDataProviderInstanceId"));
+			long ddmDataProviderInstanceId = GetterUtil.getLong(
+				ddmFormField.getProperty("ddmDataProviderInstanceId"));
 
-				DDMDataProvider ddmDataProvider =
-					ddmDataProviderTracker.getDDMDataProviderByInstanceId(
+			try {
+				DDMDataProviderInstance ddmDataProviderInstance =
+					ddmDataProviderInstanceService.getDataProviderInstance(
 						ddmDataProviderInstanceId);
 
-				DDMDataProviderContext ddmDataProviderContext = null;
-
-				if (ddmDataProvider != null) {
-					ddmDataProviderContext = new DDMDataProviderContext(null);
-				}
-				else {
-					DDMDataProviderInstance ddmDataProviderInstance =
-						ddmDataProviderInstanceService.getDataProviderInstance(
-							Long.valueOf(ddmDataProviderInstanceId));
-
-					ddmDataProvider = ddmDataProviderTracker.getDDMDataProvider(
+				DDMDataProvider ddmDataProvider =
+					ddmDataProviderTracker.getDDMDataProvider(
 						ddmDataProviderInstance.getType());
 
-					DDMForm ddmForm = DDMFormFactory.create(
-						ddmDataProvider.getSettings());
+				DDMForm ddmForm = DDMFormFactory.create(
+					ddmDataProvider.getSettings());
 
-					DDMFormValues ddmFormValues =
-						ddmFormValuesJSONDeserializer.deserialize(
-							ddmForm, ddmDataProviderInstance.getDefinition());
+				DDMFormValues ddmFormValues =
+					ddmFormValuesJSONDeserializer.deserialize(
+						ddmForm, ddmDataProviderInstance.getDefinition());
 
-					ddmDataProviderContext = new DDMDataProviderContext(
-						ddmFormValues);
+				DDMDataProviderContext ddmDataProviderContext =
+					new DDMDataProviderContext(ddmFormValues);
 
-					List<DDMDataProviderContextContributor>
-						ddmDataProviderContextContributors =
-					ddmDataProviderTracker.
-					getDDMDataProviderContextContributors(
-						ddmDataProviderInstance.getType());
+				List<DDMDataProviderContextContributor>
+					ddmDataProviderContextContributors =
+						ddmDataProviderTracker.
+							getDDMDataProviderContextContributors(
+								ddmDataProviderInstance.getType());
 
-					addDDMDataProviderContextParameters(
-						ddmFormFieldRenderingContext.getHttpServletRequest(),
-						ddmDataProviderContext,
-						ddmDataProviderContextContributors);
-				}
+				addDDMDataProviderContextParameters(
+					ddmFormFieldRenderingContext.getHttpServletRequest(),
+					ddmDataProviderContext, ddmDataProviderContextContributors);
 
-				ddmDataProviderContext.setHttpServletRequest(
-					ddmFormFieldRenderingContext.getHttpServletRequest());
+				List<KeyValuePair> keyValuePairs = ddmDataProvider.getData(
+					ddmDataProviderContext);
 
-				DDMDataProviderRequest ddmDataProviderRequest =
-					new DDMDataProviderRequest(ddmDataProviderContext);
-
-				DDMDataProviderResponse ddmDataProviderResponse =
-					ddmDataProvider.getData(ddmDataProviderRequest);
-
-				for (Map<Object, Object> map :
-						ddmDataProviderResponse.getData()) {
-
-					for (Entry<Object, Object> entry : map.entrySet()) {
-						ddmFormFieldOptions.addOptionLabel(
-							String.valueOf(entry.getValue()),
-							ddmFormFieldRenderingContext.getLocale(),
-							String.valueOf(entry.getKey()));
-					}
+				for (KeyValuePair keyValuePair : keyValuePairs) {
+					ddmFormFieldOptions.addOptionLabel(
+						keyValuePair.getValue(),
+						ddmFormFieldRenderingContext.getLocale(),
+						keyValuePair.getKey());
 				}
 
 				return ddmFormFieldOptions;
@@ -202,7 +179,7 @@ public class SelectDDMFormFieldTemplateContextContributor
 				(List<Map<String, String>>)
 					ddmFormFieldRenderingContext.getProperty("options");
 
-			if (keyValuePairs.isEmpty()) {
+			if (keyValuePairs.size() == 0) {
 				return ddmFormField.getDDMFormFieldOptions();
 			}
 

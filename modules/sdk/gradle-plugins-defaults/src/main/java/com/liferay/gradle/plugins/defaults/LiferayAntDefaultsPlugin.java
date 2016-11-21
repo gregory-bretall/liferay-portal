@@ -40,18 +40,18 @@ public class LiferayAntDefaultsPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		GradleUtil.applyPlugin(project, LiferayAntPlugin.class);
 
-		_applyPlugins(project);
+		applyPlugins(project);
 
 		// GRADLE-2427
 
-		_addTaskInstall(project);
+		addTaskInstall(project);
 
-		_applyConfigScripts(project);
+		applyConfigScripts(project);
 
-		final ReplaceRegexTask updateVersionTask = _addTaskUpdateVersion(
+		final ReplaceRegexTask updateVersionTask = addTaskUpdateVersion(
 			project);
 
-		_configureProject(project);
+		configureProject(project);
 
 		project.afterEvaluate(
 			new Action<Project>() {
@@ -64,13 +64,13 @@ public class LiferayAntDefaultsPlugin implements Plugin<Project> {
 					// configureTaskUploadArchives, because the latter one needs
 					// to know if we are publishing a snapshot or not.
 
-					_configureTaskUploadArchives(project, updateVersionTask);
+					configureTaskUploadArchives(project, updateVersionTask);
 				}
 
 			});
 	}
 
-	private Upload _addTaskInstall(Project project) {
+	protected Upload addTaskInstall(Project project) {
 		Upload upload = GradleUtil.addTask(
 			project, MavenPlugin.INSTALL_TASK_NAME, Upload.class, true);
 
@@ -85,7 +85,7 @@ public class LiferayAntDefaultsPlugin implements Plugin<Project> {
 		return upload;
 	}
 
-	private ReplaceRegexTask _addTaskUpdateVersion(final Project project) {
+	protected ReplaceRegexTask addTaskUpdateVersion(final Project project) {
 		ReplaceRegexTask replaceRegexTask = GradleUtil.addTask(
 			project, LiferayRelengPlugin.UPDATE_VERSION_TASK_NAME,
 			ReplaceRegexTask.class);
@@ -113,23 +113,23 @@ public class LiferayAntDefaultsPlugin implements Plugin<Project> {
 		return replaceRegexTask;
 	}
 
-	private void _applyConfigScripts(Project project) {
+	protected void applyConfigScripts(Project project) {
 		GradleUtil.applyScript(
 			project,
-			"com/liferay/gradle/plugins/defaults/dependencies" +
-				"/config-maven.gradle",
+			"com/liferay/gradle/plugins/defaults/dependencies/" +
+				"config-maven.gradle",
 			project);
 	}
 
-	private void _applyPlugins(Project project) {
+	protected void applyPlugins(Project project) {
 		GradleUtil.applyPlugin(project, MavenPlugin.class);
 	}
 
-	private void _configureProject(Project project) {
+	protected void configureProject(Project project) {
 		project.setGroup(_GROUP);
 	}
 
-	private void _configureTaskUploadArchives(
+	protected void configureTaskUploadArchives(
 		Project project, Task updatePluginVersionTask) {
 
 		if (GradleUtil.isSnapshot(project)) {

@@ -18,7 +18,6 @@ import java.io.File;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.Environment.Variable;
 
 /**
  * @author Andrea Di Giorgi
@@ -28,7 +27,6 @@ public class LiferayGradleExecTask extends GradleExecTask {
 	@Override
 	public void execute() throws BuildException {
 		_addArguments();
-		_addEnvironmentVariables();
 
 		super.execute();
 	}
@@ -54,10 +52,6 @@ public class LiferayGradleExecTask extends GradleExecTask {
 		_portalPreBuild = portalPreBuild;
 	}
 
-	public void setWebSphereHomeDir(String webSphereHomeDir) {
-		_webSphereHomeDir = webSphereHomeDir;
-	}
-
 	private void _addArguments() {
 		Project project = getProject();
 
@@ -80,34 +74,8 @@ public class LiferayGradleExecTask extends GradleExecTask {
 		addArgument("-Dportal.pre.build=" + _portalPreBuild);
 	}
 
-	private void _addEnvironmentVariables() {
-		String webSphereHomeDir = _getWebSphereHomeDir();
-
-		if ((webSphereHomeDir != null) && !webSphereHomeDir.isEmpty()) {
-			Variable variable = new Variable();
-
-			variable.setKey("WAS_HOME");
-			variable.setValue(webSphereHomeDir);
-
-			addEnv(variable);
-		}
-	}
-
-	private String _getWebSphereHomeDir() {
-		String webSphereHomeDir = _webSphereHomeDir;
-
-		if ((webSphereHomeDir == null) || webSphereHomeDir.isEmpty()) {
-			Project project = getProject();
-
-			webSphereHomeDir = project.getProperty("app.server.websphere.dir");
-		}
-
-		return webSphereHomeDir;
-	}
-
 	private boolean _forcedCacheEnabled = true;
 	private boolean _portalBuild = true;
 	private boolean _portalPreBuild;
-	private String _webSphereHomeDir;
 
 }

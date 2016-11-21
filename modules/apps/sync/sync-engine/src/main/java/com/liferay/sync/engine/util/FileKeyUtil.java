@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class FileKeyUtil {
 
 	public static long getFileKey(Path filePath) {
-		if (!FileUtil.isRealFilePath(filePath) || !FileUtil.exists(filePath)) {
+		if (!FileUtil.exists(filePath)) {
 			return -1;
 		}
 
@@ -75,7 +75,8 @@ public class FileKeyUtil {
 					return -1;
 				}
 
-				ByteBuffer byteBuffer = ByteBuffer.allocate(20);
+				ByteBuffer byteBuffer = ByteBuffer.allocate(
+					userDefinedFileAttributeView.size("fileKey"));
 
 				userDefinedFileAttributeView.read("fileKey", byteBuffer);
 

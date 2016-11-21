@@ -14,8 +14,6 @@
 
 package com.liferay.exportimport.portlet.preferences.processor;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.osgi.util.ServiceTrackerFactory;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -35,7 +33,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 /**
  * @author Mate Thurzo
  */
-@ProviderType
 public class ExportImportPortletPreferencesProcessorRegistryUtil {
 
 	public static ExportImportPortletPreferencesProcessor

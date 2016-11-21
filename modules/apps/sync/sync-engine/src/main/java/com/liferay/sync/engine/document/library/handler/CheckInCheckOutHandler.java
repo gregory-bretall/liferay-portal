@@ -38,7 +38,6 @@ public class CheckInCheckOutHandler extends BaseJSONHandler {
 			return;
 		}
 
-		localSyncFile.setLanTokenKey(remoteSyncFile.getLanTokenKey());
 		localSyncFile.setLockExpirationDate(
 			remoteSyncFile.getLockExpirationDate());
 		localSyncFile.setLockUserId(remoteSyncFile.getLockUserId());

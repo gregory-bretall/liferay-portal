@@ -42,8 +42,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 
-import org.jboss.netty.util.internal.ByteBufferUtil;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -70,19 +68,6 @@ public class EmbeddedElasticsearchConnection
 
 		if (_node == null) {
 			return;
-		}
-
-		try {
-			Class.forName(ByteBufferUtil.class.getName());
-		}
-		catch (ClassNotFoundException cnfe) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Unable to preload " + ByteBufferUtil.class +
-						" to prevent Netty shutdown concurrent class loading " +
-							"interruption issue",
-					cnfe);
-			}
 		}
 
 		_node.close();
@@ -128,8 +113,6 @@ public class EmbeddedElasticsearchConnection
 	protected void configureClustering() {
 		settingsBuilder.put(
 			"cluster.name", elasticsearchConfiguration.clusterName());
-		settingsBuilder.put(
-			"cluster.routing.allocation.disk.threshold_enabled", false);
 		settingsBuilder.put("discovery.zen.ping.multicast.enabled", false);
 	}
 

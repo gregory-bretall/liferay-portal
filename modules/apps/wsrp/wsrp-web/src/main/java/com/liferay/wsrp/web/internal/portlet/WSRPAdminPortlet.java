@@ -15,8 +15,6 @@
 package com.liferay.wsrp.web.internal.portlet;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
@@ -114,13 +112,6 @@ public class WSRPAdminPortlet extends MVCPortlet {
 			doRestartConsumer(actionRequest, actionResponse);
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			SessionErrors.add(actionRequest, "restartConsumer");
 		}
 	}
@@ -133,13 +124,6 @@ public class WSRPAdminPortlet extends MVCPortlet {
 			doUpdateServiceDescription(actionRequest, actionResponse);
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
 			SessionErrors.add(actionRequest, "updateServiceDescription");
 		}
 	}
@@ -379,9 +363,6 @@ public class WSRPAdminPortlet extends MVCPortlet {
 
 		_wSRPProducerLocalService = wSRPProducerLocalService;
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		WSRPAdminPortlet.class);
 
 	private static WSRPConsumerLocalService _wSRPConsumerLocalService;
 	private static WSRPConsumerPortletLocalService

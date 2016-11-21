@@ -99,7 +99,7 @@ public class FlagsRequest implements Serializable {
 	}
 
 	public void setReason(String reason) {
-		_reason = reason;
+		this._reason = reason;
 	}
 
 	public void setReportedUserId(long reportedUserId) {

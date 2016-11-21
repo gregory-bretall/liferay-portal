@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
+import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
@@ -70,7 +71,8 @@ public class DDMStructureStagedModelDataHandlerTest
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
+			SynchronousDestinationTestRule.INSTANCE,
+			TransactionalTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
@@ -148,8 +150,6 @@ public class DDMStructureStagedModelDataHandlerTest
 
 		DDMFormField selectDDMFormField = DDMFormTestUtil.createDDMFormField(
 			"Country", "Country", "select", "string", true, false, true);
-
-		selectDDMFormField.setProperty("dataSourceType", "data-provider");
 
 		selectDDMFormField.setProperty(
 			"ddmDataProviderInstanceId",

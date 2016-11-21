@@ -23,9 +23,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  */
 @ExtendedObjectClassDefinition(category = "forms-and-workflow")
 @Meta.OCD(
-	id = "com.liferay.portal.workflow.task.web.configuration.WorkflowTaskWebConfiguration",
-	localization = "content/Language",
-	name = "workflow.task.web.configuration.name"
+	id = "com.liferay.portal.workflow.task.web.configuration.WorkflowTaskWebConfiguration"
 )
 public interface WorkflowTaskWebConfiguration {
 

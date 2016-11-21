@@ -706,12 +706,11 @@ public class MBUtil {
 
 		String subject = message.getSubject();
 
-		if (subject.startsWith(MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE)) {
+		if (subject.startsWith("RE:")) {
 			return subject;
 		}
 		else {
-			return MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE +
-				message.getSubject();
+			return "RE: " + message.getSubject();
 		}
 	}
 

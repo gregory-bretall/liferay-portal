@@ -21,9 +21,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.HashMap;
@@ -42,24 +39,16 @@ public class BaseTinyMCEEditorConfigConfigurator
 		ThemeDisplay themeDisplay,
 		RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
-		StringBundler sb = new StringBundler(3);
+		String themeCssPath = HtmlUtil.escape(themeDisplay.getPathThemeCss());
 
-		sb.append(
-			HtmlUtil.escape(
-				PortalUtil.getStaticResourceURL(
-					themeDisplay.getRequest(),
-					themeDisplay.getPathThemeCss() + "/aui.css")));
-		sb.append(StringPool.COMMA);
-		sb.append(
-			HtmlUtil.escape(
-				PortalUtil.getStaticResourceURL(
-					themeDisplay.getRequest(),
-					themeDisplay.getPathThemeCss() + "/main.css")));
-
-		jsonObject.put("content_css", sb.toString());
+		jsonObject.put(
+			"content_css",
+			themeCssPath + "/aui.css," + themeCssPath + "/main.css");
 
 		jsonObject.put("convert_urls", Boolean.FALSE);
+
 		jsonObject.put("extended_valid_elements", _EXTENDED_VALID_ELEMENTS);
+
 		jsonObject.put("invalid_elements", "script");
 
 		String contentsLanguageId = (String)inputEditorTaglibAttributes.get(

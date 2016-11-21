@@ -71,7 +71,7 @@ public class ThemeSettingImpl implements Serializable, ThemeSetting {
 
 	@Override
 	public void setConfigurable(boolean configurable) {
-		_configurable = configurable;
+		this._configurable = configurable;
 	}
 
 	@Override

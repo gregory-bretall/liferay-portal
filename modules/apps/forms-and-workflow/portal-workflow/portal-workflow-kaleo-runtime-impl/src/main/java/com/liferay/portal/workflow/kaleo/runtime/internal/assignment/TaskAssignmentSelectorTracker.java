@@ -15,7 +15,6 @@
 package com.liferay.portal.workflow.kaleo.runtime.internal.assignment;
 
 import com.liferay.portal.workflow.kaleo.runtime.assignment.TaskAssignmentSelector;
-import com.liferay.portal.workflow.kaleo.runtime.assignment.TaskAssignmentSelectorRegistry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,11 +28,9 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 /**
  * @author Leonardo Barros
  */
-@Component(immediate = true, service = TaskAssignmentSelectorRegistry.class)
-public class TaskAssignmentSelectorTracker
-	implements TaskAssignmentSelectorRegistry {
+@Component(immediate = true, service = TaskAssignmentSelectorTracker.class)
+public class TaskAssignmentSelectorTracker {
 
-	@Override
 	public TaskAssignmentSelector getTaskAssignmentSelector(
 		String assigneeClassName) {
 

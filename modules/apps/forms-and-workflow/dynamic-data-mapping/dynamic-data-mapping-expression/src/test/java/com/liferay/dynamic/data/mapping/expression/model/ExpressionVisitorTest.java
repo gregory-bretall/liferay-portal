@@ -86,25 +86,24 @@ public class ExpressionVisitorTest {
 		@Override
 		public String visit(AndExpression andExpression) {
 			return formatBinaryExpression(
-				andExpression.getOperator(),
-				andExpression.getLeftOperandExpression(),
-				andExpression.getRightOperandExpression());
+				andExpression.getOperator(), andExpression.getLeftOperand(),
+				andExpression.getRightOperand());
 		}
 
 		@Override
 		public String visit(ArithmeticExpression arithmeticExpression) {
 			return formatBinaryExpression(
 				arithmeticExpression.getOperator(),
-				arithmeticExpression.getLeftOperandExpression(),
-				arithmeticExpression.getRightOperandExpression());
+				arithmeticExpression.getLeftOperand(),
+				arithmeticExpression.getRightOperand());
 		}
 
 		@Override
 		public String visit(ComparisonExpression comparisonExpression) {
 			return formatBinaryExpression(
 				comparisonExpression.getOperator(),
-				comparisonExpression.getLeftOperandExpression(),
-				comparisonExpression.getRightOperandExpression());
+				comparisonExpression.getLeftOperand(),
+				comparisonExpression.getRightOperand());
 		}
 
 		@Override
@@ -112,7 +111,7 @@ public class ExpressionVisitorTest {
 			StringBundler sb = new StringBundler();
 
 			for (Expression parameter :
-					functionCallExpression.getParameterExpressions()) {
+					functionCallExpression.getParameters()) {
 
 				sb.append(visit(parameter));
 				sb.append(", ");
@@ -127,22 +126,19 @@ public class ExpressionVisitorTest {
 
 		@Override
 		public String visit(MinusExpression minusExpression) {
-			return String.format(
-				"-(%s)", visit(minusExpression.getOperandExpression()));
+			return String.format("-(%s)", visit(minusExpression.getOperand()));
 		}
 
 		@Override
 		public String visit(NotExpression notExpression) {
-			return String.format(
-				"not(%s)", visit(notExpression.getOperandExpression()));
+			return String.format("not(%s)", visit(notExpression.getOperand()));
 		}
 
 		@Override
 		public String visit(OrExpression orExpression) {
 			return formatBinaryExpression(
-				orExpression.getOperator(),
-				orExpression.getLeftOperandExpression(),
-				orExpression.getRightOperandExpression());
+				orExpression.getOperator(), orExpression.getLeftOperand(),
+				orExpression.getRightOperand());
 		}
 
 		@Override

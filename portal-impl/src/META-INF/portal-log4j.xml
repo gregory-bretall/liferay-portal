@@ -652,10 +652,6 @@
 		<priority value="ERROR" />
 	</category>
 
-	<category name="com.liferay.portal.service.persistence.impl">
-		<priority value="WARN " />
-	</category>
-
 	<category name="com.liferay.portal.servlet">
 		<priority value="ERROR" />
 	</category>
@@ -954,6 +950,14 @@
 
 	<category name="com.liferay.portlet.asset.util.AssetUtil">
 		<priority value="ERROR" />
+	</category>
+
+	<category name="com.liferay.portlet.blogs.service.impl.BlogsEntryLocalServiceImpl">
+		<priority value="INFO" />
+	</category>
+
+	<category name="com.liferay.portlet.blogs.util">
+		<priority value="INFO" />
 	</category>
 
 	<category name="com.liferay.portlet.documentlibrary.lar">

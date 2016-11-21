@@ -25,12 +25,12 @@
 
 				"operands": [
 					{
-						"type": "field",
-						"value": "Field1"
+						"type": "constant",
+						"value": "2"
 					},
 					{
-						"type": "field",
-						"value": "Field2"
+						"type": "constant",
+						"value": "3"
 					}
 				],
 				"operator": "greater-than-equals"
@@ -38,12 +38,12 @@
 			{
 				"operands": [
 					{
-						"type": "field",
-						"value": "Field1"
+						"type": "constant",
+						"value": "1"
 					},
 					{
-						"type": "field",
-						"value": "Field2"
+						"type": "constant",
+						"value": "4"
 					}
 				],
 				"operator": "less-than"
@@ -51,12 +51,12 @@
 			{
 				"operands": [
 					{
-						"type": "field",
-						"value": "Field1"
+						"type": "constant",
+						"value": "6"
 					},
 					{
-						"type": "field",
-						"value": "Field2"
+						"type": "constant",
+						"value": "2"
 					}
 				],
 				"operator": "less-than-equals"

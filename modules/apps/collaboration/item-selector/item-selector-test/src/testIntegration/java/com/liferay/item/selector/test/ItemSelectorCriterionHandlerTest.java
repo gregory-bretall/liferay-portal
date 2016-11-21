@@ -14,7 +14,6 @@
 
 package com.liferay.item.selector.test;
 
-import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.item.selector.ItemSelectorCriterion;
 import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.ItemSelectorView;
@@ -26,6 +25,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,7 +37,6 @@ import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -47,10 +48,7 @@ public class ItemSelectorCriterionHandlerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_bundle = FrameworkUtil.getBundle(
-			ItemSelectorCriterionHandlerTest.class);
-
-		_bundleContext = _bundle.getBundleContext();
+		_bundleContext = bundle.getBundleContext();
 
 		_serviceReference = _bundleContext.getServiceReference(
 			TestItemSelectorCriterionHandler.class);
@@ -118,6 +116,9 @@ public class ItemSelectorCriterionHandlerTest {
 		}
 	}
 
+	@ArquillianResource
+	public Bundle bundle;
+
 	protected ServiceRegistration<ItemSelectorView> registerItemSelectorView(
 		ItemSelectorView itemSelectorView, String itemSelectorViewKey) {
 
@@ -148,7 +149,6 @@ public class ItemSelectorCriterionHandlerTest {
 		serviceRegistrations.forEach(ServiceRegistration::unregister);
 	}
 
-	private Bundle _bundle;
 	private BundleContext _bundleContext;
 	private TestItemSelectorCriterionHandler _itemSelectorCriterionHandler;
 	private ServiceReference<TestItemSelectorCriterionHandler>

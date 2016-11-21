@@ -16,7 +16,9 @@ package com.liferay.portal.portlet.bridge.soy.internal;
 
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.template.Template;
+import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -30,7 +32,6 @@ import java.lang.reflect.Method;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +57,11 @@ public class SoyPortletHelperTest {
 	public void testgetPortletJavaScriptWithBundleWithoutPackageFile()
 		throws Exception {
 
-		String portletJavaScript = getPortletJavaScript(_mockBundle, "View");
+		SoyPortletHelper soyPortletHelper = new SoyPortletHelper(_mockBundle);
+
+		String portletJavaScript = soyPortletHelper.getPortletJavaScript(
+			_mockTemplate, "View", StringUtil.randomString(),
+			Collections.<String>emptySet());
 
 		Assert.assertEquals(StringPool.BLANK, portletJavaScript);
 	}
@@ -65,43 +70,6 @@ public class SoyPortletHelperTest {
 	public void testgetPortletJavaScriptWithBundleWithPackageFile()
 		throws Exception {
 
-		Bundle bundle = getBundleWithPackageFile();
-
-		String portletJavaScript = getPortletJavaScript(bundle, "View");
-
-		Assert.assertNotEquals(StringPool.BLANK, portletJavaScript);
-	}
-
-	@Test
-	public void testgetRequiredModulesWithBundleWithPackageFile()
-		throws Exception {
-
-		Bundle bundle = getBundleWithPackageFile();
-
-		SoyPortletHelper soyPortletHelper = new SoyPortletHelper(bundle);
-
-		Set<String> expectedRequiredModules = new HashSet<>();
-
-		expectedRequiredModules.add("SampleModuleName/View.soy");
-
-		Set<String> actualRequiredModules = soyPortletHelper.getRequiredModules(
-			"View", Collections.<String>emptySet());
-
-		Assert.assertEquals(expectedRequiredModules, actualRequiredModules);
-	}
-
-	@Test
-	public void testTemplateNamespace() throws Exception {
-		String path = "View";
-
-		SoyPortletHelper soyPortletHelper = new SoyPortletHelper(_mockBundle);
-
-		Assert.assertEquals(
-			path.concat(".render"),
-			soyPortletHelper.getTemplateNamespace(path));
-	}
-
-	protected Bundle getBundleWithPackageFile() {
 		Bundle bundle = (Bundle)ProxyUtil.newProxyInstance(
 			Bundle.class.getClassLoader(), new Class<?>[] {Bundle.class},
 			new InvocationHandler() {
@@ -123,21 +91,51 @@ public class SoyPortletHelperTest {
 
 			});
 
-		return bundle;
-	}
-
-	protected String getPortletJavaScript(Bundle bundle, String path)
-		throws Exception {
-
 		SoyPortletHelper soyPortletHelper = new SoyPortletHelper(bundle);
+
+		String portletNamespace = StringUtil.randomString();
+
+		// Expected
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+		String portletComponentId = portletNamespace.concat("PortletComponent");
+
+		jsonObject.put(TemplateConstants.NAMESPACE, portletNamespace);
+		jsonObject.put("element", StringPool.POUND.concat(portletComponentId));
+		jsonObject.put("id", portletComponentId);
+
+		jsonObject.put("key 1", "value 1");
+
+		String expectedPortletJavaScript =
+			soyPortletHelper.getPortletJavaScript(
+				jsonObject.toJSONString(), portletNamespace,
+				"\"SampleModuleName/View.soy\"");
+
+		// Actual
 
 		Template template = new MockTemplate();
 
-		String portletJavaScript = soyPortletHelper.getPortletJavaScript(
-			template, path, StringUtil.randomString(),
-			Collections.<String>emptySet());
+		template.put(TemplateConstants.NAMESPACE, portletNamespace);
+		template.put("element", StringPool.POUND.concat(portletComponentId));
+		template.put("id", portletComponentId);
+		template.put("key 1", "value 1");
 
-		return portletJavaScript;
+		String actualPortletJavaScript = soyPortletHelper.getPortletJavaScript(
+			template, "View", portletNamespace, Collections.<String>emptySet());
+
+		Assert.assertEquals(expectedPortletJavaScript, actualPortletJavaScript);
+	}
+
+	@Test
+	public void testTemplateNamespace() throws Exception {
+		String path = "View";
+
+		SoyPortletHelper soyPortletHelper = new SoyPortletHelper(_mockBundle);
+
+		Assert.assertEquals(
+			path.concat(".render"),
+			soyPortletHelper.getTemplateNamespace(path));
 	}
 
 	protected void setUpHtmlUtil() {
@@ -154,6 +152,17 @@ public class SoyPortletHelperTest {
 
 	private final Bundle _mockBundle = (Bundle)ProxyUtil.newProxyInstance(
 		Bundle.class.getClassLoader(), new Class<?>[] {Bundle.class},
+		new InvocationHandler() {
+
+			@Override
+			public Object invoke(Object proxy, Method method, Object[] args) {
+				return null;
+			}
+
+		});
+
+	private final Template _mockTemplate = (Template)ProxyUtil.newProxyInstance(
+		Template.class.getClassLoader(), new Class<?>[] {Template.class},
 		new InvocationHandler() {
 
 			@Override

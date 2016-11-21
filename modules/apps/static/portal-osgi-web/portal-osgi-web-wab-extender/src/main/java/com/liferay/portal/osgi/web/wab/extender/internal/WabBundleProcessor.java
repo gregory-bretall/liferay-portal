@@ -364,9 +364,11 @@ public class WabBundleProcessor {
 		// The following supported listener is omitted on purpose because it is
 		// registered individually.
 
-		/*if (ServletContextListener.class.isInstance(eventListener)) {
+		/*
+		if (ServletContextListener.class.isInstance(eventListener)) {
 			classNamesList.add(ServletContextListener.class.getName());
-		}*/
+		}
+		*/
 
 		if (ServletRequestAttributeListener.class.isInstance(eventListener)) {
 			classNamesList.add(ServletRequestAttributeListener.class.getName());

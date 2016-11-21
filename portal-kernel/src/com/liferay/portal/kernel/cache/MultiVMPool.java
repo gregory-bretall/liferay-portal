@@ -14,15 +14,12 @@
 
 package com.liferay.portal.kernel.cache;
 
-import aQute.bnd.annotation.ProviderType;
-
 import java.io.Serializable;
 
 /**
  * @author Brian Wing Shun Chan
  * @author Michael Young
  */
-@ProviderType
 public interface MultiVMPool {
 
 	public void clear();
@@ -54,9 +51,6 @@ public interface MultiVMPool {
 
 	public PortalCache<? extends Serializable, ? extends Serializable>
 		getPortalCache(String portalCacheName, boolean blocking);
-
-	public PortalCache<? extends Serializable, ? extends Serializable>
-		getPortalCache(String portalCacheName, boolean blocking, boolean mvcc);
 
 	public PortalCacheManager<? extends Serializable, ? extends Serializable>
 		getPortalCacheManager();

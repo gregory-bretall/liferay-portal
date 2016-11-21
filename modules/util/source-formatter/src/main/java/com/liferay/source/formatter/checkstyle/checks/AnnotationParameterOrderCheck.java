@@ -39,7 +39,7 @@ public class AnnotationParameterOrderCheck extends AbstractCheck {
 	public void visitToken(DetailAST detailAST) {
 		List<DetailAST> annotationMemberValuePairASTList =
 			DetailASTUtil.getAllChildTokens(
-				detailAST, false, TokenTypes.ANNOTATION_MEMBER_VALUE_PAIR);
+				detailAST, TokenTypes.ANNOTATION_MEMBER_VALUE_PAIR, false);
 
 		String previousName = null;
 

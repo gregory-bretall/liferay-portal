@@ -12503,7 +12503,7 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((DLFileEntryModelImpl)dlFileEntry, true);
+		clearUniqueFindersCache((DLFileEntryModelImpl)dlFileEntry);
 	}
 
 	@Override
@@ -12515,71 +12515,127 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 			entityCache.removeResult(DLFileEntryModelImpl.ENTITY_CACHE_ENABLED,
 				DLFileEntryImpl.class, dlFileEntry.getPrimaryKey());
 
-			clearUniqueFindersCache((DLFileEntryModelImpl)dlFileEntry, true);
+			clearUniqueFindersCache((DLFileEntryModelImpl)dlFileEntry);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		DLFileEntryModelImpl dlFileEntryModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					dlFileEntryModelImpl.getUuid(),
+					dlFileEntryModelImpl.getGroupId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+				dlFileEntryModelImpl);
+
+			args = new Object[] {
+					dlFileEntryModelImpl.getGroupId(),
+					dlFileEntryModelImpl.getFolderId(),
+					dlFileEntryModelImpl.getName()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_N, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_N, args,
+				dlFileEntryModelImpl);
+
+			args = new Object[] {
+					dlFileEntryModelImpl.getGroupId(),
+					dlFileEntryModelImpl.getFolderId(),
+					dlFileEntryModelImpl.getFileName()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_FN, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_FN, args,
+				dlFileEntryModelImpl);
+
+			args = new Object[] {
+					dlFileEntryModelImpl.getGroupId(),
+					dlFileEntryModelImpl.getFolderId(),
+					dlFileEntryModelImpl.getTitle()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_T, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_T, args,
+				dlFileEntryModelImpl);
+		}
+		else {
+			if ((dlFileEntryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						dlFileEntryModelImpl.getUuid(),
+						dlFileEntryModelImpl.getGroupId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+					dlFileEntryModelImpl);
+			}
+
+			if ((dlFileEntryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_G_F_N.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						dlFileEntryModelImpl.getGroupId(),
+						dlFileEntryModelImpl.getFolderId(),
+						dlFileEntryModelImpl.getName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_N, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_N, args,
+					dlFileEntryModelImpl);
+			}
+
+			if ((dlFileEntryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_G_F_FN.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						dlFileEntryModelImpl.getGroupId(),
+						dlFileEntryModelImpl.getFolderId(),
+						dlFileEntryModelImpl.getFileName()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_FN, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_FN, args,
+					dlFileEntryModelImpl);
+			}
+
+			if ((dlFileEntryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_G_F_T.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						dlFileEntryModelImpl.getGroupId(),
+						dlFileEntryModelImpl.getFolderId(),
+						dlFileEntryModelImpl.getTitle()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_T, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_T, args,
+					dlFileEntryModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		DLFileEntryModelImpl dlFileEntryModelImpl) {
 		Object[] args = new Object[] {
 				dlFileEntryModelImpl.getUuid(),
 				dlFileEntryModelImpl.getGroupId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-			dlFileEntryModelImpl, false);
-
-		args = new Object[] {
-				dlFileEntryModelImpl.getGroupId(),
-				dlFileEntryModelImpl.getFolderId(),
-				dlFileEntryModelImpl.getName()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_N, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_N, args,
-			dlFileEntryModelImpl, false);
-
-		args = new Object[] {
-				dlFileEntryModelImpl.getGroupId(),
-				dlFileEntryModelImpl.getFolderId(),
-				dlFileEntryModelImpl.getFileName()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_FN, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_FN, args,
-			dlFileEntryModelImpl, false);
-
-		args = new Object[] {
-				dlFileEntryModelImpl.getGroupId(),
-				dlFileEntryModelImpl.getFolderId(),
-				dlFileEntryModelImpl.getTitle()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_G_F_T, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_G_F_T, args,
-			dlFileEntryModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		DLFileEntryModelImpl dlFileEntryModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					dlFileEntryModelImpl.getUuid(),
-					dlFileEntryModelImpl.getGroupId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 
 		if ((dlFileEntryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					dlFileEntryModelImpl.getOriginalUuid(),
 					dlFileEntryModelImpl.getOriginalGroupId()
 				};
@@ -12588,20 +12644,18 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					dlFileEntryModelImpl.getGroupId(),
-					dlFileEntryModelImpl.getFolderId(),
-					dlFileEntryModelImpl.getName()
-				};
+		args = new Object[] {
+				dlFileEntryModelImpl.getGroupId(),
+				dlFileEntryModelImpl.getFolderId(),
+				dlFileEntryModelImpl.getName()
+			};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_F_N, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_N, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_G_F_N, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_N, args);
 
 		if ((dlFileEntryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_G_F_N.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					dlFileEntryModelImpl.getOriginalGroupId(),
 					dlFileEntryModelImpl.getOriginalFolderId(),
 					dlFileEntryModelImpl.getOriginalName()
@@ -12611,20 +12665,18 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_N, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					dlFileEntryModelImpl.getGroupId(),
-					dlFileEntryModelImpl.getFolderId(),
-					dlFileEntryModelImpl.getFileName()
-				};
+		args = new Object[] {
+				dlFileEntryModelImpl.getGroupId(),
+				dlFileEntryModelImpl.getFolderId(),
+				dlFileEntryModelImpl.getFileName()
+			};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_F_FN, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_FN, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_G_F_FN, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_FN, args);
 
 		if ((dlFileEntryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_G_F_FN.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					dlFileEntryModelImpl.getOriginalGroupId(),
 					dlFileEntryModelImpl.getOriginalFolderId(),
 					dlFileEntryModelImpl.getOriginalFileName()
@@ -12634,20 +12686,18 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_FN, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					dlFileEntryModelImpl.getGroupId(),
-					dlFileEntryModelImpl.getFolderId(),
-					dlFileEntryModelImpl.getTitle()
-				};
+		args = new Object[] {
+				dlFileEntryModelImpl.getGroupId(),
+				dlFileEntryModelImpl.getFolderId(),
+				dlFileEntryModelImpl.getTitle()
+			};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_F_T, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_T, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_G_F_T, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_G_F_T, args);
 
 		if ((dlFileEntryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_G_F_T.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					dlFileEntryModelImpl.getOriginalGroupId(),
 					dlFileEntryModelImpl.getOriginalFolderId(),
 					dlFileEntryModelImpl.getOriginalTitle()
@@ -13113,8 +13163,8 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 			DLFileEntryImpl.class, dlFileEntry.getPrimaryKey(), dlFileEntry,
 			false);
 
-		clearUniqueFindersCache(dlFileEntryModelImpl, false);
-		cacheUniqueFindersCache(dlFileEntryModelImpl);
+		clearUniqueFindersCache(dlFileEntryModelImpl);
+		cacheUniqueFindersCache(dlFileEntryModelImpl, isNew);
 
 		dlFileEntry.resetOriginalValues();
 

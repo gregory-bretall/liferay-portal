@@ -46,17 +46,14 @@ public abstract class BaseAssetEntryQueryProcessor
 	 * @deprecated As of 7.0.0
 	 */
 	@Deprecated
-	@Override
 	public String getTitle(Locale locale) {
 		return StringPool.BLANK;
 	}
 
 	/**
 	 * @deprecated As of 7.0.0
-	 * @throws IOException
 	 */
 	@Deprecated
-	@Override
 	public void include(
 			HttpServletRequest request, HttpServletResponse response)
 		throws IOException {

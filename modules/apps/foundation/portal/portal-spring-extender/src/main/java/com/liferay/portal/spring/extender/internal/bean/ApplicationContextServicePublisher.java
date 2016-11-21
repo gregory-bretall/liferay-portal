@@ -89,29 +89,25 @@ public class ApplicationContextServicePublisher {
 		_serviceRegistrations.clear();
 	}
 
-	protected Dictionary<String, Object> getBeanProperties(
-		String symbloicName, Object object) {
-
-		HashMapDictionary<String, Object> properties =
-			new HashMapDictionary<>();
-
-		properties.put("origin.bundle.symbolic.name", symbloicName);
-
+	protected Dictionary<String, Object> getBeanProperties(Object object) {
 		Class<? extends Object> clazz = null;
 
 		try {
 			clazz = getTargetClass(object);
 		}
 		catch (Exception e) {
-			return properties;
+			return new HashMapDictionary<>();
 		}
 
 		OSGiBeanProperties osgiBeanProperties = AnnotationUtils.findAnnotation(
 			clazz, OSGiBeanProperties.class);
 
 		if (osgiBeanProperties == null) {
-			return properties;
+			return null;
 		}
+
+		HashMapDictionary<String, Object> properties =
+			new HashMapDictionary<>();
 
 		properties.putAll(OSGiBeanProperties.Convert.toMap(osgiBeanProperties));
 
@@ -222,11 +218,7 @@ public class ApplicationContextServicePublisher {
 			return;
 		}
 
-		Bundle bundle = bundleContext.getBundle();
-
-		registerService(
-			bundleContext, bean, names,
-			getBeanProperties(bundle.getSymbolicName(), bean));
+		registerService(bundleContext, bean, names, getBeanProperties(bean));
 	}
 
 	protected void registerService(

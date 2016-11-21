@@ -109,7 +109,7 @@ public class CalendarBookingLocalServiceImpl
 
 		// Calendar booking
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		Calendar calendar = calendarPersistence.findByPrimaryKey(calendarId);
 
 		long calendarBookingId = counterLocalService.increment();
@@ -288,7 +288,7 @@ public class CalendarBookingLocalServiceImpl
 
 		for (CalendarBooking calendarBooking : calendarBookings) {
 			try {
-				Company company = companyLocalService.getCompany(
+				Company company = companyPersistence.findByPrimaryKey(
 					calendarBooking.getCompanyId());
 
 				if (company.isActive()) {
@@ -1270,7 +1270,7 @@ public class CalendarBookingLocalServiceImpl
 
 		// Calendar booking
 
-		User user = userLocalService.getUser(userId);
+		User user = userPersistence.findByPrimaryKey(userId);
 		Date now = new Date();
 
 		int oldStatus = calendarBooking.getStatus();

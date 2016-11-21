@@ -52,13 +52,6 @@ public class PropfindMethodImpl extends BasePropMethodImpl implements Method {
 			return writeResponseXML(webDAVRequest, props);
 		}
 		catch (InvalidRequestException ire) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(ire, ire);
-			}
-
 			return HttpServletResponse.SC_BAD_REQUEST;
 		}
 		catch (Exception e) {

@@ -774,15 +774,11 @@ public class ListTypePersistenceImpl extends BasePersistenceImpl<ListType>
 						list);
 				}
 				else {
-					if (list.size() > 1) {
-						Collections.sort(list, Collections.reverseOrder());
-
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								"ListTypePersistenceImpl.fetchByN_T(String, String, boolean) with parameters (" +
-								StringUtil.merge(finderArgs) +
-								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
-						}
+					if ((list.size() > 1) && _log.isWarnEnabled()) {
+						_log.warn(
+							"ListTypePersistenceImpl.fetchByN_T(String, String, boolean) with parameters (" +
+							StringUtil.merge(finderArgs) +
+							") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
 					}
 
 					ListType listType = list.get(0);
@@ -993,7 +989,7 @@ public class ListTypePersistenceImpl extends BasePersistenceImpl<ListType>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((ListTypeModelImpl)listType, true);
+		clearUniqueFindersCache((ListTypeModelImpl)listType);
 	}
 
 	@Override
@@ -1005,35 +1001,48 @@ public class ListTypePersistenceImpl extends BasePersistenceImpl<ListType>
 			entityCache.removeResult(ListTypeModelImpl.ENTITY_CACHE_ENABLED,
 				ListTypeImpl.class, listType.getPrimaryKey());
 
-			clearUniqueFindersCache((ListTypeModelImpl)listType, true);
+			clearUniqueFindersCache((ListTypeModelImpl)listType);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(ListTypeModelImpl listTypeModelImpl) {
-		Object[] args = new Object[] {
-				listTypeModelImpl.getName(), listTypeModelImpl.getType()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_N_T, args, Long.valueOf(1),
-			false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_N_T, args,
-			listTypeModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		ListTypeModelImpl listTypeModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
+	protected void cacheUniqueFindersCache(
+		ListTypeModelImpl listTypeModelImpl, boolean isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 					listTypeModelImpl.getName(), listTypeModelImpl.getType()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_N_T, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_N_T, args);
+			finderCache.putResult(FINDER_PATH_COUNT_BY_N_T, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_N_T, args,
+				listTypeModelImpl);
 		}
+		else {
+			if ((listTypeModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_N_T.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						listTypeModelImpl.getName(), listTypeModelImpl.getType()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_N_T, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_N_T, args,
+					listTypeModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(ListTypeModelImpl listTypeModelImpl) {
+		Object[] args = new Object[] {
+				listTypeModelImpl.getName(), listTypeModelImpl.getType()
+			};
+
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_N_T, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_N_T, args);
 
 		if ((listTypeModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_N_T.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					listTypeModelImpl.getOriginalName(),
 					listTypeModelImpl.getOriginalType()
 				};
@@ -1198,8 +1207,8 @@ public class ListTypePersistenceImpl extends BasePersistenceImpl<ListType>
 		entityCache.putResult(ListTypeModelImpl.ENTITY_CACHE_ENABLED,
 			ListTypeImpl.class, listType.getPrimaryKey(), listType, false);
 
-		clearUniqueFindersCache(listTypeModelImpl, false);
-		cacheUniqueFindersCache(listTypeModelImpl);
+		clearUniqueFindersCache(listTypeModelImpl);
+		cacheUniqueFindersCache(listTypeModelImpl, isNew);
 
 		listType.resetOriginalValues();
 

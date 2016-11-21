@@ -45,26 +45,14 @@ public class LiferayAntPlugin implements Plugin<Project> {
 
 		antBuilder.importBuild("build.xml", _antTaskNamer);
 
-		_configureArchivesBaseName(project, antBuilder);
-		_configureArtifacts(project, antBuilder);
-		_configureVersion(project, antBuilder);
+		configureArchivesBaseName(project, antBuilder);
+		configureArtifacts(project, antBuilder);
+		configureVersion(project, antBuilder);
 
 		_configureAntTask(project, BasePlugin.CLEAN_TASK_NAME);
 	}
 
-	private void _configureAntTask(Project project, String targetName) {
-		String antTaskName = _antTaskNamer.transform(targetName);
-
-		if (targetName.equals(antTaskName)) {
-			return;
-		}
-
-		Task task = GradleUtil.getTask(project, targetName);
-
-		task.dependsOn(antTaskName);
-	}
-
-	private void _configureArchivesBaseName(
+	protected void configureArchivesBaseName(
 		Project project, AntBuilder antBuilder) {
 
 		BasePluginConvention basePluginConvention = GradleUtil.getConvention(
@@ -74,7 +62,7 @@ public class LiferayAntPlugin implements Plugin<Project> {
 			String.valueOf(antBuilder.getProperty("plugin.name")));
 	}
 
-	private void _configureArtifacts(
+	protected void configureArtifacts(
 		final Project project, AntBuilder antBuilder) {
 
 		ArtifactHandler artifacts = project.getArtifacts();
@@ -100,8 +88,20 @@ public class LiferayAntPlugin implements Plugin<Project> {
 			});
 	}
 
-	private void _configureVersion(Project project, AntBuilder antBuilder) {
+	protected void configureVersion(Project project, AntBuilder antBuilder) {
 		project.setVersion(antBuilder.getProperty("plugin.full.version"));
+	}
+
+	private void _configureAntTask(Project project, String targetName) {
+		String antTaskName = _antTaskNamer.transform(targetName);
+
+		if (targetName.equals(antTaskName)) {
+			return;
+		}
+
+		Task task = GradleUtil.getTask(project, targetName);
+
+		task.dependsOn(antTaskName);
 	}
 
 	private static final String _WAR_TASK_NAME = "war";

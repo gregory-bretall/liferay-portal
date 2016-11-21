@@ -10714,7 +10714,7 @@ public class AssetCategoryPersistenceImpl extends BasePersistenceImpl<AssetCateg
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((AssetCategoryModelImpl)assetCategory, true);
+		clearUniqueFindersCache((AssetCategoryModelImpl)assetCategory);
 	}
 
 	@Override
@@ -10726,49 +10726,77 @@ public class AssetCategoryPersistenceImpl extends BasePersistenceImpl<AssetCateg
 			entityCache.removeResult(AssetCategoryModelImpl.ENTITY_CACHE_ENABLED,
 				AssetCategoryImpl.class, assetCategory.getPrimaryKey());
 
-			clearUniqueFindersCache((AssetCategoryModelImpl)assetCategory, true);
+			clearUniqueFindersCache((AssetCategoryModelImpl)assetCategory);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
+		AssetCategoryModelImpl assetCategoryModelImpl, boolean isNew) {
+		if (isNew) {
+			Object[] args = new Object[] {
+					assetCategoryModelImpl.getUuid(),
+					assetCategoryModelImpl.getGroupId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+				assetCategoryModelImpl);
+
+			args = new Object[] {
+					assetCategoryModelImpl.getParentCategoryId(),
+					assetCategoryModelImpl.getName(),
+					assetCategoryModelImpl.getVocabularyId()
+				};
+
+			finderCache.putResult(FINDER_PATH_COUNT_BY_P_N_V, args,
+				Long.valueOf(1));
+			finderCache.putResult(FINDER_PATH_FETCH_BY_P_N_V, args,
+				assetCategoryModelImpl);
+		}
+		else {
+			if ((assetCategoryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						assetCategoryModelImpl.getUuid(),
+						assetCategoryModelImpl.getGroupId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+					assetCategoryModelImpl);
+			}
+
+			if ((assetCategoryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_P_N_V.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						assetCategoryModelImpl.getParentCategoryId(),
+						assetCategoryModelImpl.getName(),
+						assetCategoryModelImpl.getVocabularyId()
+					};
+
+				finderCache.putResult(FINDER_PATH_COUNT_BY_P_N_V, args,
+					Long.valueOf(1));
+				finderCache.putResult(FINDER_PATH_FETCH_BY_P_N_V, args,
+					assetCategoryModelImpl);
+			}
+		}
+	}
+
+	protected void clearUniqueFindersCache(
 		AssetCategoryModelImpl assetCategoryModelImpl) {
 		Object[] args = new Object[] {
 				assetCategoryModelImpl.getUuid(),
 				assetCategoryModelImpl.getGroupId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-			assetCategoryModelImpl, false);
-
-		args = new Object[] {
-				assetCategoryModelImpl.getParentCategoryId(),
-				assetCategoryModelImpl.getName(),
-				assetCategoryModelImpl.getVocabularyId()
-			};
-
-		finderCache.putResult(FINDER_PATH_COUNT_BY_P_N_V, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_P_N_V, args,
-			assetCategoryModelImpl, false);
-	}
-
-	protected void clearUniqueFindersCache(
-		AssetCategoryModelImpl assetCategoryModelImpl, boolean clearCurrent) {
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					assetCategoryModelImpl.getUuid(),
-					assetCategoryModelImpl.getGroupId()
-				};
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 
 		if ((assetCategoryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					assetCategoryModelImpl.getOriginalUuid(),
 					assetCategoryModelImpl.getOriginalGroupId()
 				};
@@ -10777,20 +10805,18 @@ public class AssetCategoryPersistenceImpl extends BasePersistenceImpl<AssetCateg
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 		}
 
-		if (clearCurrent) {
-			Object[] args = new Object[] {
-					assetCategoryModelImpl.getParentCategoryId(),
-					assetCategoryModelImpl.getName(),
-					assetCategoryModelImpl.getVocabularyId()
-				};
+		args = new Object[] {
+				assetCategoryModelImpl.getParentCategoryId(),
+				assetCategoryModelImpl.getName(),
+				assetCategoryModelImpl.getVocabularyId()
+			};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_P_N_V, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_P_N_V, args);
-		}
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_P_N_V, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_P_N_V, args);
 
 		if ((assetCategoryModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_P_N_V.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] {
+			args = new Object[] {
 					assetCategoryModelImpl.getOriginalParentCategoryId(),
 					assetCategoryModelImpl.getOriginalName(),
 					assetCategoryModelImpl.getOriginalVocabularyId()
@@ -11235,8 +11261,8 @@ public class AssetCategoryPersistenceImpl extends BasePersistenceImpl<AssetCateg
 			AssetCategoryImpl.class, assetCategory.getPrimaryKey(),
 			assetCategory, false);
 
-		clearUniqueFindersCache(assetCategoryModelImpl, false);
-		cacheUniqueFindersCache(assetCategoryModelImpl);
+		clearUniqueFindersCache(assetCategoryModelImpl);
+		cacheUniqueFindersCache(assetCategoryModelImpl, isNew);
 
 		assetCategory.resetOriginalValues();
 

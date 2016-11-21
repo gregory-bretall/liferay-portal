@@ -33,23 +33,19 @@ AUI.add(
 					},
 
 					onBlurMethod: {
-						getter: '_getEditorMethod',
-						validator: '_validateEditorMethod'
+						validator: Lang.isFunction
 					},
 
 					onChangeMethod: {
-						getter: '_getEditorMethod',
-						validator: '_validateEditorMethod'
+						validator: Lang.isFunction
 					},
 
 					onFocusMethod: {
-						getter: '_getEditorMethod',
-						validator: '_validateEditorMethod'
+						validator: Lang.isFunction
 					},
 
 					onInitMethod: {
-						getter: '_getEditorMethod',
-						validator: '_validateEditorMethod'
+						validator: Lang.isFunction
 					},
 
 					textMode: {
@@ -225,10 +221,6 @@ AUI.add(
 						}
 					},
 
-					_getEditorMethod: function(method) {
-						return Lang.isFunction(method) ? method : (window[method] || method);
-					},
-
 					_initializeData: function() {
 						var instance = this;
 
@@ -240,7 +232,7 @@ AUI.add(
 
 						var onInitFn = instance.get('onInitMethod');
 
-						if (Lang.isFunction(onInitFn)) {
+						if (onInitFn) {
 							onInitFn();
 						}
 
@@ -256,9 +248,7 @@ AUI.add(
 
 						var blurFn = instance.get('onBlurMethod');
 
-						if (Lang.isFunction(blurFn)) {
-							blurFn(event.editor);
-						}
+						blurFn(event.editor);
 					},
 
 					_onChange: function() {
@@ -266,9 +256,7 @@ AUI.add(
 
 						var changeFn = instance.get('onChangeMethod');
 
-						if (Lang.isFunction(changeFn)) {
-							changeFn(instance.getText());
-						}
+						changeFn(instance.getText());
 					},
 
 					_onCustomDataProcessorLoaded: function() {
@@ -286,9 +274,7 @@ AUI.add(
 
 						var focusFn = instance.get('onFocusMethod');
 
-						if (Lang.isFunction(focusFn)) {
-							focusFn(event.editor);
-						}
+						focusFn(event.editor);
 					},
 
 					_onInstanceReady: function() {
@@ -319,10 +305,6 @@ AUI.add(
 						fragment.writeHtml(writer);
 
 						event.data.dataValue = writer.getHtml();
-					},
-
-					_validateEditorMethod: function(method) {
-						return Lang.isString(method) || Lang.isFunction(method);
 					}
 				}
 			}

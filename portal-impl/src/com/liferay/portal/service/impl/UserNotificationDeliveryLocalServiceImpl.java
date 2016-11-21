@@ -16,8 +16,6 @@ package com.liferay.portal.service.impl;
 
 import com.liferay.portal.kernel.exception.NoSuchUserNotificationDeliveryException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserNotificationDelivery;
 import com.liferay.portal.service.base.UserNotificationDeliveryLocalServiceBaseImpl;
@@ -69,12 +67,6 @@ public class UserNotificationDeliveryLocalServiceImpl
 				userId, portletId, classNameId, notificationType, deliveryType);
 		}
 		catch (NoSuchUserNotificationDeliveryException nsunde) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(nsunde, nsunde);
-			}
 		}
 	}
 
@@ -118,8 +110,5 @@ public class UserNotificationDeliveryLocalServiceImpl
 		return userNotificationDeliveryPersistence.update(
 			userNotificationDelivery);
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		UserNotificationDeliveryLocalServiceImpl.class);
 
 }

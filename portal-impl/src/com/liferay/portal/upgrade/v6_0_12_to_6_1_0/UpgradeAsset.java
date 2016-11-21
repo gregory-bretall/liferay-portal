@@ -71,16 +71,11 @@ public class UpgradeAsset extends UpgradeProcess {
 					long journalStructureId = getJournalStructureId(
 						structureId);
 
-					StringBundler sb = new StringBundler(6);
-
-					sb.append("update AssetEntry set classTypeId = ");
-					sb.append(journalStructureId);
-					sb.append(" where classNameId = ");
-					sb.append(classNameId);
-					sb.append(" and classPK = ");
-					sb.append(resourcePrimKey);
-
-					runSQL(sb.toString());
+					runSQL(
+						"update AssetEntry set classTypeId = " +
+							journalStructureId + " where classNameId = " +
+								classNameId + " and classPK = " +
+									resourcePrimKey);
 				}
 			}
 		}

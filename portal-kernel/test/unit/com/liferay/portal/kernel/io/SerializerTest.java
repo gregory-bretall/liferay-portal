@@ -695,7 +695,7 @@ public class SerializerTest {
 
 		Assert.assertEquals(9, byteBuffer.limit());
 		Assert.assertEquals(SerializationConstants.TC_DOUBLE, byteBuffer.get());
-		Assert.assertTrue(byteBuffer.getDouble() == 17.58D);
+		Assert.assertTrue(17.58D == byteBuffer.getDouble());
 	}
 
 	@Test
@@ -708,7 +708,7 @@ public class SerializerTest {
 
 		Assert.assertEquals(5, byteBuffer.limit());
 		Assert.assertEquals(SerializationConstants.TC_FLOAT, byteBuffer.get());
-		Assert.assertTrue(byteBuffer.getFloat() == 17.58F);
+		Assert.assertTrue(17.58F == byteBuffer.getFloat());
 	}
 
 	@Test

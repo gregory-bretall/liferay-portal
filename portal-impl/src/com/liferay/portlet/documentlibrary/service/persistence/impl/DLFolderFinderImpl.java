@@ -29,8 +29,6 @@ import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.Type;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -801,12 +799,6 @@ public class DLFolderFinderImpl
 			return dlGroupServiceSettings.isShowHiddenMountFolders();
 		}
 		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
 		}
 
 		return false;
@@ -853,8 +845,5 @@ public class DLFolderFinderImpl
 
 		return sql;
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		DLFolderFinderImpl.class);
 
 }

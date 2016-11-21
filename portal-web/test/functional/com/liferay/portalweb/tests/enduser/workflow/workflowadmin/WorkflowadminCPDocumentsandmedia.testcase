@@ -803,6 +803,11 @@
 			<var name="workflowTask" value="Review" />
 		</execute>
 
+		<execute macro="Workflow#viewPreviewCategories">
+			<var name="categoryNameList" value="legal,Other" />
+			<var name="vocabularyName" value="Vocabulary Name" />
+		</execute>
+
 		<execute macro="Workflow#gotoPreviewEdit" />
 
 		<execute macro="DMDocument#viewCategories">

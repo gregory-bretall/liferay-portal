@@ -64,7 +64,7 @@ renderResponse.setTitle((kbFolder == null) ? LanguageUtil.get(resourceBundle, "n
 
 			<c:if test="<%= kbFolder == null %>">
 				<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="permissions">
-					<aui:field-wrapper>
+					<aui:field-wrapper cssClass='<%= (parentResourcePrimKey != KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) ? "hide" : StringPool.BLANK %>'>
 						<liferay-ui:input-permissions
 							modelName="<%= KBFolder.class.getName() %>"
 						/>

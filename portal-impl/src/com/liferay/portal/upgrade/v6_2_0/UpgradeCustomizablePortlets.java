@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.impl.PortletPreferencesImpl;
@@ -64,14 +63,11 @@ public class UpgradeCustomizablePortlets extends UpgradeProcess {
 			long ownerId, int ownerType, long plid, String portletId)
 		throws Exception {
 
-		StringBundler sb = new StringBundler(3);
-
-		sb.append("select portletPreferencesId, ownerId, ownerType, plid, ");
-		sb.append("portletId, preferences from PortletPreferences where ");
-		sb.append("ownerId = ?, ownerType = ?, plid = ?, portletId = ?");
-
 		try (PreparedStatement ps = connection.prepareStatement(
-				sb.toString())) {
+				"select portletPreferencesId, ownerId, ownerType, plid, " +
+					"portletId, preferences from PortletPreferences where " +
+						"ownerId = ?, ownerType = ?, plid = ?, portletId = " +
+							"?")) {
 
 			ps.setLong(1, ownerId);
 			ps.setInt(2, ownerType);
@@ -160,15 +156,11 @@ public class UpgradeCustomizablePortlets extends UpgradeProcess {
 
 				List<String> newPortletIds = new ArrayList<>();
 
-				StringBundler sb = new StringBundler(4);
-
-				sb.append("update PortletPreferences set ownerId = ?, ");
-				sb.append("ownerType = ?, plid = ?, portletId = ? where ");
-				sb.append("ownerId = ? and ownerType = ? and plid = ? and ");
-				sb.append("portletId = ?");
-
 				try (PreparedStatement ps = connection.prepareStatement(
-						sb.toString())) {
+						"update PortletPreferences set ownerId = ?, " +
+							"ownerType = ?, plid = ?, portletId = ? where " +
+							"ownerId = ? and ownerType = ? and plid = ? and " +
+							"portletId = ?")) {
 
 					for (String customPortletId : StringUtil.split(value)) {
 						String newPortletId = null;

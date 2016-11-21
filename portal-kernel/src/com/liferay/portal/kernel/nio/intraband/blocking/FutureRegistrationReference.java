@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 /**
  * @author Shuyang Zhou
  */
-public class FutureRegistrationReference implements RegistrationReference {
+class FutureRegistrationReference implements RegistrationReference {
 
 	@Override
 	public void cancelRegistration() {

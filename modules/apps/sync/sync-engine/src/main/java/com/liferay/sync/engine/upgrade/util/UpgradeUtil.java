@@ -17,16 +17,12 @@ package com.liferay.sync.engine.upgrade.util;
 import com.liferay.sync.engine.model.SyncProp;
 import com.liferay.sync.engine.service.SyncAccountService;
 import com.liferay.sync.engine.service.SyncFileService;
-import com.liferay.sync.engine.service.SyncLanClientService;
-import com.liferay.sync.engine.service.SyncLanEndpointService;
 import com.liferay.sync.engine.service.SyncPropService;
 import com.liferay.sync.engine.service.SyncSiteService;
 import com.liferay.sync.engine.service.SyncUserService;
 import com.liferay.sync.engine.service.SyncWatchEventService;
 import com.liferay.sync.engine.service.persistence.SyncAccountPersistence;
 import com.liferay.sync.engine.service.persistence.SyncFilePersistence;
-import com.liferay.sync.engine.service.persistence.SyncLanClientPersistence;
-import com.liferay.sync.engine.service.persistence.SyncLanEndpointPersistence;
 import com.liferay.sync.engine.service.persistence.SyncPropPersistence;
 import com.liferay.sync.engine.service.persistence.SyncSitePersistence;
 import com.liferay.sync.engine.service.persistence.SyncUserPersistence;
@@ -41,8 +37,6 @@ import com.liferay.sync.engine.upgrade.v3_0_9.UpgradeProcess_3_0_9;
 import com.liferay.sync.engine.upgrade.v3_1_0.UpgradeProcess_3_1_0;
 import com.liferay.sync.engine.upgrade.v3_2_1.UpgradeProcess_3_2_1;
 import com.liferay.sync.engine.upgrade.v3_3_0.UpgradeProcess_3_3_0;
-import com.liferay.sync.engine.upgrade.v3_4_0.UpgradeProcess_3_4_0;
-import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.LoggerUtil;
 import com.liferay.sync.engine.util.PropsValues;
 import com.liferay.sync.engine.util.ReleaseInfo;
@@ -94,12 +88,12 @@ public class UpgradeUtil {
 			Path loggerConfigurationFilePath = configurationFilePath.resolve(
 				PropsValues.SYNC_LOGGER_CONFIGURATION_FILE);
 
-			if (!FileUtil.exists(loggerConfigurationFilePath)) {
+			if (!Files.exists(loggerConfigurationFilePath)) {
 				copyLoggerConfiguration();
 			}
 
 			SyncPropService.updateSyncProp(
-				SyncProp.KEY_BUILD_NUMBER, ReleaseInfo.getBuildNumber());
+				"buildNumber", ReleaseInfo.getBuildNumber());
 
 			return;
 		}
@@ -118,7 +112,6 @@ public class UpgradeUtil {
 		upgradeProcesses.add(new UpgradeProcess_3_1_0());
 		upgradeProcesses.add(new UpgradeProcess_3_2_1());
 		upgradeProcesses.add(new UpgradeProcess_3_3_0());
-		upgradeProcesses.add(new UpgradeProcess_3_4_0());
 
 		for (UpgradeProcess upgradeProcess : upgradeProcesses) {
 			if (buildNumber < upgradeProcess.getThreshold()) {
@@ -155,20 +148,6 @@ public class UpgradeUtil {
 
 		if (!syncFilePersistence.isTableExists()) {
 			syncFilePersistence.createTable();
-		}
-
-		SyncLanClientPersistence syncLanClientPersistence =
-			SyncLanClientService.getSyncLanClientPersistence();
-
-		if (!syncLanClientPersistence.isTableExists()) {
-			syncLanClientPersistence.createTable();
-		}
-
-		SyncLanEndpointPersistence syncLanEndpointPersistence =
-			SyncLanEndpointService.getSyncLanEndpointPersistence();
-
-		if (!syncLanEndpointPersistence.isTableExists()) {
-			syncLanEndpointPersistence.createTable();
 		}
 
 		SyncPropPersistence syncPropPersistence =

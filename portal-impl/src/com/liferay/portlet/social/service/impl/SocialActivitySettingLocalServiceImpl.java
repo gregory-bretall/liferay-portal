@@ -154,8 +154,7 @@ public class SocialActivitySettingLocalServiceImpl
 		catch (JSONException jsone) {
 			_log.error(
 				"Unable to create JSON object from " +
-					activitySetting.getValue(),
-				jsone);
+					activitySetting.getValue());
 
 			return false;
 		}

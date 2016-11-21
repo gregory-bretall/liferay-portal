@@ -27,17 +27,13 @@ import aQute.lib.io.IO;
 
 import aQute.service.reporter.Reporter;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
@@ -74,8 +70,8 @@ public abstract class Baseline {
 				!_oldJarFile.canRead()) {
 
 				baselineProcessor.warning(
-					"Baseline file %s is invalid. Check if it exists, is " +
-						"readable, and is not a directory.",
+					"Baseline file %s is invalid. Check if it exists, " +
+						"is readable, and is not a directory.",
 					_oldJarFile);
 			}
 			else {
@@ -102,7 +98,7 @@ public abstract class Baseline {
 
 			BundleInfo bundleInfo = baseline.getBundleInfo();
 
-			if (hasPackageRemoved(infos)) {
+			if (hasPackageDelta(infos, Delta.REMOVED)) {
 				bundleInfo.suggestedVersion = new Version(
 					bundleInfo.olderVersion.getMajor() + 1, 0, 0);
 
@@ -416,29 +412,6 @@ public abstract class Baseline {
 		return correct;
 	}
 
-	protected Set<String> getMovedPackages() throws IOException {
-		File movedPackagesFile = new File(
-			_bndFile.getParentFile(), "moved-packages.txt");
-
-		if (!movedPackagesFile.exists()) {
-			return Collections.emptySet();
-		}
-
-		Set<String> movedPackages = new HashSet<>();
-
-		try (BufferedReader bufferedReader = new BufferedReader(
-				new FileReader(movedPackagesFile))) {
-
-			String line = null;
-
-			while ((line = bufferedReader.readLine()) != null) {
-				movedPackages.add(line);
-			}
-		}
-
-		return movedPackages;
-	}
-
 	protected String getShortDelta(Delta delta) {
 		if (delta == Delta.ADDED) {
 			return "+";
@@ -464,15 +437,9 @@ public abstract class Baseline {
 		return String.valueOf(deltaString.charAt(0));
 	}
 
-	protected boolean hasPackageRemoved(Iterable<Info> infos)
-		throws IOException {
-
-		Set<String> movedPackages = getMovedPackages();
-
+	protected boolean hasPackageDelta(Iterable<Info> infos, Delta delta) {
 		for (Info info : infos) {
-			if ((info.packageDiff.getDelta() == Delta.REMOVED) &&
-				!movedPackages.contains(info.packageName)) {
-
+			if (info.packageDiff.getDelta() == delta) {
 				return true;
 			}
 		}
