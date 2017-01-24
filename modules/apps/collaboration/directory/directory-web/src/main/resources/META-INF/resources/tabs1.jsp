@@ -31,7 +31,14 @@ String viewUsersRedirect = ParamUtil.getString(request, "viewUsersRedirect");
 
 String redirect = ParamUtil.getString(request, "redirect", viewUsersRedirect);
 
-String backURL = ParamUtil.getString(request, "backURL", redirect);
+String backURL;
+
+if(!ParamUtil.getString(request, "advancedSearch").equals("") && request.getAttribute("view.jsp-portletURLString") != null) {
+	backURL = request.getAttribute("view.jsp-portletURLString").toString();
+}
+else {
+	backURL = ParamUtil.getString(request, "backURL", redirect);
+}
 %>
 
 <liferay-ui:tabs
