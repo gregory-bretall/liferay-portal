@@ -66,8 +66,9 @@
 		</execute>
 	</command>
 
-	<command name="AddMemberAssignSiteRole" priority="4">
-		<property name="testray.component.names" value="Site Administration,Users and Organizations" />
+	<command name="AddMemberAssignSiteRole" priority="5">
+		<property name="portal.acceptance" value="pending" />
+		<property name="testray.component.names" value="Site Administration,Training,Users and Organizations" />
 
 		<execute macro="ProductMenu#gotoControlPanelUsers">
 			<var name="portlet" value="Users and Organizations" />
@@ -413,14 +414,6 @@
 		<property name="test.name.skip.portal.instance" value="CPSitememberships#OrganizationsView" />
 		<property name="testray.component.names" value="Site Administration,Users and Organizations" />
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
-			<var name="portlet" value="Server Administration" />
-		</execute>
-
-		<execute macro="ServerAdministration#executeServerResourcesActions">
-			<var name="actionsDescription" value="Reindex all search indexes." />
-		</execute>
-
 		<execute macro="ProductMenu#gotoControlPanelUsers">
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
@@ -678,11 +671,11 @@
 
 		<execute macro="Site#searchMembershipCP">
 			<var name="emptyResults" value="true" />
-			<var name="searchValue">"Organization Name 2"</var>
+			<var name="searchValue" value="&quot;Organization Name 2&quot;" />
 		</execute>
 
 		<execute macro="Site#searchMembershipCP">
-			<var name="searchValue">"Organization Name 1"</var>
+			<var name="searchValue" value="&quot;Organization Name 1&quot;" />
 		</execute>
 	</command>
 
@@ -717,11 +710,11 @@
 
 		<execute macro="Site#searchMembershipCP">
 			<var name="emptyResults" value="true" />
-			<var name="searchValue">"User Group Name 2"</var>
+			<var name="searchValue" value="&quot;User Group Name 2&quot;" />
 		</execute>
 
 		<execute macro="Site#searchMembershipCP">
-			<var name="searchValue">"User Group Name 1"</var>
+			<var name="searchValue" value="&quot;User Group Name 1&quot;" />
 		</execute>
 	</command>
 

@@ -14,7 +14,6 @@
 
 package com.liferay.asset.kernel.model;
 
-import com.liferay.asset.kernel.NoSuchClassTypeException;
 import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -36,7 +35,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -76,7 +74,6 @@ public abstract class BaseAssetRendererFactory<T>
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public AssetRenderer<T> getAssetRenderer(long groupId, String urlTitle)
 		throws PortalException {
 
@@ -270,7 +267,6 @@ public abstract class BaseAssetRendererFactory<T>
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public PortletURL getURLAdd(
 			LiferayPortletRequest liferayPortletRequest,
 			LiferayPortletResponse liferayPortletResponse, long classTypeId)
@@ -280,7 +276,6 @@ public abstract class BaseAssetRendererFactory<T>
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public PortletURL getURLView(
 			LiferayPortletResponse liferayPortletResponse,
 			WindowState windowState)
@@ -425,23 +420,5 @@ public abstract class BaseAssetRendererFactory<T>
 	private boolean _searchable;
 	private boolean _selectable = true;
 	private boolean _supportsClassTypes;
-
-	private static class NullClassTypeReader implements ClassTypeReader {
-
-		@Override
-		public List<ClassType> getAvailableClassTypes(
-			long[] groupIds, Locale locale) {
-
-			return Collections.emptyList();
-		}
-
-		@Override
-		public ClassType getClassType(long classTypeId, Locale locale)
-			throws PortalException {
-
-			throw new NoSuchClassTypeException();
-		}
-
-	}
 
 }

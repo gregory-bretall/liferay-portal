@@ -15,7 +15,6 @@
 package com.liferay.source.formatter.checks;
 
 import com.liferay.portal.kernel.util.CharPool;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -65,6 +64,11 @@ public class JavaOSGiReferenceCheck extends BaseFileCheck {
 
 		_serviceReferenceUtilClassNames = StringUtil.split(
 			serviceReferenceUtilClassNames);
+
+		for (int i = 0; i < _serviceReferenceUtilClassNames.length; i++) {
+			_serviceReferenceUtilClassNames[i] = StringUtil.trim(
+				_serviceReferenceUtilClassNames[i]);
+		}
 	}
 
 	@Override
@@ -92,7 +96,7 @@ public class JavaOSGiReferenceCheck extends BaseFileCheck {
 		content = _formatDuplicateReferenceMethods(
 			fileName, content, moduleSuperClassContent);
 
-		if (GetterUtil.getBoolean(getProperty("tom.wang.flag"))) {
+		if (!isExcludedPath("service.reference.util.excludes", absolutePath)) {
 			for (String serviceProxyFactoryUtilClassName :
 					_serviceProxyFactoryUtilClassNames) {
 

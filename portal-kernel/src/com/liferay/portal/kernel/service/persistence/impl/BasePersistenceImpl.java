@@ -136,7 +136,6 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public T findByPrimaryKey(Serializable primaryKey)
 		throws NoSuchModelException {
 
@@ -271,7 +270,6 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public T remove(Serializable primaryKey) throws NoSuchModelException {
 		throw new UnsupportedOperationException();
 	}
@@ -670,12 +668,12 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 
 		@Override
 		public CacheModel<NullModel> toCacheModel() {
-			return this;
+			return nullModel;
 		}
 
 		@Override
 		public NullModel toEntityModel() {
-			return this;
+			return nullModel;
 		}
 
 		@Override

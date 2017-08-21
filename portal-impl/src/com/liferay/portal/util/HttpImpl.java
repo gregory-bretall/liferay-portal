@@ -381,8 +381,8 @@ public class HttpImpl implements Http {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by
-	 *     {@link URLCodec#encodeURL(String, boolean)}
+	 * @deprecated As of 7.0.0, replaced by {@link URLCodec#encodeURL(String,
+	 *             boolean)}
 	 */
 	@Deprecated
 	@Override
@@ -521,7 +521,6 @@ public class HttpImpl implements Http {
 	 * @deprecated As of 7.0.0, with no direct replacement
 	 */
 	@Deprecated
-	@SuppressWarnings("unused")
 	public org.apache.commons.httpclient.HostConfiguration getHostConfiguration(
 			String location)
 		throws IOException {

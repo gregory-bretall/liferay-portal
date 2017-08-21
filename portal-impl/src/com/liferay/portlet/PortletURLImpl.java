@@ -73,6 +73,7 @@ import java.util.function.BiConsumer;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletModeException;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletSecurityException;
 import javax.portlet.PortletURL;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceURL;
@@ -299,8 +300,8 @@ public class PortletURLImpl
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link #visitReservedParameters(
-	 *             BiConsumer)}
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #visitReservedParameters(BiConsumer)}
 	 */
 	@Deprecated
 	@Override
@@ -645,7 +646,7 @@ public class PortletURLImpl
 	}
 
 	@Override
-	public void setSecure(boolean secure) {
+	public void setSecure(boolean secure) throws PortletSecurityException {
 		_secure = secure;
 
 		clearCache();
@@ -745,7 +746,8 @@ public class PortletURLImpl
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #PortletURLImpl(PortletRequest, String, PortletRequest, Layout, String)}
+	 *             #PortletURLImpl(PortletRequest, String, PortletRequest,
+	 *             Layout, String)}
 	 */
 	@Deprecated
 	protected PortletURLImpl(

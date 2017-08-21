@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PredicateFilter;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.search.summary.SummaryBuilderFactory;
 import com.liferay.portal.search.web.constants.SearchPortletParameterNames;
 import com.liferay.portal.search.web.facet.SearchFacet;
 import com.liferay.portal.search.web.facet.util.SearchFacetTracker;
@@ -67,13 +68,15 @@ public class SearchDisplayContext {
 			Portal portal, Html html, Language language,
 			FacetedSearcherManager facetedSearcherManager,
 			IndexSearchPropsValues indexSearchPropsValues,
-			PortletURLFactory portletURLFactory)
+			PortletURLFactory portletURLFactory,
+			SummaryBuilderFactory summaryBuilderFactory)
 		throws PortletException {
 
 		_renderRequest = renderRequest;
 		_portletPreferences = portletPreferences;
 		_indexSearchPropsValues = indexSearchPropsValues;
 		_portletURLFactory = portletURLFactory;
+		_summaryBuilderFactory = summaryBuilderFactory;
 
 		ThemeDisplaySupplier themeDisplaySupplier =
 			new PortletRequestThemeDisplaySupplier(renderRequest);
@@ -334,6 +337,10 @@ public class SearchDisplayContext {
 		return _searchScopePreferenceString;
 	}
 
+	public SummaryBuilderFactory getSummaryBuilderFactory() {
+		return _summaryBuilderFactory;
+	}
+
 	public boolean isCollatedSpellCheckResultEnabled() {
 		if (_collatedSpellCheckResultEnabled != null) {
 			return _collatedSpellCheckResultEnabled;
@@ -504,6 +511,7 @@ public class SearchDisplayContext {
 			isCollatedSpellCheckResultEnabled());
 		queryConfig.setCollatedSpellCheckResultScoresThreshold(
 			getCollatedSpellCheckResultDisplayThreshold());
+		queryConfig.setHighlightEnabled(isHighlightEnabled());
 		queryConfig.setQueryIndexingEnabled(isQueryIndexingEnabled());
 		queryConfig.setQueryIndexingThreshold(getQueryIndexingThreshold());
 		queryConfig.setQuerySuggestionEnabled(isQuerySuggestionsEnabled());
@@ -612,6 +620,7 @@ public class SearchDisplayContext {
 	private final SearchContext _searchContext;
 	private final SearchResultPreferences _searchResultPreferences;
 	private String _searchScopePreferenceString;
+	private final SummaryBuilderFactory _summaryBuilderFactory;
 	private final ThemeDisplaySupplier _themeDisplaySupplier;
 	private Boolean _useAdvancedSearchSyntax;
 

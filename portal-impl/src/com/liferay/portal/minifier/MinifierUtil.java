@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.InstanceFactory;
+import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.util.PropsValues;
 
 import com.yahoo.platform.yui.compressor.CssCompressor;
@@ -48,6 +49,7 @@ public class MinifierUtil {
 	private static JavaScriptMinifier _getJavaScriptMinifier() {
 		try {
 			return (JavaScriptMinifier)InstanceFactory.newInstance(
+				PortalClassLoaderUtil.getClassLoader(),
 				PropsValues.MINIFIER_JAVASCRIPT_IMPL);
 		}
 		catch (Exception e) {
@@ -75,7 +77,7 @@ public class MinifierUtil {
 				unsyncStringWriter, PropsValues.YUI_COMPRESSOR_CSS_LINE_BREAK);
 		}
 		catch (Exception e) {
-			_log.error("Unable to minfiy CSS:\n" + content, e);
+			_log.error("Unable to minify CSS:\n" + content, e);
 
 			unsyncStringWriter.append(content);
 		}

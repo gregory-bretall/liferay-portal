@@ -14,11 +14,13 @@
 
 package com.liferay.portal.osgi.web.wab.generator.internal.connection;
 
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.osgi.web.wab.generator.WabGenerator;
 import com.liferay.portal.util.FastDateFormatFactoryImpl;
 import com.liferay.portal.util.FileImpl;
@@ -71,7 +73,26 @@ public class WabURLConnection extends URLConnection {
 					"Web-ContextPath");
 		}
 
-		final File file = transferToTempFile(new URL(url.getPath()));
+		String[] protocols = parameters.get("protocol");
+
+		if (ArrayUtil.isEmpty(protocols)) {
+			throw new IllegalArgumentException(
+				"The parameter map does not contain the required parameter " +
+					"protocol");
+		}
+
+		String path = url.getPath();
+
+		String[] portalProfileNames = parameters.get(
+			"liferay-portal-profile-names");
+
+		if (ArrayUtil.isNotEmpty(portalProfileNames)) {
+			path = path.concat("?liferay-portal-profile-names=");
+
+			path = path.concat(StringUtil.merge(portalProfileNames));
+		}
+
+		final File file = transferToTempFile(new URL(protocols[0], null, path));
 
 		File processedFile = _wabGenerator.generate(
 			_classLoader, file, parameters);

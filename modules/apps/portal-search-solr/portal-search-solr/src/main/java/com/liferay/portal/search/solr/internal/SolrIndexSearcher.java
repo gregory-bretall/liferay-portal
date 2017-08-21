@@ -15,6 +15,8 @@
 package com.liferay.portal.search.solr.internal;
 
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.dao.search.SearchPaginationUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BaseIndexSearcher;
@@ -44,6 +46,8 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Props;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -55,7 +59,6 @@ import com.liferay.portal.search.solr.groupby.GroupByTranslator;
 import com.liferay.portal.search.solr.internal.facet.CompositeFacetProcessor;
 import com.liferay.portal.search.solr.internal.facet.SolrFacetFieldCollector;
 import com.liferay.portal.search.solr.internal.facet.SolrFacetQueryCollector;
-import com.liferay.portal.search.solr.internal.pagination.Pagination;
 import com.liferay.portal.search.solr.stats.StatsTranslator;
 
 import java.util.ArrayList;
@@ -64,7 +67,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang.time.StopWatch;
@@ -114,28 +116,40 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		stopWatch.start();
 
 		try {
-			Pagination pagination = new Pagination(
-				searchContext.getStart(), searchContext.getEnd());
+			int start = searchContext.getStart();
+			int end = searchContext.getEnd();
+
+			if (start == QueryUtil.ALL_POS) {
+				start = 0;
+			}
+			else if (start < 0) {
+				throw new IllegalArgumentException("Invalid start " + start);
+			}
+
+			if (end == QueryUtil.ALL_POS) {
+				end = GetterUtil.getInteger(
+					props.get(PropsKeys.INDEX_SEARCH_LIMIT));
+			}
+			else if (end < 0) {
+				throw new IllegalArgumentException("Invalid end " + end);
+			}
 
 			Hits hits = null;
 
 			while (true) {
-				hits = doSearchHits(searchContext, query, pagination);
+				hits = doSearchHits(searchContext, query, start, end);
 
 				Document[] documents = hits.getDocs();
 
-				if (documents.length != 0) {
+				if ((documents.length != 0) || (start == 0)) {
 					break;
 				}
 
-				Optional<Pagination> paginationOptional =
-					pagination.repageToLast(hits.getLength());
+				int[] startAndEnd = SearchPaginationUtil.calculateStartAndEnd(
+					start, end, hits.getLength());
 
-				if (!paginationOptional.isPresent()) {
-					break;
-				}
-
-				pagination = paginationOptional.get();
+				start = startAndEnd[0];
+				end = startAndEnd[1];
 			}
 
 			hits.setStart(stopWatch.getStartTime());
@@ -242,8 +256,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 	}
 
 	protected void addGroupBy(
-		SolrQuery solrQuery, SearchContext searchContext,
-		Pagination pagination) {
+		SolrQuery solrQuery, SearchContext searchContext, int start, int end) {
 
 		GroupBy groupBy = searchContext.getGroupBy();
 
@@ -251,9 +264,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			return;
 		}
 
-		_groupByTranslator.translate(
-			solrQuery, searchContext, pagination.getStart(),
-			pagination.getEnd());
+		_groupByTranslator.translate(solrQuery, searchContext, start, end);
 	}
 
 	protected void addHighlightedField(
@@ -267,7 +278,10 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		solrQuery.addHighlightField(localizedFieldName);
 	}
 
-	protected void addHighlights(SolrQuery solrQuery, QueryConfig queryConfig) {
+	protected void addHighlights(
+		SolrQuery solrQuery, SearchContext searchContext,
+		QueryConfig queryConfig) {
+
 		if (!queryConfig.isHighlightEnabled()) {
 			return;
 		}
@@ -282,13 +296,17 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			addHighlightedField(solrQuery, queryConfig, highlightFieldName);
 		}
 
-		solrQuery.setHighlightRequireFieldMatch(
-			queryConfig.isHighlightRequireFieldMatch());
+		boolean luceneSyntax = GetterUtil.getBoolean(
+			searchContext.getAttribute("luceneSyntax"));
+
+		if (!luceneSyntax) {
+			solrQuery.setHighlightRequireFieldMatch(
+				queryConfig.isHighlightRequireFieldMatch());
+		}
 	}
 
 	protected void addPagination(
-		SolrQuery solrQuery, SearchContext searchContext,
-		Pagination pagination) {
+		SolrQuery solrQuery, SearchContext searchContext, int start, int end) {
 
 		GroupBy groupBy = searchContext.getGroupBy();
 
@@ -296,13 +314,8 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			return;
 		}
 
-		Optional<Integer> fromOptional = pagination.getFrom();
-
-		fromOptional.ifPresent(solrQuery::setStart);
-
-		Optional<Integer> sizeOptional = pagination.getSize();
-
-		sizeOptional.ifPresent(solrQuery::setRows);
+		solrQuery.setRows(end - start);
+		solrQuery.setStart(start);
 	}
 
 	protected void addSelectedFields(
@@ -354,12 +367,10 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 		Map<String, List<String>> uidHighlights = highlights.get(key);
 
-		String localizedFieldName = DocumentImpl.getLocalizedName(
+		String snippetFieldName = DocumentImpl.getLocalizedName(
 			locale, fieldName);
 
-		String snippetFieldName = localizedFieldName;
-
-		List<String> snippets = uidHighlights.get(localizedFieldName);
+		List<String> snippets = uidHighlights.get(snippetFieldName);
 
 		if (snippets == null) {
 			snippets = uidHighlights.get(fieldName);
@@ -377,8 +388,9 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			}
 		}
 
-		HighlightUtil.addSnippet(
-			document, queryTerms, snippet, snippetFieldName);
+		document.addText(
+			Field.SNIPPET.concat(StringPool.UNDERLINE).concat(snippetFieldName),
+			snippet);
 	}
 
 	protected void addSort(SolrQuery solrQuery, Sort[] sorts) {
@@ -420,7 +432,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 	}
 
 	protected QueryResponse doSearch(
-			SearchContext searchContext, Query query, Pagination pagination,
+			SearchContext searchContext, Query query, int start, int end,
 			boolean count)
 		throws Exception {
 
@@ -432,9 +444,9 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 		if (!count) {
 			addFacets(solrQuery, searchContext);
-			addGroupBy(solrQuery, searchContext, pagination);
-			addHighlights(solrQuery, queryConfig);
-			addPagination(solrQuery, searchContext, pagination);
+			addGroupBy(solrQuery, searchContext, start, end);
+			addHighlights(solrQuery, searchContext, queryConfig);
+			addPagination(solrQuery, searchContext, start, end);
 			addSelectedFields(solrQuery, queryConfig);
 			addSort(solrQuery, searchContext.getSorts());
 
@@ -459,7 +471,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 		if (query.getPostFilter() != null) {
 			String filterQuery = _filterTranslator.translate(
-				query.getPreBooleanFilter(), searchContext);
+				query.getPostFilter(), searchContext);
 
 			filterQueries.add(filterQuery);
 		}
@@ -467,6 +479,10 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		if (!filterQueries.isEmpty()) {
 			solrQuery.setFilterQueries(
 				filterQueries.toArray(new String[filterQueries.size()]));
+
+			if (Validator.isBlank(solrQuery.getQuery())) {
+				solrQuery.setQuery("*:*");
+			}
 		}
 
 		String solrQueryString = solrQuery.toString();
@@ -492,7 +508,8 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		throws Exception {
 
 		QueryResponse queryResponse = doSearch(
-			searchContext, query, null, true);
+			searchContext, query, searchContext.getStart(),
+			searchContext.getEnd(), true);
 
 		SolrDocumentList solrDocumentList = queryResponse.getResults();
 
@@ -500,13 +517,15 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 	}
 
 	protected Hits doSearchHits(
-			SearchContext searchContext, Query query, Pagination pagination)
+			SearchContext searchContext, Query query, int start, int end)
 		throws Exception {
 
 		QueryResponse queryResponse = doSearch(
-			searchContext, query, pagination, false);
+			searchContext, query, start, end, false);
 
-		return processResponse(queryResponse, searchContext, query);
+		Hits hits = processResponse(queryResponse, searchContext, query);
+
+		return hits;
 	}
 
 	protected QueryResponse executeSearchRequest(SolrQuery solrQuery)
@@ -728,6 +747,9 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			hits.addStatsResults(statsResults);
 		}
 	}
+
+	@Reference
+	protected Props props;
 
 	private static final String _VERSION_FIELD = "_version_";
 

@@ -72,7 +72,7 @@
 <!--DATE-->
 <tr>
 	<td>DATE_FIELD</td>
-	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//input[@type='text' and contains(@aria-label,'${key_fieldLabel}')]</td>
+	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -266,6 +266,17 @@
 	<td></td>
 	<td></td>
 </tr>
+<!--PASSWORD-->
+<tr>
+	<td>PASSWORD_FIELD</td>
+	<td>//input[@type='password' and contains(@id,'${key_fieldName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
 <!--SELECT-->
 <tr>
 	<td>SELECT_FIELD</td>
@@ -379,6 +390,27 @@
 <tr>
 	<td>AUTOCOMPLETE_PANEL</td>
 	<td>//div[@class='panel-body' and contains(.,'Autocomplete')]</td>
+	<td></td>
+</tr>
+<!--DOCUMENTS_AND_MEDIA-->
+<tr>
+	<td>DOCUMENTS_AND_MEDIA_FIELD</td>
+	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//input[@id='inputFile']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DOCUMENTS_AND_MEDIA_LABEL</td>
+	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//label</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DOCUMENTS_AND_MEDIA_FILE_NAME</td>
+	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//h4[contains(.,'${key_uploadFileName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DOCUMENTS_AND_MEDIA_DOWNLOAD_ICON</td>
+	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//a[@download='${key_uploadFileName}']</td>
 	<td></td>
 </tr>
 </tbody>

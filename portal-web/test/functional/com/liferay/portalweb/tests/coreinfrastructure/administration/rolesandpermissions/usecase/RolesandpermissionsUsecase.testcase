@@ -199,7 +199,6 @@
 
 		<execute macro="PermissionsInline#gotoConfigurationPG">
 			<var name="portletName" value="Web Content Display" />
-			<var name="portletOption" value="Configuration" />
 		</execute>
 
 		<var name="key_teamName" value="Site Team Name" />
@@ -219,7 +218,6 @@
 
 		<execute macro="PermissionsInline#gotoConfigurationPG">
 			<var name="portletName" value="Web Content Display" />
-			<var name="portletOption" value="Configuration" />
 		</execute>
 
 		<var name="key_teamName" value="Site Team Name" />
@@ -643,7 +641,7 @@
 			<var name="portlet" value="Documents and Media" />
 		</execute>
 
-		<execute macro="PermissionsInline#gotoDMDocumentCP">
+		<execute macro="DMNavigator#gotoDocumentPermissionsCP">
 			<var name="dmDocumentTitle" value="Test Document" />
 		</execute>
 
@@ -1236,7 +1234,7 @@
 			<var name="portlet" value="Documents and Media" />
 		</execute>
 
-		<execute macro="PermissionsInline#gotoDMDocumentCP">
+		<execute macro="DMNavigator#gotoDocumentPermissionsCP">
 			<var name="dmDocumentTitle" value="Test Document" />
 		</execute>
 
@@ -2350,7 +2348,6 @@
 
 		<execute macro="PermissionsInline#gotoConfigurationPG">
 			<var name="portletName" value="Currency Converter" />
-			<var name="portletOption" value="Configuration" />
 		</execute>
 
 		<execute macro="Role#definePermissionPG">

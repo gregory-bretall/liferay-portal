@@ -29,7 +29,6 @@ import com.liferay.portal.search.test.util.indexing.DocumentCreationHelpers;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,7 +46,7 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		for (int i = 0; i < TOTAL_DOCUMENTS; i++) {
+		for (int i = 0; i < _TOTAL_DOCUMENTS; i++) {
 			addDocument(
 				DocumentCreationHelpers.singleText(
 					"test-field",
@@ -56,41 +55,14 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 		}
 	}
 
-	@After
-	@Override
-	public void tearDown() throws Exception {
-		super.tearDown();
-	}
-
 	@Test
 	public void testBadEnd() throws Exception {
-		_assertBadRange(QueryUtil.ALL_POS, -2, "End cannot be negative: -2");
-	}
-
-	@Test
-	public void testBadRange() throws Exception {
-		_assertBadRange(10, 5, "End cannot be less than start: 5, 10");
+		_assertBadRange(QueryUtil.ALL_POS, -2, "Invalid end -2");
 	}
 
 	@Test
 	public void testBadStart() throws Exception {
-		_assertBadRange(-2, QueryUtil.ALL_POS, "Start cannot be negative: -2");
-	}
-
-	@Test
-	public void testCount() throws Exception {
-		_assertSearchCountFindsAll(createSearchContext());
-	}
-
-	@Test
-	public void testCountIgnoresPagination() throws Exception {
-		_assertSearchCountFindsAll(_createSearchContext(11, 10));
-	}
-
-	@Test
-	public void testCountUnbounded() throws Exception {
-		_assertSearchCountFindsAll(
-			_createSearchContext(QueryUtil.ALL_POS, QueryUtil.ALL_POS));
+		_assertBadRange(-2, QueryUtil.ALL_POS, "Invalid start -2");
 	}
 
 	@Test
@@ -105,22 +77,17 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 
 	@Test
 	public void testLast() throws Exception {
-		_assertPagination(TOTAL_DOCUMENTS - 1, TOTAL_DOCUMENTS, 1);
+		_assertPagination(_TOTAL_DOCUMENTS - 1, _TOTAL_DOCUMENTS, 1);
 	}
 
 	@Test
 	public void testLastUnbounded() throws Exception {
-		_assertPagination(TOTAL_DOCUMENTS - 1, QueryUtil.ALL_POS, 1);
+		_assertPagination(_TOTAL_DOCUMENTS - 1, QueryUtil.ALL_POS, 1);
 	}
 
 	@Test
 	public void testMiddle() throws Exception {
 		_assertPagination(5, 8, 3);
-	}
-
-	@Test
-	public void testMiddleNone() throws Exception {
-		_assertPagination(5, 5, 0);
 	}
 
 	@Test
@@ -130,12 +97,12 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 
 	@Test
 	public void testMiddleUntilPastLast() throws Exception {
-		_assertPagination(TOTAL_DOCUMENTS - 4, TOTAL_DOCUMENTS + 4, 4);
+		_assertPagination(_TOTAL_DOCUMENTS - 4, _TOTAL_DOCUMENTS + 4, 4);
 	}
 
 	@Test
 	public void testNextToLast() throws Exception {
-		_assertPagination(TOTAL_DOCUMENTS - 2, TOTAL_DOCUMENTS - 1, 1);
+		_assertPagination(_TOTAL_DOCUMENTS - 2, _TOTAL_DOCUMENTS - 1, 1);
 	}
 
 	@Test
@@ -145,41 +112,22 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 
 	@Test
 	public void testPastLast() throws Exception {
-		_assertPagination(TOTAL_DOCUMENTS, TOTAL_DOCUMENTS + 1, 1);
-	}
-
-	@Test
-	public void testPastLastUnbounded() throws Exception {
-		_assertPagination(
-			TOTAL_DOCUMENTS, QueryUtil.ALL_POS,
-			DEFAULT_SEARCH_ENGINE_RESULT_WINDOW);
+		_assertPagination(_TOTAL_DOCUMENTS, _TOTAL_DOCUMENTS + 1, 1);
 	}
 
 	@Test
 	public void testUnbounded() throws Exception {
 		_assertPagination(
-			QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-			DEFAULT_SEARCH_ENGINE_RESULT_WINDOW);
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, _TOTAL_DOCUMENTS);
 	}
 
 	@Test
 	public void testWayPastLast() throws Exception {
-		_assertPagination(TOTAL_DOCUMENTS + 5, TOTAL_DOCUMENTS + 6, 1);
-	}
-
-	@Test
-	public void testWayPastLastUnbounded() throws Exception {
-		_assertPagination(
-			TOTAL_DOCUMENTS + 5, QueryUtil.ALL_POS,
-			DEFAULT_SEARCH_ENGINE_RESULT_WINDOW);
+		_assertPagination(_TOTAL_DOCUMENTS + 5, _TOTAL_DOCUMENTS + 6, 1);
 	}
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
-
-	protected static final int DEFAULT_SEARCH_ENGINE_RESULT_WINDOW = 10;
-
-	protected static final int TOTAL_DOCUMENTS = 20;
 
 	private void _assertBadRange(int start, int end, String message)
 		throws Exception {
@@ -195,31 +143,7 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 		}
 	}
 
-	private void _assertPagination(
-			int start, int end, int expectedDocumentsLength)
-		throws Exception {
-
-		SearchContext searchContext = _createSearchContext(start, end);
-
-		IdempotentRetryAssert.retryAssert(
-			3, TimeUnit.SECONDS,
-			() -> {
-				Hits hits = search(searchContext);
-
-				Assert.assertEquals(
-					hits.toString(), TOTAL_DOCUMENTS, hits.getLength());
-
-				Document[] documents = hits.getDocs();
-
-				Assert.assertEquals(
-					Arrays.toString(documents), expectedDocumentsLength,
-					documents.length);
-
-				return null;
-			});
-	}
-
-	private void _assertSearchCountFindsAll(SearchContext searchContext)
+	private void _assertPagination(int start, int end, int expectedSize)
 		throws Exception {
 
 		IdempotentRetryAssert.retryAssert(
@@ -227,10 +151,18 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 			() -> {
 				IndexSearcher indexSearcher = getIndexSearcher();
 
-				long count = indexSearcher.searchCount(
+				SearchContext searchContext = _createSearchContext(start, end);
+
+				Hits hits = indexSearcher.search(
 					searchContext, getDefaultQuery());
 
-				Assert.assertEquals(TOTAL_DOCUMENTS, count);
+				Assert.assertEquals(
+					hits.toString(), _TOTAL_DOCUMENTS, hits.getLength());
+
+				Document[] documents = hits.getDocs();
+
+				Assert.assertEquals(
+					Arrays.toString(documents), expectedSize, documents.length);
 
 				return null;
 			});
@@ -244,5 +176,7 @@ public abstract class BasePaginationTestCase extends BaseIndexingTestCase {
 
 		return searchContext;
 	}
+
+	private static final int _TOTAL_DOCUMENTS = 20;
 
 }

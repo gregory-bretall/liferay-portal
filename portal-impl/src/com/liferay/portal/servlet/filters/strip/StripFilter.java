@@ -253,10 +253,10 @@ public class StripFilter extends BasePortalFilter {
 
 	protected void processCSS(
 			HttpServletRequest request, HttpServletResponse response,
-			CharBuffer charBuffer, Writer writer)
+			CharBuffer charBuffer, Writer writer, char[] openTag)
 		throws Exception {
 
-		outputOpenTag(charBuffer, writer, _MARKER_STYLE_OPEN);
+		outputOpenTag(charBuffer, writer, openTag);
 
 		int length = KMPSearch.search(
 			charBuffer, _MARKER_STYLE_CLOSE, _MARKER_STYLE_CLOSE_NEXTS);
@@ -657,7 +657,23 @@ public class StripFilter extends BasePortalFilter {
 					continue;
 				}
 				else if (hasMarker(charBuffer, _MARKER_STYLE_OPEN)) {
-					processCSS(request, response, charBuffer, writer);
+					processCSS(request, response, charBuffer, writer, 
+						_MARKER_STYLE_OPEN);
+
+					continue;
+				}
+				else if (hasMarker(charBuffer, 
+							_MARKER_STYLE_DATA_SENNA_TRACK_PERMANENT)) {
+					processCSS(request, response, charBuffer, writer,
+						_MARKER_STYLE_DATA_SENNA_TRACK_PERMANENT);
+
+					continue;
+				}
+				else if (hasMarker(charBuffer, 
+							_MARKER_STYLE_DATA_SENNA_TRACK_TEMPORARY)) {
+
+					processCSS(request, response, charBuffer, writer,
+						_MARKER_STYLE_DATA_SENNA_TRACK_TEMPORARY);
 
 					continue;
 				}
@@ -704,6 +720,12 @@ public class StripFilter extends BasePortalFilter {
 
 	private static final int[] _MARKER_STYLE_CLOSE_NEXTS =
 		KMPSearch.generateNexts(_MARKER_STYLE_CLOSE);
+
+	private static final char[] _MARKER_STYLE_DATA_SENNA_TRACK_PERMANENT =
+		"style data-senna-track=\"permanent\" type=\"text/css\">".toCharArray();
+
+	private static final char[] _MARKER_STYLE_DATA_SENNA_TRACK_TEMPORARY =
+		"style data-senna-track=\"temporary\" type=\"text/css\">".toCharArray();
 
 	private static final char[] _MARKER_STYLE_OPEN =
 		"style type=\"text/css\">".toCharArray();

@@ -121,16 +121,24 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 
 		Collection<String> fileNames = new TreeSet<>();
 
-		String[] excludes = new String[] {
+		String[] excludes = {
 			"**/*_IW.java", "**/counter/service/**", "**/jsp/*",
 			"**/model/impl/*Model.java", "**/model/impl/*ModelImpl.java",
 			"**/portal/service/**", "**/portal-client/**",
 			"**/portal-web/test/**/*Test.java", "**/test/*-generated/**"
 		};
 
-		for (String directoryName : getPluginsInsideModulesDirectoryNames()) {
+		if (subrepository) {
 			excludes = ArrayUtil.append(
-				excludes, _getPluginExcludes("**" + directoryName));
+				excludes, _getPluginExcludes(StringPool.BLANK));
+		}
+		else {
+			for (String directoryName :
+					getPluginsInsideModulesDirectoryNames()) {
+
+				excludes = ArrayUtil.append(
+					excludes, _getPluginExcludes("**" + directoryName));
+			}
 		}
 
 		fileNames.addAll(getFileNames(excludes, includes));
@@ -197,7 +205,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 		}
 	}
 
-	private static final String[] _INCLUDES = new String[] {"**/*.java"};
+	private static final String[] _INCLUDES = {"**/*.java"};
 
 	private final Set<File> _ungeneratedFiles = new CopyOnWriteArraySet<>();
 
