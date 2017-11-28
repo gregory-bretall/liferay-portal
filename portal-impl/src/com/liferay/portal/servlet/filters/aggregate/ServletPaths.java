@@ -76,7 +76,11 @@ public class ServletPaths {
 
 		int pos = normalizedPath.indexOf(CharPool.QUESTION);
 
+		String queryString = "";
+
 		if (pos != -1) {
+			queryString = normalizedPath.substring(pos);
+
 			normalizedPath = normalizedPath.substring(0, pos);
 		}
 
@@ -93,7 +97,7 @@ public class ServletPaths {
 				CharPool.BACK_SLASH, CharPool.SLASH);
 		}
 
-		return new ServletPaths(downPathString, _servletContext);
+		return new ServletPaths(downPathString + queryString, _servletContext);
 	}
 
 	public String getContent() {
