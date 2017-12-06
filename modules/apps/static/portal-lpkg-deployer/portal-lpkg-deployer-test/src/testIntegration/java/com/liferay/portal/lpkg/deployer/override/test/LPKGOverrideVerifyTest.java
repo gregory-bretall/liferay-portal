@@ -93,14 +93,14 @@ public class LPKGOverrideVerifyTest {
 
 				Assert.assertTrue(
 					"Static JAR not sucessfully overridden: " + symbolicName,
-					location.contains("Static-Jar::"));
+					location.contains("protocol=jar"));
 			}
-			else if (wars.remove(symbolicName)) {
+			else {
 				String location = bundle.getLocation();
 
-				Assert.assertTrue(
-					"WAR not sucessfully overridden: " + symbolicName,
-					!location.contains("lpkg://"));
+				if (location.contains("protocol=file")) {
+					wars.remove(symbolicName);
+				}
 			}
 		}
 

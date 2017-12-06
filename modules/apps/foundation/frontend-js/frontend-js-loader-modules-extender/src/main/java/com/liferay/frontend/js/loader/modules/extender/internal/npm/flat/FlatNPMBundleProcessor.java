@@ -18,11 +18,11 @@ import com.liferay.frontend.js.loader.modules.extender.npm.JSBundle;
 import com.liferay.frontend.js.loader.modules.extender.npm.JSBundleProcessor;
 import com.liferay.frontend.js.loader.modules.extender.npm.JSPackageDependency;
 import com.liferay.frontend.js.loader.modules.extender.npm.ModuleNameUtil;
-import com.liferay.portal.kernel.json.JSONException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Provides an implementation of {@link JSBundleProcessor} that assumes the
@@ -101,6 +102,26 @@ public class FlatNPMBundleProcessor implements JSBundleProcessor {
 		}
 	}
 
+	private String _normalizeModuleContent(String moduleContent) {
+		moduleContent = moduleContent.replaceAll("\n", " ");
+
+		int index = moduleContent.indexOf("Liferay.Loader.define(");
+
+		if (index == -1) {
+			return StringPool.BLANK;
+		}
+
+		moduleContent = moduleContent.substring(index);
+
+		index = moduleContent.indexOf("function");
+
+		if (index == -1) {
+			return StringPool.BLANK;
+		}
+
+		return moduleContent.substring(0, index);
+	}
+
 	/**
 	 * Returns the dependencies of a module given its URL. The dependencies are
 	 * parsed by reading the module's JavaScript code.
@@ -111,15 +132,22 @@ public class FlatNPMBundleProcessor implements JSBundleProcessor {
 	private Collection<String> _parseModuleDependencies(URL url)
 		throws IOException {
 
-		String urlContent = StringUtil.read(url.openStream());
+		String urlContent = _normalizeModuleContent(
+			StringUtil.read(url.openStream()));
 
 		Matcher matcher = _moduleDefinitionPattern.matcher(urlContent);
 
-		if (!matcher.lookingAt()) {
+		if (!matcher.find()) {
 			return Collections.emptyList();
 		}
 
-		String[] dependencies = matcher.group(1).split(",");
+		String group = matcher.group(1);
+
+		String[] dependencies = group.split(",");
+
+		if ((dependencies.length == 1) && dependencies[0].equals("")) {
+			return Collections.emptyList();
+		}
 
 		for (int i = 0; i < dependencies.length; i++) {
 			dependencies[i] = dependencies[i].trim();
@@ -174,6 +202,10 @@ public class FlatNPMBundleProcessor implements JSBundleProcessor {
 
 		Enumeration<URL> urls = flatJSBundle.findEntries(
 			location, "*.js", true);
+
+		if (urls == null) {
+			return;
+		}
 
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
@@ -249,14 +281,15 @@ public class FlatNPMBundleProcessor implements JSBundleProcessor {
 		JSONObject jsonObject = null;
 
 		try {
-			jsonObject = JSONFactoryUtil.createJSONObject(
+			jsonObject = _jsonFactory.createJSONObject(
 				_getResourceContent(flatJSBundle, location + "/package.json"));
 		}
-		catch (JSONException jsone) {
+		catch (Exception e) {
 			_log.error(
-				"Unable to parse package of " + flatJSBundle + ": " + location +
-					"/package.json",
-				jsone);
+				StringBundler.concat(
+					"Unable to parse package of ", String.valueOf(flatJSBundle),
+					": ", location, "/package.json"),
+				e);
 
 			return;
 		}
@@ -311,6 +344,9 @@ public class FlatNPMBundleProcessor implements JSBundleProcessor {
 		FlatNPMBundleProcessor.class);
 
 	private static final Pattern _moduleDefinitionPattern = Pattern.compile(
-		"Liferay\\.Loader\\.define.*\\[(.*)\\].*function", Pattern.MULTILINE);
+		"Liferay\\.Loader\\.define.*\\[(.*)\\].*");
+
+	@Reference
+	private JSONFactory _jsonFactory;
 
 }

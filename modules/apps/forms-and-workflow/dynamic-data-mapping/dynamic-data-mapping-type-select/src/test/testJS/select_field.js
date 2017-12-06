@@ -33,7 +33,6 @@ describe(
 		before(
 			function(done) {
 				AUI().use(
-					'liferay-ddm-form-field-select-template',
 					'liferay-ddm-form-field-select',
 					function(A) {
 						Liferay.DDM.Renderer.FieldTypes.register(
@@ -69,7 +68,7 @@ describe(
 						var container = selectField.get('container');
 
 						assert.isNotNull(
-							container.one('.help-block'),
+							container.one('.form-feedback-indicator'),
 							'The selectField has an error'
 						);
 
@@ -83,7 +82,7 @@ describe(
 			'.setValue()',
 			function() {
 				it(
-					'should return empty value if set an empty array value',
+					'should return empty array if set an empty array value',
 					function(done) {
 						selectField = createSelectField(
 							{
@@ -93,29 +92,9 @@ describe(
 
 						selectField.setValue([]);
 
-						assert.equal(
+						assert.deepEqual(
 							selectField.getValue(),
-							''
-						);
-
-						done();
-					}
-				);
-
-				it(
-					'should return empty value if set an empty string value',
-					function(done) {
-						selectField = createSelectField(
-							{
-								options: [{label: 'a', value: 'a'}]
-							}
-						);
-
-						selectField.setValue('');
-
-						assert.equal(
-							selectField.getValue(),
-							''
+							[]
 						);
 
 						done();
@@ -130,10 +109,10 @@ describe(
 						var container = selectField.get('container');
 
 						selectField.set('options', [{label: 'a', value: 'a'}]);
-						selectField.setValue('a');
+						selectField.setValue(['a']);
 
-						assert.equal(selectField.get('value'), 'a');
-						assert.equal(selectField.getValue(), 'a');
+						assert.deepEqual(selectField.get('value'), ['a']);
+						assert.deepEqual(selectField.getValue(), ['a']);
 						assert.equal(container.one('.select-field-trigger').one('.option-selected').html(), 'a');
 
 						done();
@@ -146,13 +125,13 @@ describe(
 						selectField = createSelectField(
 							{
 								options: [{label: 'a', value: 'a'}],
-								value: 'a'
+								value: ['a']
 							}
 						);
 
-						assert.equal(
+						assert.deepEqual(
 							selectField.getValue(),
-							'a'
+							['a']
 						);
 
 						done();
@@ -165,7 +144,7 @@ describe(
 			'.getValue()',
 			function() {
 				it(
-					'should return string value for single selectField',
+					'should return array value for single selectField',
 					function(done) {
 						selectField = createSelectField(
 							{
@@ -175,14 +154,14 @@ describe(
 
 						selectField.setValue(['a']);
 
-						assert.equal(selectField.getValue(), 'a');
+						assert.deepEqual(selectField.getValue(), ['a']);
 
 						done();
 					}
 				);
 
 				it(
-					'should return string values for multiple selectField',
+					'should return array value for multiple selectField',
 					function(done) {
 						selectField = createSelectField(
 							{
@@ -193,9 +172,9 @@ describe(
 
 						selectField.setValue(['a', 'c']);
 
-						assert.equal(
+						assert.deepEqual(
 							selectField.getValue(),
-							'a,c'
+							['a', 'c']
 						);
 
 						done();
@@ -212,9 +191,9 @@ describe(
 							}
 						);
 
-						assert.equal(
+						assert.deepEqual(
 							selectField.getValue(),
-							''
+							[]
 						);
 
 						done();
@@ -235,7 +214,7 @@ describe(
 							}
 						);
 
-						selectField.set('value', '19');
+						selectField.set('value', ['19']);
 
 						assert.equal(selectField.getValueSelected()[0].label, 'b');
 
@@ -358,7 +337,7 @@ describe(
 
 						item.simulate('click');
 
-						assert.equal(selectField.getValue(), 'foo');
+						assert.deepEqual(selectField.getValue(), ['foo']);
 					}
 				);
 

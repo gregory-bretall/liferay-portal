@@ -28,14 +28,17 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 	factory = true,
 	id = "com.liferay.frontend.taglib.form.navigator.internal.configuration.FormNavigatorConfiguration",
 	localization = "content/Language",
-	name = "form.navigator.configuration.name"
+	name = "form-navigator-configuration-name"
 )
 public interface FormNavigatorConfiguration {
 
-	@Meta.AD(required = true)
+	@Meta.AD(name = "form-navigator-id", required = true)
 	public String formNavigatorId();
 
-	@Meta.AD(description = "form-navigator-entry-keys", required = true)
+	@Meta.AD(
+		description = "form-navigator-entry-keys-help",
+		name = "form-navigator-entry-keys", required = true
+	)
 	public String[] formNavigatorEntryKeys();
 
 }

@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +37,11 @@ import org.json.JSONObject;
  * @author Kevin Yen
  */
 public class BatchBuild extends BaseBuild {
+
+	@Override
+	public void addTimelineData(BaseBuild.TimelineData timelineData) {
+		addDownstreamBuildsTimelineData(timelineData);
+	}
 
 	@Override
 	public String getAppServer() {
@@ -68,26 +75,45 @@ public class BatchBuild extends BaseBuild {
 			return messageElement;
 		}
 
+		Map<Build, Element> downstreamBuildFailureMessages =
+			getDownstreamBuildMessages("ABORTED", "FAILURE", "UNSTABLE");
+
 		List<Element> failureElements = new ArrayList<>();
+		List<Element> upstreamJobFailureElements = new ArrayList<>();
 
-		for (Build downstreamBuild : getDownstreamBuilds(null)) {
-			String downstreamBuildResult = downstreamBuild.getResult();
+		for (Build failedDownstreamBuild :
+				downstreamBuildFailureMessages.keySet()) {
 
-			if (downstreamBuildResult.equals("SUCCESS")) {
+			Element failureElement = downstreamBuildFailureMessages.get(
+				failedDownstreamBuild);
+
+			Element upstreamJobFailureElement =
+				failedDownstreamBuild.
+					getGitHubMessageUpstreamJobFailureElement();
+
+			if (upstreamJobFailureElement != null) {
+				upstreamJobFailureElements.add(upstreamJobFailureElement);
+			}
+
+			if (failureElement == null) {
 				continue;
 			}
-			else {
-				Element failureElement =
-					downstreamBuild.getGitHubMessageElement();
 
-				if (isHighPriorityBuildFailureElement(failureElement)) {
-					failureElements.add(0, failureElement);
+			if (isHighPriorityBuildFailureElement(failureElement)) {
+				failureElements.add(0, failureElement);
 
-					continue;
-				}
-
-				failureElements.add(failureElement);
+				continue;
 			}
+
+			failureElements.add(failureElement);
+		}
+
+		if (!upstreamJobFailureElements.isEmpty()) {
+			upstreamJobFailureMessageElement = getGitHubMessageElement(true);
+
+			Dom4JUtil.getOrderedListElement(
+				upstreamJobFailureElements, upstreamJobFailureMessageElement,
+				4);
 		}
 
 		Dom4JUtil.getOrderedListElement(failureElements, messageElement, 4);
@@ -98,6 +124,10 @@ public class BatchBuild extends BaseBuild {
 				Dom4JUtil.getNewAnchorElement(
 					getBuildURL() + "testReport", "here"),
 				" for more failures.");
+		}
+
+		if (failureElements.isEmpty()) {
+			return null;
 		}
 
 		return messageElement;
@@ -118,7 +148,7 @@ public class BatchBuild extends BaseBuild {
 		String status = getStatus();
 
 		if (!status.equals("completed")) {
-			return null;
+			return Collections.emptyList();
 		}
 
 		List<TestResult> testResults = new ArrayList<>();
@@ -166,6 +196,18 @@ public class BatchBuild extends BaseBuild {
 	}
 
 	@Override
+	public long getTotalDuration() {
+		long totalDuration = super.getTotalDuration();
+
+		return totalDuration - getDuration();
+	}
+
+	@Override
+	public int getTotalSlavesUsedCount() {
+		return super.getTotalSlavesUsedCount() - 1;
+	}
+
+	@Override
 	public void update() {
 		super.update();
 
@@ -174,6 +216,8 @@ public class BatchBuild extends BaseBuild {
 		if (badBuildNumbers.size() >= MAX_REINVOCATIONS) {
 			return;
 		}
+
+		String result = getResult();
 
 		if ((status.equals("completed") && result.equals("SUCCESS")) ||
 			fromArchive) {
@@ -216,13 +260,6 @@ public class BatchBuild extends BaseBuild {
 
 	protected BatchBuild(String url, TopLevelBuild topLevelBuild) {
 		super(url, topLevelBuild);
-	}
-
-	@Override
-	protected List<String> findDownstreamBuildsInConsoleText(
-		String consoleText) {
-
-		return Collections.emptyList();
 	}
 
 	protected AxisBuild getAxisBuild(String axisVariable) {
@@ -310,20 +347,58 @@ public class BatchBuild extends BaseBuild {
 	}
 
 	@Override
+	protected ExecutorService getExecutorService() {
+		return _executorService;
+	}
+
+	@Override
 	protected Element getFailureMessageElement() {
 		return null;
 	}
 
 	@Override
 	protected Element getGitHubMessageJobResultsElement() {
+		return getGitHubMessageJobResultsElement(false);
+	}
+
+	@Override
+	protected Element getGitHubMessageJobResultsElement(
+		boolean showCommonFailuresCount) {
+
 		String result = getResult();
 
 		int failCount = getDownstreamBuildCountByResult("FAILURE");
 		int successCount = getDownstreamBuildCountByResult("SUCCESS");
+		int upstreamFailCount = 0;
 
 		if (result.equals("UNSTABLE")) {
 			failCount = getTestCountByStatus("FAILURE");
 			successCount = getTestCountByStatus("SUCCESS");
+
+			if (isCompareToUpstream()) {
+				for (TestResult testResult : getTestResults(null)) {
+					String testStatus = testResult.getStatus();
+
+					if (testStatus.equals("PASSED") ||
+						testStatus.equals("SKIPPED")) {
+
+						continue;
+					}
+
+					if (UpstreamFailureUtil.isTestFailingInUpstreamJob(
+							testResult)) {
+
+						upstreamFailCount++;
+					}
+				}
+
+				if (showCommonFailuresCount) {
+					failCount = upstreamFailCount;
+				}
+				else {
+					failCount = failCount - upstreamFailCount;
+				}
+			}
 		}
 
 		return Dom4JUtil.getNewElement(
@@ -339,6 +414,39 @@ public class BatchBuild extends BaseBuild {
 				" Failed.", getFailureMessageElement()));
 	}
 
+	@Override
+	protected String getJenkinsReportBuildInfoCellElementTagName() {
+		return "th";
+	}
+
+	@Override
+	protected List<Element> getJenkinsReportTableRowElements(
+		String result, String status) {
+
+		List<Element> tableRowElements = new ArrayList<>();
+
+		tableRowElements.add(getJenkinsReportTableRowElement());
+
+		List<Build> downstreamBuilds = getDownstreamBuilds(null);
+
+		Collections.sort(
+			downstreamBuilds, new BaseBuild.BuildDisplayNameComparator());
+
+		for (Build downstreamBuild : downstreamBuilds) {
+			if (!(downstreamBuild instanceof AxisBuild)) {
+				continue;
+			}
+
+			AxisBuild downstreamAxisBuild = (AxisBuild)downstreamBuild;
+
+			tableRowElements.add(
+				downstreamAxisBuild.getJenkinsReportTableRowElement());
+		}
+
+		return tableRowElements;
+	}
+
+	@Override
 	protected int getTestCountByStatus(String status) {
 		JSONObject testReportJSONObject = getTestReportJSONObject();
 
@@ -359,5 +467,8 @@ public class BatchBuild extends BaseBuild {
 
 	protected final Pattern majorVersionPattern = Pattern.compile(
 		"((\\d+)\\.?(\\d+?)).*");
+
+	private static ExecutorService _executorService = getNewThreadPoolExecutor(
+		20);
 
 }

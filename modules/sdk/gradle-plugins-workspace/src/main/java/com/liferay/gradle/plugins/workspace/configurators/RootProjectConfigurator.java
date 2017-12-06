@@ -18,6 +18,7 @@ import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
 import com.liferay.gradle.plugins.workspace.internal.util.FileUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.workspace.tasks.CreateTokenTask;
 import com.liferay.gradle.util.Validator;
 import com.liferay.gradle.util.copy.StripPathSegmentsAction;
 
@@ -28,12 +29,16 @@ import groovy.lang.Closure;
 import java.io.File;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
+import org.apache.http.HttpHeaders;
 
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
@@ -69,6 +74,8 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 	public static final String CLEAN_TASK_NAME =
 		LifecycleBasePlugin.CLEAN_TASK_NAME;
+
+	public static final String CREATE_TOKEN_TASK_NAME = "createToken";
 
 	public static final String DIST_BUNDLE_TAR_TASK_NAME = "distBundleTar";
 
@@ -106,8 +113,11 @@ public class RootProjectConfigurator implements Plugin<Project> {
 			GradleUtil.addDefaultRepositories(project);
 		}
 
-		Download downloadBundleTask = _addTaskDownloadBundle(
+		CreateTokenTask createTokenTask = _addTaskCreateToken(
 			project, workspaceExtension);
+
+		Download downloadBundleTask = _addTaskDownloadBundle(
+			createTokenTask, workspaceExtension);
 
 		Copy distBundleTask = _addTaskDistBundle(
 			project, downloadBundleTask, workspaceExtension);
@@ -190,6 +200,59 @@ public class RootProjectConfigurator implements Plugin<Project> {
 		return copy;
 	}
 
+	private CreateTokenTask _addTaskCreateToken(
+		Project project, final WorkspaceExtension workspaceExtension) {
+
+		CreateTokenTask createTokenTask = GradleUtil.addTask(
+			project, CREATE_TOKEN_TASK_NAME, CreateTokenTask.class);
+
+		createTokenTask.setDescription("Creates a liferay.com download token.");
+
+		createTokenTask.setEmailAddress(
+			new Callable<String>() {
+
+				@Override
+				public String call() throws Exception {
+					return workspaceExtension.getBundleTokenEmailAddress();
+				}
+
+			});
+
+		createTokenTask.setForce(
+			new Callable<Boolean>() {
+
+				@Override
+				public Boolean call() throws Exception {
+					return workspaceExtension.isBundleTokenForce();
+				}
+
+			});
+
+		createTokenTask.setGroup(BUNDLE_GROUP);
+
+		createTokenTask.setPassword(
+			new Callable<String>() {
+
+				@Override
+				public String call() throws Exception {
+					return workspaceExtension.getBundleTokenPassword();
+				}
+
+			});
+
+		createTokenTask.setPasswordFile(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					return workspaceExtension.getBundleTokenPasswordFile();
+				}
+
+			});
+
+		return createTokenTask;
+	}
+
 	private Copy _addTaskDistBundle(
 		final Project project, Download downloadBundleTask,
 		WorkspaceExtension workspaceExtension) {
@@ -258,17 +321,67 @@ public class RootProjectConfigurator implements Plugin<Project> {
 	}
 
 	private Download _addTaskDownloadBundle(
-		Project project, final WorkspaceExtension workspaceExtension) {
+		final CreateTokenTask createTokenTask,
+		final WorkspaceExtension workspaceExtension) {
+
+		Project project = createTokenTask.getProject();
 
 		final Download download = GradleUtil.addTask(
 			project, DOWNLOAD_BUNDLE_TASK_NAME, Download.class);
 
-		File destinationDir = new File(
-			System.getProperty("user.home"), ".liferay/bundles");
+		download.doFirst(
+			new Action<Task>() {
 
-		destinationDir.mkdirs();
+				@Override
+				public void execute(Task task) {
+					Logger logger = download.getLogger();
+					Project project = download.getProject();
 
-		download.dest(destinationDir);
+					if (workspaceExtension.isBundleTokenDownload()) {
+						String token = FileUtil.read(
+							createTokenTask.getTokenFile());
+
+						token = token.trim();
+
+						download.header(
+							HttpHeaders.AUTHORIZATION, "Bearer " + token);
+					}
+
+					for (Object src : _getSrcList(download)) {
+						File file = null;
+
+						try {
+							URI uri = project.uri(src);
+
+							file = project.file(uri);
+						}
+						catch (Exception e) {
+							if (logger.isDebugEnabled()) {
+								logger.debug(e.getMessage(), e);
+							}
+						}
+
+						if ((file == null) || !file.exists()) {
+							continue;
+						}
+
+						File destinationFile = download.getDest();
+
+						if (destinationFile.isDirectory()) {
+							destinationFile = new File(
+								destinationFile, file.getName());
+						}
+
+						if (destinationFile.equals(file)) {
+							throw new GradleException(
+								"Download source " + file +
+									" and destination " + destinationFile +
+										" cannot be the same");
+						}
+					}
+				}
+
+			});
 
 		download.onlyIfNewer(true);
 		download.setDescription("Downloads the Liferay bundle zip file.");
@@ -278,19 +391,21 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 				@Override
 				public void execute(Project project) {
-					Object src = download.getSrc();
+					if (workspaceExtension.isBundleTokenDownload()) {
+						download.dependsOn(createTokenTask);
+					}
 
-					if (src != null) {
-						if (src instanceof List<?>) {
-							List<?> srcList = (List<?>)src;
+					File destinationDir =
+						workspaceExtension.getBundleCacheDir();
 
-							if (!srcList.isEmpty()) {
-								return;
-							}
-						}
-						else {
-							return;
-						}
+					destinationDir.mkdirs();
+
+					download.dest(destinationDir);
+
+					List<?> srcList = _getSrcList(download);
+
+					if (!srcList.isEmpty()) {
+						return;
 					}
 
 					String bundleUrl = workspaceExtension.getBundleUrl();
@@ -489,6 +604,20 @@ public class RootProjectConfigurator implements Plugin<Project> {
 				}
 
 			});
+	}
+
+	private List<?> _getSrcList(Download download) {
+		Object src = download.getSrc();
+
+		if (src == null) {
+			return Collections.emptyList();
+		}
+
+		if (src instanceof List<?>) {
+			return (List<?>)src;
+		}
+
+		return Collections.singletonList(src);
 	}
 
 	private static final boolean _DEFAULT_REPOSITORY_ENABLED = true;

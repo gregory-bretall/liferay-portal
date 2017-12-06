@@ -28,6 +28,10 @@ AUI.add(
 						value: 'singleline'
 					},
 
+					initialHeight: {
+						value: 0
+					},
+
 					options: {
 						value: []
 					},
@@ -85,14 +89,6 @@ AUI.add(
 						return 'input';
 					},
 
-					getTextHeight: function() {
-						var instance = this;
-
-						var text = instance.getValue();
-
-						return text.split('\n').length;
-					},
-
 					render: function() {
 						var instance = this;
 
@@ -105,6 +101,7 @@ AUI.add(
 						}
 
 						if (instance.get('displayStyle') === 'multiline') {
+							instance._setInitialHeight();
 							instance.syncInputHeight();
 						}
 
@@ -118,9 +115,9 @@ AUI.add(
 
 						var container = instance.get('container');
 
-						var inputGroup = container.one('.input-group-container');
+						var formGroup = container.one('.form-group');
 
-						inputGroup.insert(container.one('.help-block'), 'after');
+						formGroup.insert(container.one('.form-feedback-item'), 'after');
 					},
 
 					syncInputHeight: function() {
@@ -128,13 +125,14 @@ AUI.add(
 
 						var inputNode = instance.getInputNode();
 
-						var height = instance.getTextHeight();
+						var initialHeight = instance.get('initialHeight');
 
-						if (height < 2) {
-							inputNode.set('rows', 2);
-						}
-						else {
-							inputNode.set('rows', height);
+						inputNode.setStyle('height', initialHeight);
+
+						var height = inputNode.get('scrollHeight');
+
+						if (height > initialHeight) {
+							inputNode.setStyle('height', height);
 						}
 					},
 
@@ -190,6 +188,18 @@ AUI.add(
 						if (instance.get('displayStyle') === 'multiline') {
 							instance.syncInputHeight();
 						}
+					},
+
+					_setInitialHeight: function() {
+						var instance = this;
+
+						var inputNode = instance.getInputNode();
+
+						var initialHeightInPx = inputNode.getStyle('height');
+
+						var initialHeight = parseInt(initialHeightInPx, 10);
+
+						instance.set('initialHeight', initialHeight);
 					}
 				}
 			}

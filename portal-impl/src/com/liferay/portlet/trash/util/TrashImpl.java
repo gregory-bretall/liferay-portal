@@ -15,6 +15,7 @@
 package com.liferay.portlet.trash.util;
 
 import com.liferay.document.library.kernel.store.DLStoreUtil;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -36,7 +37,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashRenderer;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -51,7 +51,6 @@ import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.trash.model.impl.TrashEntryImpl;
 import com.liferay.trash.kernel.model.TrashEntry;
 import com.liferay.trash.kernel.model.TrashVersion;
 import com.liferay.trash.kernel.service.TrashEntryLocalServiceUtil;
@@ -77,8 +76,8 @@ import javax.portlet.PortletURL;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author Sergio González
- * @author Julio Camarero
+ * @author     Sergio González
+ * @author     Julio Camarero
  * @deprecated As of 7.0.0
  */
 @Deprecated
@@ -224,7 +223,7 @@ public class TrashImpl implements Trash {
 
 					Date removedDate = document.getDate(Field.REMOVED_DATE);
 
-					entry = new TrashEntryImpl();
+					entry = TrashEntryLocalServiceUtil.createTrashEntry(0);
 
 					entry.setUserName(userName);
 					entry.setCreateDate(removedDate);
@@ -258,8 +257,9 @@ public class TrashImpl implements Trash {
 			catch (Exception e) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
-						"Unable to find trash entry for " + entryClassName +
-							" with primary key " + classPK);
+						StringBundler.concat(
+							"Unable to find trash entry for ", entryClassName,
+							" with primary key ", String.valueOf(classPK)));
 				}
 			}
 		}

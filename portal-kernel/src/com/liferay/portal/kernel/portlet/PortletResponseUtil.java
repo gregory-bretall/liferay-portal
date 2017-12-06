@@ -189,9 +189,9 @@ public class PortletResponseUtil {
 	public static void write(MimeResponse mimeResponse, File file)
 		throws IOException {
 
-		FileInputStream fileInputStream = new FileInputStream(file);
+		try (FileInputStream fileInputStream = new FileInputStream(file)) {
+			FileChannel fileChannel = fileInputStream.getChannel();
 
-		try (FileChannel fileChannel = fileInputStream.getChannel()) {
 			long contentLength = fileChannel.size();
 
 			if (mimeResponse instanceof ResourceResponse) {
@@ -219,7 +219,16 @@ public class PortletResponseUtil {
 		throws IOException {
 
 		if (mimeResponse.isCommitted()) {
-			StreamUtil.cleanUp(inputStream);
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				}
+				catch (IOException ioe) {
+					if (_log.isWarnEnabled()) {
+						_log.warn(ioe, ioe);
+					}
+				}
+			}
 
 			return;
 		}

@@ -17,6 +17,7 @@ package com.liferay.jenkins.results.parser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -28,9 +29,26 @@ import org.json.JSONObject;
  */
 public class JenkinsMaster implements Comparable<JenkinsMaster> {
 
-	public JenkinsMaster(String masterName, String masterURL) {
-		_masterName = masterName;
-		_masterURL = masterURL;
+	public JenkinsMaster(String masterName) {
+		if (masterName.contains(".")) {
+			_masterName = masterName.substring(0, masterName.indexOf("."));
+		}
+		else {
+			_masterName = masterName;
+		}
+
+		try {
+			Properties properties =
+				JenkinsResultsParserUtil.getBuildProperties();
+
+			_masterURL = properties.getProperty(
+				JenkinsResultsParserUtil.combine(
+					"jenkins.local.url[", _masterName, "]"));
+		}
+		catch (Exception e) {
+			throw new RuntimeException(
+				"Unable to determine URL for master " + _masterName, e);
+		}
 	}
 
 	public synchronized void addRecentBatch(int batchSize) {
@@ -87,8 +105,12 @@ public class JenkinsMaster implements Comparable<JenkinsMaster> {
 		return availableSlavesCount;
 	}
 
-	public String getMasterName() {
+	public String getName() {
 		return _masterName;
+	}
+
+	public String getURL() {
+		return _masterURL;
 	}
 
 	public boolean isAvailable() {

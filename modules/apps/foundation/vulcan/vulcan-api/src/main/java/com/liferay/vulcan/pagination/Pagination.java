@@ -17,19 +17,43 @@ package com.liferay.vulcan.pagination;
 import aQute.bnd.annotation.ProviderType;
 
 /**
+ * Defines pagination for a collection endpoint. An instance of this interface
+ * is handed to resources that handle pagination parameters.
+ *
  * @author Alejandro Hernández
  * @author Carlos Sierra Andrés
  * @author Jorge Ferrer
+ * @see    Page
  */
 @ProviderType
 public interface Pagination {
 
+	/**
+	 * Returns the position of the requested page's last element.
+	 *
+	 * @return the position of the requested page's last element
+	 */
 	public int getEndPosition();
 
+	/**
+	 * Returns the selected number of items per page.
+	 *
+	 * @return the selected number of items per page
+	 */
 	public int getItemsPerPage();
 
+	/**
+	 * Returns the requested page's number.
+	 *
+	 * @return the requested page's number
+	 */
 	public int getPageNumber();
 
+	/**
+	 * Returns the position of the requested page's first element.
+	 *
+	 * @return the position of the requested page's first element
+	 */
 	public int getStartPosition();
 
 }

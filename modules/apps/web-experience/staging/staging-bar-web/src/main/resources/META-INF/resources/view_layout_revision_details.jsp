@@ -17,13 +17,13 @@
 <%@ include file="/init.jsp" %>
 
 <%
-LayoutRevision layoutRevision = (LayoutRevision)request.getAttribute("view.jsp-layoutRevision");
+LayoutRevision layoutRevision = (LayoutRevision)request.getAttribute(WebKeys.LAYOUT_REVISION);
 
 if ((layoutRevision == null) && (layout != null)) {
 	layoutRevision = LayoutStagingUtil.getLayoutRevision(layout);
 }
 
-LayoutSetBranch layoutSetBranch = (LayoutSetBranch)request.getAttribute("view.jsp-layoutSetBranch");
+LayoutSetBranch layoutSetBranch = (LayoutSetBranch)request.getAttribute(StagingProcessesWebKeys.LAYOUT_SET_BRANCH);
 
 if (layoutSetBranch == null) {
 	layoutSetBranch = LayoutSetBranchLocalServiceUtil.getLayoutSetBranch(layoutRevision.getLayoutSetBranchId());
@@ -207,13 +207,13 @@ else {
 						<liferay-ui:message key="site-pages-variation" />
 					</a>
 				</li>
-				<li>
-					<a href="javascript:;" id="manageLayoutRevisions" onclick="<%= renderResponse.getNamespace() + "openPageVariationsDialog();" %>">
-						<liferay-ui:message key="page-variations" />
-					</a>
-				</li>
 
 				<c:if test="<%= !layoutRevision.isIncomplete() %>">
+					<li>
+						<a href="javascript:;" id="manageLayoutRevisions" onclick="<%= renderResponse.getNamespace() + "openPageVariationsDialog();" %>">
+							<liferay-ui:message key="page-variations" />
+						</a>
+					</li>
 					<li>
 						<a href="javascript:Liferay.fire('<%= liferayPortletResponse.getNamespace() %>viewHistory', {layoutRevisionId: '<%= layoutRevision.getLayoutRevisionId() %>', layoutSetBranchId: '<%= layoutRevision.getLayoutSetBranchId() %>'}); void(0);" id="viewHistoryLink">
 							<liferay-ui:message key="history" />
@@ -292,6 +292,11 @@ else {
 		Liferay.Util.openWindow(
 			{
 				dialog: {
+					after: {
+						destroy: function(event) {
+							window.location.reload();
+						}
+					},
 					destroyOnHide: true
 				},
 				id: 'pagesVariationsDialog',
@@ -311,6 +316,11 @@ else {
 		Liferay.Util.openWindow(
 			{
 				dialog: {
+					after: {
+						destroy: function(event) {
+							window.location.reload();
+						}
+					},
 					destroyOnHide: true
 				},
 				id: 'sitePagesVariationDialog',

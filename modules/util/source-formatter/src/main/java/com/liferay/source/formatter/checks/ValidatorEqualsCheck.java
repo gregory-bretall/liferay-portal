@@ -26,9 +26,7 @@ public class ValidatorEqualsCheck extends BaseFileCheck {
 	protected String doProcess(
 		String fileName, String absolutePath, String content) {
 
-		if (!fileName.endsWith("ValidatorEqualsCheck.java")) {
-			_checkValidatorEquals(fileName, content);
-		}
+		_checkValidatorEquals(fileName, content);
 
 		return content;
 	}
@@ -40,8 +38,8 @@ public class ValidatorEqualsCheck extends BaseFileCheck {
 			addMessage(
 				fileName,
 				"Use Objects.equals(Object, Object) instead of " +
-					"Objects.equals(Object, Object), see LPS-65135",
-				getLineCount(content, matcher.start()));
+					"Objects.equals(Object, Object)",
+				"equals.markdown", getLineCount(content, matcher.start()));
 		}
 	}
 

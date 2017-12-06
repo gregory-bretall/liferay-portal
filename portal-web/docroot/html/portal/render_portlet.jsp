@@ -122,6 +122,15 @@ else if (modePreview) {
 else if (modePrint) {
 	portletMode = LiferayPortletMode.PRINT;
 }
+else if (layoutTypePortlet instanceof LayoutTypePortletImpl) {
+	LayoutTypePortletImpl layoutTypePortletImpl = (LayoutTypePortletImpl)layoutTypePortlet;
+
+	String customPortletMode = layoutTypePortletImpl.getAddedCustomPortletMode();
+
+	if (customPortletMode != null) {
+		portletMode = new PortletMode(customPortletMode);
+	}
+}
 
 InvokerPortlet invokerPortlet = null;
 
@@ -962,6 +971,7 @@ Boolean renderPortletBoundary = GetterUtil.getBoolean(request.getAttribute(WebKe
 	%>
 
 	<div class="<%= cssClasses %>" id="p_p_id<%= HtmlUtil.escapeAttribute(renderResponseImpl.getNamespace()) %>" <%= freeformStyles %>>
+		<span id="p_<%= HtmlUtil.escapeAttribute(portletId) %>"></span>
 </c:if>
 
 <c:choose>
@@ -1100,6 +1110,10 @@ else {
 %>
 
 <aui:script position='<%= themeDisplay.isIsolated() ? "inline" : "auto" %>'>
+	<c:if test="<%= !layoutTypePortlet.hasStateMax() && !themeDisplay.isStatePopUp() %>">
+		Liferay.Portlet.register('<%= HtmlUtil.escapeJS(portletDisplay.getId()) %>');
+	</c:if>
+
 	Liferay.Portlet.onLoad(
 		{
 			canEditTitle: <%= showConfigurationIcon %>,
@@ -1107,7 +1121,8 @@ else {
 			isStatic: '<%= staticVar %>',
 			namespacedId: 'p_p_id<%= HtmlUtil.escapeJS(renderResponseImpl.getNamespace()) %>',
 			portletId: '<%= HtmlUtil.escapeJS(portletDisplay.getId()) %>',
-			refreshURL: '<%= HtmlUtil.escapeJS(PortletURLUtil.getRefreshURL(request, themeDisplay)) %>'
+			refreshURL: '<%= HtmlUtil.escapeJS(PortletURLUtil.getRefreshURL(request, themeDisplay, false)) %>',
+			refreshURLData: <%= JSONFactoryUtil.looseSerializeDeep(PortletURLUtil.getRefreshURLParameters(request)) %>
 		}
 	);
 </aui:script>

@@ -14,8 +14,8 @@
 
 package com.liferay.source.formatter.checks.util;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -36,11 +36,20 @@ import org.dom4j.io.SAXReader;
 public class SourceUtil {
 
 	public static String getAbsolutePath(File file) {
-		return _getAbsolutePath(file.toPath());
+		return getAbsolutePath(file.toPath());
+	}
+
+	public static String getAbsolutePath(Path filePath) {
+		filePath = filePath.toAbsolutePath();
+
+		filePath = filePath.normalize();
+
+		return StringUtil.replace(
+			filePath.toString(), CharPool.BACK_SLASH, CharPool.SLASH);
 	}
 
 	public static String getAbsolutePath(String fileName) {
-		return _getAbsolutePath(Paths.get(fileName));
+		return getAbsolutePath(Paths.get(fileName));
 	}
 
 	public static String getIndent(String s) {
@@ -95,6 +104,12 @@ public class SourceUtil {
 		return level;
 	}
 
+	public static Document readXML(File file) throws Exception {
+		SAXReader saxReader = SAXReaderFactory.getSAXReader(null, false, false);
+
+		return saxReader.read(file);
+	}
+
 	public static Document readXML(String content) throws Exception {
 		SAXReader saxReader = SAXReaderFactory.getSAXReader(null, false, false);
 
@@ -110,7 +125,7 @@ public class SourceUtil {
 		for (String line : lines) {
 			line = StringUtil.trim(line);
 
-			if (line.startsWith("//")) {
+			if (line.startsWith("//") || line.startsWith("*")) {
 				continue;
 			}
 
@@ -130,15 +145,6 @@ public class SourceUtil {
 		}
 
 		return level;
-	}
-
-	private static String _getAbsolutePath(Path filePath) {
-		filePath = filePath.toAbsolutePath();
-
-		filePath = filePath.normalize();
-
-		return StringUtil.replace(
-			filePath.toString(), CharPool.BACK_SLASH, CharPool.SLASH);
 	}
 
 }

@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.cal.DayAndPosition;
 import com.liferay.portal.kernel.cal.Duration;
 import com.liferay.portal.kernel.cal.Recurrence;
 import com.liferay.portal.kernel.cal.RecurrenceSerializer;
+import com.liferay.portal.kernel.cluster.ClusterableContextThreadLocal;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -52,8 +53,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.scheduler.SchedulerClusterInvokingThreadLocal;
-import com.liferay.portal.scheduler.configuration.SchedulerEngineHelperConfiguration;
+import com.liferay.portal.scheduler.internal.configuration.SchedulerEngineHelperConfiguration;
 import com.liferay.portal.scheduler.internal.messaging.config.SchedulerProxyMessagingConfigurator;
 import com.liferay.portal.scheduler.internal.messaging.config.ScriptingMessageListener;
 
@@ -570,6 +570,30 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 		MessageListener messageListener, SchedulerEntry schedulerEntry,
 		String destinationName) {
 
+		Dictionary<String, Object> properties = new HashMapDictionary<>();
+
+		properties.put("destination.name", destinationName);
+
+		Class<?> messageListenerClass = messageListener.getClass();
+
+		ServiceRegistration<SchedulerEventMessageListener> serviceRegistration =
+			_serviceRegistrations.get(messageListenerClass.getName());
+
+		if (serviceRegistration != null) {
+			SchedulerEventMessageListenerWrapper
+				schedulerEventMessageListenerWrapper =
+					(SchedulerEventMessageListenerWrapper)
+						_bundleContext.getService(
+							serviceRegistration.getReference());
+
+			schedulerEventMessageListenerWrapper.setSchedulerEntry(
+				schedulerEntry);
+
+			serviceRegistration.setProperties(properties);
+
+			return;
+		}
+
 		SchedulerEventMessageListenerWrapper
 			schedulerEventMessageListenerWrapper =
 				new SchedulerEventMessageListenerWrapper();
@@ -579,16 +603,12 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 
 		schedulerEventMessageListenerWrapper.setSchedulerEntry(schedulerEntry);
 
-		Dictionary<String, Object> properties = new HashMapDictionary<>();
+		serviceRegistration = _bundleContext.registerService(
+			SchedulerEventMessageListener.class,
+			schedulerEventMessageListenerWrapper, properties);
 
-		properties.put("destination.name", destinationName);
-
-		ServiceRegistration<SchedulerEventMessageListener> serviceRegistration =
-			_bundleContext.registerService(
-				SchedulerEventMessageListener.class,
-				schedulerEventMessageListenerWrapper, properties);
-
-		_serviceRegistrations.put(messageListener, serviceRegistration);
+		_serviceRegistrations.put(
+			messageListenerClass.getName(), serviceRegistration);
 	}
 
 	@Override
@@ -611,6 +631,8 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 			Trigger trigger, StorageType storageType, String description,
 			String destinationName, Message message, int exceptionsMaxSize)
 		throws SchedulerException {
+
+		_schedulerEngine.validateTrigger(trigger, storageType);
 
 		if (message == null) {
 			message = new Message();
@@ -657,8 +679,10 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 
 	@Override
 	public void unregister(MessageListener messageListener) {
+		Class<?> messageListenerClass = messageListener.getClass();
+
 		_serviceRegistrations.compute(
-			messageListener,
+			messageListenerClass.getName(),
 			(key, value) -> {
 				value.unregister();
 
@@ -902,7 +926,7 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 	private volatile SchedulerEngineHelperConfiguration
 		_schedulerEngineHelperConfiguration;
 	private final Map
-		<MessageListener, ServiceRegistration<SchedulerEventMessageListener>>
+		<String, ServiceRegistration<SchedulerEventMessageListener>>
 			_serviceRegistrations = new ConcurrentHashMap<>();
 	private volatile ServiceTracker
 		<SchedulerEventMessageListener, SchedulerEventMessageListener>
@@ -948,7 +972,8 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 				destinationName = DestinationNames.SCHEDULER_DISPATCH;
 			}
 
-			SchedulerClusterInvokingThreadLocal.setEnabled(false);
+			ClusterableContextThreadLocal.putThreadLocalContext(
+				SchedulerEngine.SCHEDULER_CLUSTER_INVOKING, false);
 
 			try {
 				schedule(
@@ -996,7 +1021,8 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 				_log.error(se, se);
 			}
 			finally {
-				SchedulerClusterInvokingThreadLocal.setEnabled(true);
+				ClusterableContextThreadLocal.putThreadLocalContext(
+					SchedulerEngine.SCHEDULER_CLUSTER_INVOKING, true);
 			}
 
 			return null;
@@ -1006,6 +1032,38 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 		public void modifiedService(
 			ServiceReference<SchedulerEventMessageListener> serviceReference,
 			SchedulerEventMessageListener schedulerEventMessageListener) {
+
+			SchedulerEntry schedulerEntry =
+				schedulerEventMessageListener.getSchedulerEntry();
+
+			if ((schedulerEntry == null) ||
+				(schedulerEntry.getTrigger() == null)) {
+
+				return;
+			}
+
+			StorageType storageType = StorageType.MEMORY_CLUSTERED;
+
+			if (schedulerEntry instanceof StorageTypeAware) {
+				StorageTypeAware storageTypeAware =
+					(StorageTypeAware)schedulerEntry;
+
+				storageType = storageTypeAware.getStorageType();
+			}
+
+			ClusterableContextThreadLocal.putThreadLocalContext(
+				SchedulerEngine.SCHEDULER_CLUSTER_INVOKING, false);
+
+			try {
+				update(schedulerEntry.getTrigger(), storageType);
+			}
+			catch (SchedulerException se) {
+				_log.error(se, se);
+			}
+			finally {
+				ClusterableContextThreadLocal.putThreadLocalContext(
+					SchedulerEngine.SCHEDULER_CLUSTER_INVOKING, true);
+			}
 		}
 
 		@Override
@@ -1035,16 +1093,18 @@ public class SchedulerEngineHelperImpl implements SchedulerEngineHelper {
 				storageType = storageTypeAware.getStorageType();
 			}
 
-			SchedulerClusterInvokingThreadLocal.setEnabled(false);
+			ClusterableContextThreadLocal.putThreadLocalContext(
+				SchedulerEngine.SCHEDULER_CLUSTER_INVOKING, false);
 
 			try {
-				unschedule(schedulerEntry, storageType);
+				delete(schedulerEntry, storageType);
 			}
 			catch (SchedulerException se) {
 				_log.error(se, se);
 			}
 			finally {
-				SchedulerClusterInvokingThreadLocal.setEnabled(true);
+				ClusterableContextThreadLocal.putThreadLocalContext(
+					SchedulerEngine.SCHEDULER_CLUSTER_INVOKING, true);
 			}
 
 			ServiceRegistration<MessageListener>

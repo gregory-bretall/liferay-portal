@@ -33,7 +33,7 @@ import org.json.JSONObject;
 public class TestResult {
 
 	public static List<TestResult> getTestResults(
-		AxisBuild axisBuild, JSONArray suitesJSONArray, String testStatus) {
+		Build build, JSONArray suitesJSONArray, String testStatus) {
 
 		List<TestResult> testResults = new ArrayList<>();
 
@@ -44,7 +44,7 @@ public class TestResult {
 
 			for (int j = 0; j < casesJSONArray.length(); j++) {
 				TestResult testResult = new TestResult(
-					axisBuild, casesJSONArray.getJSONObject(j));
+					build, casesJSONArray.getJSONObject(j));
 
 				if ((testStatus == null) ||
 					testStatus.equals(testResult.getStatus())) {
@@ -57,12 +57,12 @@ public class TestResult {
 		return testResults;
 	}
 
-	public TestResult(AxisBuild axisBuild, JSONObject caseJSONObject) {
-		if (axisBuild == null) {
-			throw new IllegalArgumentException("Axis build may not be null");
+	public TestResult(Build build, JSONObject caseJSONObject) {
+		if (build == null) {
+			throw new IllegalArgumentException("Build may not be null");
 		}
 
-		this.axisBuild = axisBuild;
+		this.build = build;
 
 		className = caseJSONObject.getString("className");
 
@@ -70,21 +70,34 @@ public class TestResult {
 
 		int x = className.lastIndexOf(".");
 
-		simpleClassName = className.substring(x + 1);
+		try {
+			simpleClassName = className.substring(x + 1);
 
-		packageName = className.substring(0, x);
+			packageName = className.substring(0, x);
+		}
+		catch (StringIndexOutOfBoundsException sioobe) {
+			packageName = className;
+			simpleClassName = className;
+
+			System.out.println(
+				"Invalid test class name \"" + className + "\" in build " +
+					build.getBuildURL());
+		}
 
 		testName = caseJSONObject.getString("name");
 
 		status = caseJSONObject.getString("status");
 
-		if (status.equals("FAILED")) {
-			errorStackTrace = caseJSONObject.getString("errorStackTrace");
+		if (status.equals("FAILED") && caseJSONObject.has("errorDetails") &&
+			caseJSONObject.has("errorStackTrace")) {
+
+			errorDetails = caseJSONObject.optString("errorDetails");
+			errorStackTrace = caseJSONObject.optString("errorStackTrace");
 		}
 	}
 
-	public AxisBuild getAxisBuild() {
-		return axisBuild;
+	public Build getBuild() {
+		return build;
 	}
 
 	public String getClassName() {
@@ -112,6 +125,10 @@ public class TestResult {
 		return duration;
 	}
 
+	public Element getGitHubElement() {
+		return getGitHubElement(null);
+	}
+
 	public Element getGitHubElement(String testrayLogsURL) {
 		String testReportURL = getTestReportURL();
 
@@ -121,15 +138,9 @@ public class TestResult {
 		downstreamBuildListItemElement.add(
 			Dom4JUtil.getNewAnchorElement(testReportURL, getDisplayName()));
 
-		if (errorStackTrace != null) {
-			String trimmedStackTrace = StringUtils.abbreviate(
-				errorStackTrace, _MAX_ERROR_STACK_DISPLAY_LENGTH);
+		if ((testrayLogsURL != null) &&
+			testReportURL.contains("com.liferay.poshi.runner/PoshiRunner")) {
 
-			downstreamBuildListItemElement.add(
-				Dom4JUtil.toCodeSnippetElement(trimmedStackTrace));
-		}
-
-		if (testReportURL.contains("com.liferay.poshi.runner/PoshiRunner")) {
 			Dom4JUtil.addToElement(
 				downstreamBuildListItemElement, " - ",
 				Dom4JUtil.getNewAnchorElement(
@@ -141,12 +152,24 @@ public class TestResult {
 				Dom4JUtil.getNewAnchorElement(
 					getConsoleOutputURL(testrayLogsURL), "Console Output"));
 
+			if (errorDetails != null) {
+				Dom4JUtil.addToElement(
+					Dom4JUtil.toCodeSnippetElement(errorDetails));
+			}
+
 			if (hasLiferayLog(testrayLogsURL)) {
 				Dom4JUtil.addToElement(
 					downstreamBuildListItemElement, " - ",
 					Dom4JUtil.getNewAnchorElement(
 						getLiferayLogURL(testrayLogsURL), "Liferay Log"));
 			}
+		}
+		else if (errorStackTrace != null) {
+			String trimmedStackTrace = StringUtils.abbreviate(
+				errorStackTrace, _MAX_ERROR_STACK_DISPLAY_LENGTH);
+
+			downstreamBuildListItemElement.add(
+				Dom4JUtil.toCodeSnippetElement(trimmedStackTrace));
 		}
 
 		return downstreamBuildListItemElement;
@@ -163,6 +186,10 @@ public class TestResult {
 		sb.append("/liferay-log.txt.gz");
 
 		return sb.toString();
+	}
+
+	public String getPackageName() {
+		return packageName;
 	}
 
 	public String getPoshiReportURL(String testrayLogsURL) {
@@ -202,7 +229,7 @@ public class TestResult {
 	public String getTestReportURL() {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(axisBuild.getBuildURL());
+		sb.append(build.getBuildURL());
 		sb.append("/testReport/");
 		sb.append(packageName);
 		sb.append("/");
@@ -238,9 +265,10 @@ public class TestResult {
 		return !liferayLog.isEmpty();
 	}
 
-	protected AxisBuild axisBuild;
+	protected Build build;
 	protected String className;
 	protected long duration;
+	protected String errorDetails;
 	protected String errorStackTrace;
 	protected String packageName;
 	protected String simpleClassName;

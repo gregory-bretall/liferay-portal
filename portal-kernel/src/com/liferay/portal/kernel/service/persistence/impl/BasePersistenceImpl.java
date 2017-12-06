@@ -136,7 +136,6 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public T findByPrimaryKey(Serializable primaryKey)
 		throws NoSuchModelException {
 
@@ -214,6 +213,10 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 		return Collections.emptySet();
 	}
 
+	public Set<String> getCompoundPKColumnNames() {
+		return Collections.emptySet();
+	}
+
 	@Override
 	public Session getCurrentSession() throws ORMException {
 		return _sessionFactory.getCurrentSession();
@@ -271,7 +274,6 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public T remove(Serializable primaryKey) throws NoSuchModelException {
 		throw new UnsupportedOperationException();
 	}
@@ -442,6 +444,13 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 
 		if (sqlQuery) {
 			fieldName = columnName;
+		}
+		else {
+			Set<String> compoundPKColumnNames = getCompoundPKColumnNames();
+
+			if (compoundPKColumnNames.contains(fieldName)) {
+				fieldName = "id.".concat(fieldName);
+			}
 		}
 
 		fieldName = entityAlias.concat(fieldName);
@@ -670,12 +679,12 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 
 		@Override
 		public CacheModel<NullModel> toCacheModel() {
-			return this;
+			return nullModel;
 		}
 
 		@Override
 		public NullModel toEntityModel() {
-			return this;
+			return nullModel;
 		}
 
 		@Override

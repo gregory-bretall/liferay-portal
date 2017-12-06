@@ -17,6 +17,9 @@ package com.liferay.vulcan.pagination;
 import java.util.Collection;
 
 /**
+ * Provides the information needed by {@link
+ * com.liferay.vulcan.endpoint.RootEndpoint} to construct a valid {@link Page}.
+ *
  * @author Alejandro Hernández
  */
 public class PageItems<T> {
@@ -26,10 +29,20 @@ public class PageItems<T> {
 		_totalCount = totalCount;
 	}
 
+	/**
+	 * Returns the page's items.
+	 *
+	 * @return the page's items
+	 */
 	public Collection<T> getItems() {
 		return _items;
 	}
 
+	/**
+	 * Returns the total number of elements in the collection.
+	 *
+	 * @return the total number of elements in the collection
+	 */
 	public int getTotalCount() {
 		return _totalCount;
 	}

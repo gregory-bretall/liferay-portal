@@ -29,6 +29,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormLayoutRow;
 import com.liferay.dynamic.data.mapping.model.LocalizedValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
+import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -97,6 +98,10 @@ public class DDMFormPagesTemplateContextFactory {
 		_ddmFormFieldTypeServicesTracker = ddmFormFieldTypeServicesTracker;
 	}
 
+	public void setJSONFactory(JSONFactory jsonFactory) {
+		_jsonFactory = jsonFactory;
+	}
+
 	protected boolean containsRequiredField(List<String> ddmFormFieldNames) {
 		for (String ddmFormFieldName : ddmFormFieldNames) {
 			DDMFormField ddmFormField = _ddmFormFieldsMap.get(ddmFormFieldName);
@@ -154,7 +159,7 @@ public class DDMFormPagesTemplateContextFactory {
 			new DDMFormFieldTemplateContextFactory(
 				_ddmFormFieldsMap, _ddmFormEvaluationResult,
 				_ddmFormFieldValuesMap.get(ddmFormFieldName),
-				_ddmFormRenderingContext);
+				_ddmFormRenderingContext, _jsonFactory, _pageEnabled);
 
 		ddmFormFieldTemplateContextFactory.setDDMFormFieldTypeServicesTracker(
 			_ddmFormFieldTypeServicesTracker);
@@ -186,7 +191,10 @@ public class DDMFormPagesTemplateContextFactory {
 
 		pageTemplateContext.put("description", description.getString(_locale));
 
-		pageTemplateContext.put("enabled", isPageEnabled(pageIndex));
+		_pageEnabled = isPageEnabled(pageIndex);
+
+		pageTemplateContext.put("enabled", _pageEnabled);
+
 		pageTemplateContext.put(
 			"localizedDescription", getLocalizedValueMap(description));
 
@@ -335,6 +343,8 @@ public class DDMFormPagesTemplateContextFactory {
 	private final DDMFormLayout _ddmFormLayout;
 	private final DDMFormRenderingContext _ddmFormRenderingContext;
 	private final DDMFormValues _ddmFormValues;
+	private JSONFactory _jsonFactory;
 	private final Locale _locale;
+	private boolean _pageEnabled;
 
 }

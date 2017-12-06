@@ -14,8 +14,8 @@
 
 package com.liferay.util.xml;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -120,11 +120,10 @@ public class XMLUtil {
 	}
 
 	private static final String[] _COMPACT_SAFE_NEW_SUBS =
-		new String[] {"[$NEW_LINE$]", "[$NEW_LINE$]", "[$NEW_LINE$]"};
+		{"[$NEW_LINE$]", "[$NEW_LINE$]", "[$NEW_LINE$]"};
 
-	private static final String[] _COMPACT_SAFE_OLD_SUBS = new String[] {
-		StringPool.RETURN_NEW_LINE, StringPool.NEW_LINE, StringPool.RETURN
-	};
+	private static final String[] _COMPACT_SAFE_OLD_SUBS =
+		{StringPool.RETURN_NEW_LINE, StringPool.NEW_LINE, StringPool.RETURN};
 
 	private static final String _XML_INDENT = "  ";
 

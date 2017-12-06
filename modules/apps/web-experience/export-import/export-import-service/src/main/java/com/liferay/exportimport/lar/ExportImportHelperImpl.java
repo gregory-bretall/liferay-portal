@@ -25,8 +25,9 @@ import com.liferay.exportimport.kernel.lar.ManifestSummary;
 import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
-import com.liferay.exportimport.kernel.lar.PortletDataContextFactoryUtil;
+import com.liferay.exportimport.kernel.lar.PortletDataContextFactory;
 import com.liferay.exportimport.kernel.lar.PortletDataHandler;
+import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerRegistryUtil;
@@ -73,7 +74,6 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -532,7 +532,7 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
 
 		PortletDataContext portletDataContext =
-			PortletDataContextFactoryUtil.createImportPortletDataContext(
+			_portletDataContextFactory.createImportPortletDataContext(
 				group.getCompanyId(), groupId, parameterMap,
 				getUserIdStrategy(userId, userIdStrategy), zipReader);
 
@@ -551,13 +551,14 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		throws Exception {
 
 		File file = FileUtil.createTempFile("lar");
-		InputStream inputStream = _dlFileEntryLocalService.getFileAsStream(
-			fileEntry.getFileEntryId(), fileEntry.getVersion(), false);
+
 		ZipReader zipReader = null;
 
 		ManifestSummary manifestSummary = null;
 
-		try {
+		try (InputStream inputStream = _dlFileEntryLocalService.getFileAsStream(
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false)) {
+
 			FileUtil.write(file, inputStream);
 
 			Group group = _groupLocalService.getGroup(groupId);
@@ -567,15 +568,13 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 			zipReader = ZipReaderFactoryUtil.getZipReader(file);
 
 			PortletDataContext portletDataContext =
-				PortletDataContextFactoryUtil.createImportPortletDataContext(
+				_portletDataContextFactory.createImportPortletDataContext(
 					group.getCompanyId(), groupId, parameterMap,
 					getUserIdStrategy(userId, userIdStrategy), zipReader);
 
 			manifestSummary = getManifestSummary(portletDataContext);
 		}
 		finally {
-			StreamUtil.cleanUp(inputStream);
-
 			if (zipReader != null) {
 				zipReader.close();
 			}
@@ -728,6 +727,47 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		}
 
 		return new CurrentUserIdStrategy(user);
+	}
+
+	@Override
+	public boolean isAlwaysIncludeReference(
+		PortletDataContext portletDataContext,
+		StagedModel referenceStagedModel) {
+
+		String rootPortletId = portletDataContext.getRootPortletId();
+
+		if (Validator.isBlank(rootPortletId)) {
+			return true;
+		}
+
+		Portlet portlet = _portletLocalService.getPortletById(rootPortletId);
+
+		PortletDataHandler portletDataHandler =
+			portlet.getPortletDataHandlerInstance();
+
+		Map<String, String[]> parameterMap =
+			portletDataContext.getParameterMap();
+
+		String[] referencedContentBehaviorArray = parameterMap.get(
+			PortletDataHandlerControl.getNamespacedControlName(
+				portletDataHandler.getNamespace(),
+				"referenced-content-behavior"));
+
+		String referencedContentBehavior = "include-always";
+
+		if (!ArrayUtil.isEmpty(referencedContentBehaviorArray)) {
+			referencedContentBehavior = referencedContentBehaviorArray[0];
+		}
+
+		if (referencedContentBehavior.equals("include-always") ||
+			(referencedContentBehavior.equals("include-if-modified") &&
+			 portletDataContext.isWithinDateRange(
+				 referenceStagedModel.getModifiedDate()))) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -1072,7 +1112,7 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
 
 		PortletDataContext portletDataContext =
-			PortletDataContextFactoryUtil.createImportPortletDataContext(
+			_portletDataContextFactory.createImportPortletDataContext(
 				group.getCompanyId(), groupId, parameterMap,
 				getUserIdStrategy(userId, userIdStrategy), zipReader);
 
@@ -1573,6 +1613,12 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 	protected MissingReference validateMissingReference(
 		PortletDataContext portletDataContext, Element element) {
 
+		// Missing reference is exported after added as missing
+
+		if (Validator.isNotNull(element.attributeValue("element-path"))) {
+			return null;
+		}
+
 		String className = element.attributeValue("class-name");
 
 		StagedModelDataHandler<?> stagedModelDataHandler =
@@ -1607,6 +1653,9 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 	private GroupLocalService _groupLocalService;
 	private LayoutLocalService _layoutLocalService;
 	private LayoutService _layoutService;
+
+	@Reference
+	private PortletDataContextFactory _portletDataContextFactory;
 
 	@Reference
 	private PortletDataHandlerProvider _portletDataHandlerProvider;

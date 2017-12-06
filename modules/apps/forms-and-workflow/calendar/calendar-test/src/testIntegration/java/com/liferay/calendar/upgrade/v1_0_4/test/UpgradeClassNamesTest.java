@@ -15,6 +15,7 @@
 package com.liferay.calendar.upgrade.v1_0_4.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.calendar.test.util.CalendarUpgradeTestUtil;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.model.ResourcePermission;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
@@ -22,14 +23,13 @@ import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ResourcePermissionTestUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
-import com.liferay.portal.kernel.upgrade.UpgradeStep;
 import com.liferay.portal.model.impl.ResourcePermissionImpl;
-import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
+import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,6 +38,11 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Arquillian.class)
 public class UpgradeClassNamesTest {
+
+	@ClassRule
+	@Rule
+	public static final LiferayIntegrationTestRule liferayIntegrationTestRule =
+		new LiferayIntegrationTestRule();
 
 	@Before
 	public void setUp() throws Exception {
@@ -56,7 +61,7 @@ public class UpgradeClassNamesTest {
 		_oldResourcePermission = addResourcePermission(
 			companyId, "com.liferay.portlet.calendar", primKey, roleId, scope);
 
-		_upgradeClassNames.upgrade();
+		_upgradeProcess.upgrade();
 
 		assertNewResourcePermissionExists();
 
@@ -78,7 +83,7 @@ public class UpgradeClassNamesTest {
 			RandomTestUtil.randomLong(), "com.liferay.portlet.calendar",
 			primKey, roleId, scope);
 
-		_upgradeClassNames.upgrade();
+		_upgradeProcess.upgrade();
 
 		assertNewResourcePermissionExists();
 
@@ -100,7 +105,7 @@ public class UpgradeClassNamesTest {
 			companyId, "com.liferay.portlet.calendar",
 			RandomTestUtil.randomString(), roleId, scope);
 
-		_upgradeClassNames.upgrade();
+		_upgradeProcess.upgrade();
 
 		assertNewResourcePermissionExists();
 
@@ -122,7 +127,7 @@ public class UpgradeClassNamesTest {
 			companyId, "com.liferay.portlet.calendar", primKey,
 			RandomTestUtil.randomLong(), scope);
 
-		_upgradeClassNames.upgrade();
+		_upgradeProcess.upgrade();
 
 		assertNewResourcePermissionExists();
 
@@ -144,7 +149,7 @@ public class UpgradeClassNamesTest {
 			companyId, "com.liferay.portlet.calendar", primKey, roleId,
 			RandomTestUtil.nextInt());
 
-		_upgradeClassNames.upgrade();
+		_upgradeProcess.upgrade();
 
 		assertNewResourcePermissionExists();
 
@@ -190,31 +195,8 @@ public class UpgradeClassNamesTest {
 	}
 
 	protected void setUpUpgradeCalendarResource() {
-		Registry registry = RegistryUtil.getRegistry();
-
-		UpgradeStepRegistrator upgradeStepRegistror = registry.getService(
-			"com.liferay.calendar.internal.upgrade.CalendarServiceUpgrade");
-
-		upgradeStepRegistror.register(
-			new UpgradeStepRegistrator.Registry() {
-
-				@Override
-				public void register(
-					String bundleSymbolicName, String fromSchemaVersionString,
-					String toSchemaVersionString, UpgradeStep... upgradeSteps) {
-
-					for (UpgradeStep upgradeStep : upgradeSteps) {
-						Class<?> clazz = upgradeStep.getClass();
-
-						String className = clazz.getName();
-
-						if (className.contains("v1_0_4.UpgradeClassNames")) {
-							_upgradeClassNames = (UpgradeProcess)upgradeStep;
-						}
-					}
-				}
-
-			});
+		_upgradeProcess = CalendarUpgradeTestUtil.getServiceUpgradeStep(
+			"v1_0_4.UpgradeClassNames");
 	}
 
 	@DeleteAfterTestRun
@@ -223,6 +205,6 @@ public class UpgradeClassNamesTest {
 	@DeleteAfterTestRun
 	private ResourcePermission _oldResourcePermission;
 
-	private UpgradeProcess _upgradeClassNames;
+	private UpgradeProcess _upgradeProcess;
 
 }

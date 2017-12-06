@@ -45,13 +45,13 @@ public class LoadBalancerUtil {
 				String baseInvocationURL = properties.getProperty(
 					"base.invocation.url");
 
-				String masterPrefix = _getMasterPrefix(baseInvocationURL);
+				String masterPrefix = getMasterPrefix(baseInvocationURL);
 
 				if (masterPrefix.equals(baseInvocationURL)) {
 					return baseInvocationURL;
 				}
 
-				List<JenkinsMaster> jenkinsMasters = _getJenkinsMasters(
+				List<JenkinsMaster> jenkinsMasters = getAvailableJenkinsMasters(
 					masterPrefix, properties);
 
 				long nextUpdateTimestamp = _getNextUpdateTimestamp(
@@ -73,7 +73,7 @@ public class LoadBalancerUtil {
 				StringBuilder sb = new StringBuilder();
 
 				for (JenkinsMaster jenkinsMaster : jenkinsMasters) {
-					sb.append(jenkinsMaster.getMasterName());
+					sb.append(jenkinsMaster.getName());
 					sb.append(" : ");
 					sb.append(jenkinsMaster.getAvailableSlavesCount());
 					sb.append("\n");
@@ -84,7 +84,7 @@ public class LoadBalancerUtil {
 				sb = new StringBuilder();
 
 				sb.append("\nMost available master ");
-				sb.append(mostAvailableJenkinsMaster.getMasterName());
+				sb.append(mostAvailableJenkinsMaster.getName());
 				sb.append(" has ");
 				sb.append(mostAvailableJenkinsMaster.getAvailableSlavesCount());
 				sb.append(" available slaves.");
@@ -103,7 +103,7 @@ public class LoadBalancerUtil {
 
 				mostAvailableJenkinsMaster.addRecentBatch(invokedBatchSize);
 
-				return "http://" + mostAvailableJenkinsMaster.getMasterName();
+				return "http://" + mostAvailableJenkinsMaster.getName();
 			}
 			catch (Exception e) {
 				if (retries < _MAX_RETRIES) {
@@ -171,6 +171,51 @@ public class LoadBalancerUtil {
 		_updateInterval = interval;
 	}
 
+	protected static List<JenkinsMaster> getAvailableJenkinsMasters(
+		String masterPrefix, Properties properties) {
+
+		List<JenkinsMaster> allJenkinsMasters = null;
+
+		if (!_jenkinsMasters.containsKey(masterPrefix)) {
+			allJenkinsMasters = JenkinsResultsParserUtil.getJenkinsMasters(
+				properties, masterPrefix);
+
+			_jenkinsMasters.put(masterPrefix, allJenkinsMasters);
+		}
+		else {
+			allJenkinsMasters = _jenkinsMasters.get(masterPrefix);
+		}
+
+		List<String> blacklist = _getBlacklist(properties);
+
+		if (blacklist.isEmpty()) {
+			return new ArrayList<>(allJenkinsMasters);
+		}
+
+		List<JenkinsMaster> availableJenkinsMasters = new ArrayList<>(
+			allJenkinsMasters.size());
+
+		for (JenkinsMaster jenkinsMaster : allJenkinsMasters) {
+			if (blacklist.contains(jenkinsMaster.getName())) {
+				continue;
+			}
+
+			availableJenkinsMasters.add(jenkinsMaster);
+		}
+
+		return availableJenkinsMasters;
+	}
+
+	protected static String getMasterPrefix(String baseInvocationURL) {
+		Matcher matcher = _urlPattern.matcher(baseInvocationURL);
+
+		if (!matcher.find()) {
+			return baseInvocationURL;
+		}
+
+		return matcher.group("masterPrefix");
+	}
+
 	private static List<String> _getBlacklist(Properties properties) {
 		String blacklistString = properties.getProperty(
 			"jenkins.load.balancer.blacklist", "");
@@ -188,63 +233,6 @@ public class LoadBalancerUtil {
 		}
 
 		return blacklist;
-	}
-
-	private static List<JenkinsMaster> _getJenkinsMasters(
-		String masterPrefix, Properties properties) {
-
-		List<JenkinsMaster> allJenkinsMasters = null;
-
-		if (!_jenkinsMasters.containsKey(masterPrefix)) {
-			allJenkinsMasters = new ArrayList<>();
-
-			for (String masterName :
-					JenkinsResultsParserUtil.getMasters(
-						properties, masterPrefix)) {
-
-				JenkinsMaster jenkinsMaster = new JenkinsMaster(
-					masterName,
-					properties.getProperty(
-						JenkinsResultsParserUtil.combine(
-							"jenkins.local.url[", masterName, "]")));
-
-				allJenkinsMasters.add(jenkinsMaster);
-			}
-
-			_jenkinsMasters.put(masterPrefix, allJenkinsMasters);
-		}
-		else {
-			allJenkinsMasters = _jenkinsMasters.get(masterPrefix);
-		}
-
-		List<String> blacklist = _getBlacklist(properties);
-
-		if (blacklist.isEmpty()) {
-			return new ArrayList<>(allJenkinsMasters);
-		}
-
-		List<JenkinsMaster> filteredJenkinsMasters = new ArrayList<>(
-			allJenkinsMasters.size());
-
-		for (JenkinsMaster jenkinsMaster : allJenkinsMasters) {
-			if (blacklist.contains(jenkinsMaster.getMasterName())) {
-				continue;
-			}
-
-			filteredJenkinsMasters.add(jenkinsMaster);
-		}
-
-		return filteredJenkinsMasters;
-	}
-
-	private static String _getMasterPrefix(String baseInvocationURL) {
-		Matcher matcher = _urlPattern.matcher(baseInvocationURL);
-
-		if (!matcher.find()) {
-			return baseInvocationURL;
-		}
-
-		return matcher.group("masterPrefix");
 	}
 
 	private static long _getNextUpdateTimestamp(String masterPrefix) {

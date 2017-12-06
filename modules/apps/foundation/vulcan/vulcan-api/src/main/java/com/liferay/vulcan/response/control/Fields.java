@@ -14,16 +14,30 @@
 
 package com.liferay.vulcan.response.control;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.List;
 import java.util.function.Predicate;
 
 /**
+ * Defines the fields context selected by clients. An instance of this interface
+ * is handed to {@code javax.ws.rs.ext.MessageBodyWriter} to decide which
+ * resource fields to write.
+ *
  * @author Alejandro Hernández
  * @author Carlos Sierra Andrés
  * @author Jorge Ferrer
  */
+@ProviderType
 public interface Fields {
 
+	/**
+	 * Returns the predicate for the list of types to test if a certain field
+	 * should be added to the representation.
+	 *
+	 * @param  types the resource's list of types
+	 * @return the predicate for the list of types
+	 */
 	public Predicate<String> getFieldsPredicate(List<String> types);
 
 }

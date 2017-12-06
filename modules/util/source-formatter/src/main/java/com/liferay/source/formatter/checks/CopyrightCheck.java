@@ -14,7 +14,7 @@
 
 package com.liferay.source.formatter.checks;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.tools.ToolsUtil;
@@ -68,7 +68,9 @@ public class CopyrightCheck extends BaseFileCheck {
 			addMessage(fileName, "File must start with copyright");
 		}
 
-		if (fileName.endsWith(".jsp") || fileName.endsWith(".jspf")) {
+		if (fileName.endsWith(".jsp") || fileName.endsWith(".jspf") ||
+			fileName.endsWith(".tag")) {
+
 			content = StringUtil.replace(
 				content, "<%\n" + _copyright + "\n%>",
 				"<%--\n" + _copyright + "\n--%>");

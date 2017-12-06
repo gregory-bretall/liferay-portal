@@ -51,6 +51,16 @@ public class TasksEntryServiceWrapper implements TasksEntryService,
 		return _tasksEntryService.deleteTasksEntry(tasksEntryId);
 	}
 
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
+	@Override
+	public java.lang.String getOSGiServiceIdentifier() {
+		return _tasksEntryService.getOSGiServiceIdentifier();
+	}
+
 	@Override
 	public com.liferay.tasks.model.TasksEntry getTasksEntry(long tasksEntryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -78,23 +88,6 @@ public class TasksEntryServiceWrapper implements TasksEntryService,
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _tasksEntryService.updateTasksEntryStatus(tasksEntryId,
 			resolverUserId, status, serviceContext);
-	}
-
-	@Override
-	public java.lang.Object invokeMethod(java.lang.String name,
-		java.lang.String[] parameterTypes, java.lang.Object[] arguments)
-		throws java.lang.Throwable {
-		return _tasksEntryService.invokeMethod(name, parameterTypes, arguments);
-	}
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	@Override
-	public java.lang.String getOSGiServiceIdentifier() {
-		return _tasksEntryService.getOSGiServiceIdentifier();
 	}
 
 	@Override

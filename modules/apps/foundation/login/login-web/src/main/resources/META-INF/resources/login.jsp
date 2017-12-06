@@ -42,7 +42,12 @@
 
 		String redirect = ParamUtil.getString(request, "redirect");
 
-		String login = LoginUtil.getLogin(request, "login", company);
+		String login = (String)SessionErrors.get(renderRequest, "login");
+
+		if (Validator.isNull(login)) {
+			login = LoginUtil.getLogin(request, "login", company);
+		}
+
 		String password = StringPool.BLANK;
 		boolean rememberMe = ParamUtil.getBoolean(request, "rememberMe");
 
@@ -123,7 +128,14 @@
 					UserLockoutException.PasswordPolicyLockout ule = (UserLockoutException.PasswordPolicyLockout)errorException;
 					%>
 
-					<liferay-ui:message arguments="<%= ule.user.getUnlockDate() %>" key="this-account-is-locked-until-x" translateArguments="<%= false %>" />
+					<c:choose>
+						<c:when test="<%= ule.passwordPolicy.isRequireUnlock() %>">
+							<liferay-ui:message key="this-account-is-locked" />
+						</c:when>
+						<c:otherwise>
+							<liferay-ui:message arguments="<%= ule.user.getUnlockDate() %>" key="this-account-is-locked-until-x" translateArguments="<%= false %>" />
+						</c:otherwise>
+					</c:choose>
 				</liferay-ui:error>
 
 				<liferay-ui:error exception="<%= UserPasswordException.class %>" message="authentication-failed" />

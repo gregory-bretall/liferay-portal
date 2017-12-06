@@ -18,11 +18,31 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
+ * Defines a {@code Function} that takes three input parameters. This interface,
+ * like all function interfaces, receives several arguments and returns one
+ * value of type {@code R}.
+ *
+ * <p>
+ * This interface can be implemented with a lambda function.
+ * </p>
+ *
  * @author Alejandro Hernández
+ * @author Jorge Ferrer
  */
 @FunctionalInterface
 public interface TriFunction<A, B, C, R> {
 
+	/**
+	 * Returns the {@code TriFunction} that first executes the current {@code
+	 * TriFunction} instance's {@code apply} method, then uses the result as
+	 * input for the {@code afterFunction} parameter's {@code apply} method.
+	 *
+	 * @param  afterFunction the {@code TriFunction} to execute after the
+	 *         current instance
+	 * @return the {@code TriFunction} that executes the current instance's
+	 *         {@code apply} method, then uses the result as input for the
+	 *         {@code afterFunction} parameter's {@code apply} method
+	 */
 	public default <V> TriFunction<A, B, C, V> andThen(
 		Function<? super R, ? extends V> afterFunction) {
 
@@ -31,6 +51,15 @@ public interface TriFunction<A, B, C, R> {
 		return (A a, B b, C c) -> afterFunction.apply(apply(a, b, c));
 	}
 
+	/**
+	 * Applies the current {@code TriFunction} and returns a value of type
+	 * {@code R}. This function can be implemented explicitly or with a lambda.
+	 *
+	 * @param  a the function's first argument
+	 * @param  b the function's second argument
+	 * @param  c the function's third argument
+	 * @return the function's result, as a value of type {@code R}
+	 */
 	public R apply(A a, B b, C c);
 
 }

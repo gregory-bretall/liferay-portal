@@ -17,7 +17,6 @@
 							requires: [
 								'aui-tooltip',
 								'liferay-ddm-form-field-select-search-support',
-								'liferay-ddm-form-field-select-template',
 								'liferay-ddm-form-renderer-field',
 								'liferay-ddm-soy-template-util'
 							]
@@ -26,17 +25,7 @@
 							path: 'select_search_support.js',
 							requires: [
 								'highlight',
-								'liferay-ddm-form-field-select-template',
 								'liferay-ddm-soy-template-util'
-							]
-						},
-						'liferay-ddm-form-field-select-template': {
-							condition: {
-								trigger: 'liferay-ddm-form-renderer'
-							},
-							path: 'select.soy.js',
-							requires: [
-								'soyutils'
 							]
 						}
 					},

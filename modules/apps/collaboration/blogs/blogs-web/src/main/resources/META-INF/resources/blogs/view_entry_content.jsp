@@ -25,8 +25,6 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 
 RatingsEntry ratingsEntry = (RatingsEntry)request.getAttribute("view_entry_content.jsp-ratingsEntry");
 RatingsStats ratingsStats = (RatingsStats)request.getAttribute("view_entry_content.jsp-ratingsStats");
-
-String socialBookmarksDisplayPosition = blogsPortletInstanceConfiguration.socialBookmarksDisplayPosition();
 %>
 
 <c:choose>
@@ -70,7 +68,7 @@ String socialBookmarksDisplayPosition = blogsPortletInstanceConfiguration.social
 
 					<c:if test="<%= viewSingleEntry %>">
 						<div class="cover-image-caption">
-							<small><%= HtmlUtil.escape(entry.getCoverImageCaption()) %></small>
+							<small><%= entry.getCoverImageCaption() %></small>
 						</div>
 					</c:if>
 				</c:if>
@@ -83,23 +81,9 @@ String socialBookmarksDisplayPosition = blogsPortletInstanceConfiguration.social
 						<%= dateFormatDate.format(entry.getDisplayDate()) %>
 
 						<c:if test="<%= blogsPortletInstanceConfiguration.enableReadingTime() %>">
-
-							<%
-							int readingTimeInMinutes = com.liferay.blogs.web.internal.util.BlogsUtil.getReadingTimeMinutes(entry.getContent());
-							%>
-
-							<c:if test="<%= readingTimeInMinutes > 0 %>">
-								<span> - </span>
-								<span>
-									<liferay-ui:message arguments="<%= readingTimeInMinutes %>" key="x-minutes-read" translateArguments="<%= false %>" />
-								</span>
-							</c:if>
+							<liferay-reading-time:reading-time model="<%= entry %>" />
 						</c:if>
 					</small>
-
-					<c:if test='<%= viewSingleEntry && blogsPortletInstanceConfiguration.enableSocialBookmarks() && socialBookmarksDisplayPosition.equals("top") %>'>
-						<liferay-util:include page="/blogs/social_bookmarks.jsp" servletContext="<%= application %>" />
-					</c:if>
 				</div>
 
 				<portlet:renderURL var="viewEntryURL">
@@ -132,10 +116,6 @@ String socialBookmarksDisplayPosition = blogsPortletInstanceConfiguration.social
 
 								<c:if test="<%= BlogsEntryPermission.contains(permissionChecker, entry, ActionKeys.DELETE) || BlogsEntryPermission.contains(permissionChecker, entry, ActionKeys.PERMISSIONS) || BlogsEntryPermission.contains(permissionChecker, entry, ActionKeys.UPDATE) %>">
 									<liferay-util:include page="/blogs/entry_action.jsp" servletContext="<%= application %>" />
-								</c:if>
-
-								<c:if test='<%= blogsPortletInstanceConfiguration.enableSocialBookmarks() && socialBookmarksDisplayPosition.equals("top") %>'>
-									<liferay-util:include page="/blogs/social_bookmarks.jsp" servletContext="<%= application %>" />
 								</c:if>
 							</c:when>
 							<c:otherwise>
@@ -199,7 +179,7 @@ String socialBookmarksDisplayPosition = blogsPortletInstanceConfiguration.social
 					<aui:col width="<%= 40 %>">
 						<c:if test="<%= blogsPortletInstanceConfiguration.enableRelatedAssets() %>">
 							<div class="entry-links">
-								<liferay-ui:asset-links
+								<liferay-asset:asset-links
 									assetEntryId="<%= (assetEntry != null) ? assetEntry.getEntryId() : 0 %>"
 									className="<%= BlogsEntry.class.getName() %>"
 									classPK="<%= entry.getEntryId() %>"
@@ -207,37 +187,37 @@ String socialBookmarksDisplayPosition = blogsPortletInstanceConfiguration.social
 							</div>
 						</c:if>
 
-						<liferay-ui:asset-categories-available
+						<liferay-asset:asset-categories-available
 							className="<%= BlogsEntry.class.getName() %>"
 							classPK="<%= entry.getEntryId() %>"
 						>
 							<p><liferay-ui:message key="categories" />:</p>
 
 							<div class="entry-categories">
-								<liferay-ui:asset-categories-summary
+								<liferay-asset:asset-categories-summary
 									className="<%= BlogsEntry.class.getName() %>"
 									classPK="<%= entry.getEntryId() %>"
 									portletURL="<%= renderResponse.createRenderURL() %>"
 								/>
 							</div>
-						</liferay-ui:asset-categories-available>
+						</liferay-asset:asset-categories-available>
 					</aui:col>
 
 					<aui:col width="<%= 60 %>">
-						<liferay-ui:asset-tags-available
+						<liferay-asset:asset-tags-available
 							className="<%= BlogsEntry.class.getName() %>"
 							classPK="<%= entry.getEntryId() %>"
 						>
 							<div class="entry-tags">
 								<p><liferay-ui:message key="tags" />:</p>
 
-								<liferay-ui:asset-tags-summary
+								<liferay-asset:asset-tags-summary
 									className="<%= BlogsEntry.class.getName() %>"
 									classPK="<%= entry.getEntryId() %>"
 									portletURL="<%= renderResponse.createRenderURL() %>"
 								/>
 							</div>
-						</liferay-ui:asset-tags-available>
+						</liferay-asset:asset-tags-available>
 					</aui:col>
 				</aui:container>
 			</c:if>
@@ -300,9 +280,7 @@ String socialBookmarksDisplayPosition = blogsPortletInstanceConfiguration.social
 						</div>
 					</c:if>
 
-					<c:if test='<%= blogsPortletInstanceConfiguration.enableSocialBookmarks() && socialBookmarksDisplayPosition.equals("bottom") %>'>
-						<liferay-util:include page="/blogs/social_bookmarks.jsp" servletContext="<%= application %>" />
-					</c:if>
+					<liferay-util:include page="/blogs/social_bookmarks.jsp" servletContext="<%= application %>" />
 
 					<c:if test="<%= viewSingleEntry && blogsPortletInstanceConfiguration.enableFlags() %>">
 						<div class="flags">

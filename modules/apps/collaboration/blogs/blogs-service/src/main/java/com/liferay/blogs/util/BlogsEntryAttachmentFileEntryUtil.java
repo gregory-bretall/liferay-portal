@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portlet.blogs.BlogsEntryAttachmentFileEntryReference;
 
 import java.io.File;
@@ -129,8 +130,9 @@ public class BlogsEntryAttachmentFileEntryUtil {
 	}
 
 	/**
-	 * @deprecated As of 1.1.0, replaced by
-	 * {@link BlogsEntryAttachmentContentUpdater#updateContent(String, List)}
+	 * @deprecated As of 1.1.0, replaced by {@link
+	 *             BlogsEntryAttachmentContentUpdater#updateContent(String,
+	 *             List)}
 	 */
 	@Deprecated
 	public static String updateContent(
@@ -187,8 +189,9 @@ public class BlogsEntryAttachmentFileEntryUtil {
 		}
 
 		throw new PortalException(
-			"Unable to get a unique file name for " + fileName + " in folder " +
-				folderId);
+			StringBundler.concat(
+				"Unable to get a unique file name for ", fileName,
+				" in folder ", String.valueOf(folderId)));
 	}
 
 	private static final BlogsEntryAttachmentContentUpdater

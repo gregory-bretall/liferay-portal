@@ -18,11 +18,31 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
+ * Defines a {@code Function} that takes four input parameters. This interface,
+ * like all function interfaces, receives several arguments and returns one
+ * value of type {@code R}.
+ *
+ * <p>
+ * This interface can be implemented with a lambda function.
+ * </p>
+ *
  * @author Alejandro Hernández
+ * @author Jorge Ferrer
  */
 @FunctionalInterface
 public interface TetraFunction<A, B, C, D, R> {
 
+	/**
+	 * Returns the {@code TetraFunction} that first executes the current {@code
+	 * TetraFunction} instance's {@code apply} method, then uses the result as
+	 * input for the {@code afterFunction} parameter's {@code apply} method.
+	 *
+	 * @param  afterFunction the {@code TetraFunction} to execute after the
+	 *         current instance
+	 * @return the {@code TetraFunction} that executes the current instance's
+	 *         {@code apply} method, then uses the result as input for the
+	 *         {@code afterFunction} parameter's {@code apply} method
+	 */
 	public default <V> TetraFunction<A, B, C, D, V> andThen(
 		Function<? super R, ? extends V> afterFunction) {
 
@@ -31,6 +51,16 @@ public interface TetraFunction<A, B, C, D, R> {
 		return (A a, B b, C c, D d) -> afterFunction.apply(apply(a, b, c, d));
 	}
 
+	/**
+	 * Applies the current {@code TetraFunction} and returns a value of type
+	 * {@code R}. This function can be implemented explicitly or with a lambda.
+	 *
+	 * @param  a the function's first argument
+	 * @param  b the function's second argument
+	 * @param  c the function's third argument
+	 * @param  d the function's fourth argument
+	 * @return the function's result, as a value of type {@code R}
+	 */
 	public R apply(A a, B b, C c, D d);
 
 }

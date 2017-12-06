@@ -8,7 +8,9 @@
 
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="ProductMenu#gotoControlPanelSites">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Sites" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Sites" />
 		</execute>
 
@@ -16,11 +18,13 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<execute macro="SitePageNavigator#gotoPages">
-			<var name="page" value="Public Pages" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="SitePages#addPublicPage">
 			<var name="pageName" value="Site Page Name" />
 		</execute>
 	</set-up>
@@ -34,7 +38,7 @@
 				<execute macro="PortalInstances#tearDownCP" />
 			</then>
 			<else>
-				<execute macro="Page#tearDownPG">
+				<execute macro="Page#tearDownCP">
 					<var name="site" value="Liferay" />
 				</execute>
 
@@ -221,11 +225,14 @@
 	</command>
 
 	<command name="AddWebContentFeed" priority="3">
+		<property name="test.name.skip.portal.instance" value="RSS#AddWebContentFeed" />
 		<property name="testray.component.names" value="Asset Publisher,RSS" />
 
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Web Content" />
 		</execute>
 
@@ -238,7 +245,9 @@
 
 		<execute macro="PortletEntry#publish" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Web Content" />
 		</execute>
 
@@ -253,7 +262,9 @@
 			<var name="targetFriendlyUrl" value="/web/guest/home" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Web Content" />
 		</execute>
 
@@ -261,7 +272,8 @@
 			<var name="feedName" value="WC Feed Title" />
 		</execute>
 
-		<var attribute="value" locator="//input[contains(@id,'JournalPortlet_url') and contains(@value,'journal/rss')]" name="rssFeedUrl" />
+		<var method="selenium#getAttribute('//input[contains(@id,\'JournalPortlet_url\') and contains(@value,\'journal/rss\')]@value')" name="rssFeedUrl" />
+		<var method="StringUtil#replace('${rssFeedUrl}', 'localhost', '127.0.0.1')" name="rssFeedUrl" />
 
 		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
@@ -458,7 +470,17 @@
 			<var name="pageName" value="Welcome" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Page Name" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Page Name" />
 		</execute>
 
@@ -567,6 +589,7 @@
 	</command>
 
 	<command name="EnableRSSFeedFromAssetpublisher" priority="3">
+		<property name="test.name.skip.portal.instance" value="RSS#EnableRSSFeedFromAssetpublisher" />
 		<property name="testray.component.names" value="Asset Publisher,RSS" />
 
 		<execute macro="TestCase#getSiteName">
@@ -574,12 +597,13 @@
 			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<execute macro="SitePageNavigator#gotoPages">
-			<var name="page" value="Public Pages" />
-			<var name="site" value="Site Name" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="SitePages#addPublicPage">
 			<var name="pageName" value="Site Page Name 2" />
 		</execute>
 
@@ -622,7 +646,8 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<var attribute="href" locator="//div[@class='subscribe-action']/span/a[contains(@href,'asset_publisher')]" name="rssFeedUrl" />
+		<var method="selenium#getAttribute('//div[@class=\'subscribe-action\']/span/a[contains(@href,\'asset_publisher\')]@href')" name="rssFeedUrl" />
+		<var method="StringUtil#replace('${rssFeedUrl}', 'localhost', '127.0.0.1')" name="rssFeedUrl" />
 
 		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
@@ -669,7 +694,17 @@
 			<var name="pageName" value="Welcome" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Page Name" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Page Name" />
 		</execute>
 
@@ -705,7 +740,9 @@
 			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Configuration" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="System Settings" />
 		</execute>
 
@@ -721,12 +758,13 @@
 			<var name="feedTime" value="1" />
 		</execute>
 
-		<execute macro="SitePageNavigator#gotoPages">
-			<var name="page" value="Public Pages" />
-			<var name="site" value="Site Name" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="SitePages#addPublicPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -769,7 +807,7 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<var attribute="href" locator="//div[@class='subscribe-action']/span/a[contains(@href,'asset_publisher')]" name="rssFeedUrl" />
+		<var method="selenium#getAttribute('//div[@class=\'subscribe-action\']/span/a[contains(@href,\'asset_publisher\')]@href')" name="rssFeedUrl" />
 
 		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
@@ -807,11 +845,16 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<execute macro="WebContent#editPGViaAP">
+		<execute macro="AssetPublisherPortlet#gotoEditAssetPG">
 			<var name="assetTitle" value="Web Content Title" />
-			<var name="webContentContentEdit" value="This is the updated version of web content test for rss feed" />
-			<var name="webContentTitleEdit" value="Web Content Title Updated Feed" />
 		</execute>
+
+		<execute macro="WebContent#addCP">
+			<var name="webContentContent" value="This is the updated version of web content test for rss feed" />
+			<var name="webContentTitle" value="Web Content Title Updated Feed" />
+		</execute>
+
+		<execute macro="Button#clickPublish" />
 
 		<execute macro="RSS#viewUpdateFeedTitle">
 			<var name="feedHeading" value="Web Content Title Updated Feed" />

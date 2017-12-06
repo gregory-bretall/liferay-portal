@@ -152,6 +152,8 @@ name = HtmlUtil.escapeJS(name);
 %>
 
 <aui:script use="<%= modules %>">
+	var UA = A.UA;
+
 	var getInitialContent = function() {
 		var data;
 
@@ -364,8 +366,10 @@ name = HtmlUtil.escapeJS(name);
 
 						var editorNode = A.one('#<%= name %>');
 
-						editorNode.removeAttribute('contenteditable');
-						editorNode.removeClass('lfr-editable');
+						if (editorNode) {
+							editorNode.removeAttribute('contenteditable');
+							editorNode.removeClass('lfr-editable');
+						}
 					}
 				}
 			}
@@ -400,12 +404,14 @@ name = HtmlUtil.escapeJS(name);
 	var createEditor = function() {
 		var editorNode = A.one('#<%= name %>');
 
-		editorNode.attr('contenteditable', true);
-		editorNode.addClass('lfr-editable');
+		if (editorNode) {
+			editorNode.attr('contenteditable', true);
+			editorNode.addClass('lfr-editable');
 
-		var eventHandles = [
-			A.Do.after(afterVal, editorNode, 'val', this)
-		];
+			var eventHandles = [
+				A.Do.after(afterVal, editorNode, 'val', this)
+			];
+		}
 
 		function initData() {
 			<c:if test="<%= Validator.isNotNull(initMethod) && !(inlineEdit && Validator.isNotNull(inlineEditSaveURL)) %>">
@@ -573,6 +579,8 @@ name = HtmlUtil.escapeJS(name);
 
 											window['<%= name %>'].create();
 
+											window['<%= name %>'].setHTML(ckEditorContent);
+
 											initialEditor = CKEDITOR.instances['<%= name %>'].id;
 										}
 									}
@@ -613,6 +621,56 @@ name = HtmlUtil.escapeJS(name);
 		);
 
 		ckEditor.on('dataReady', window['<%= name %>']._setStyles);
+
+		if (UA.edge && parseInt(UA.edge, 10) >= 14) {
+			var resetActiveElementValidation = function(activeElement) {
+				activeElement = A.one(activeElement);
+
+				var activeElementAncestor = activeElement.ancestor();
+
+				if (activeElementAncestor.hasClass('has-error') || activeElementAncestor.hasClass('has-success')) {
+					activeElementAncestor.removeClass('has-error');
+					activeElementAncestor.removeClass('has-success');
+
+					var formValidatorStack = activeElementAncestor.one('.form-validator-stack');
+
+					if (formValidatorStack) {
+						formValidatorStack.remove();
+					}
+				}
+			};
+
+			var onBlur = function(activeElement) {
+				resetActiveElementValidation(activeElement);
+
+				setTimeout(
+					function() {
+						if (activeElement) {
+							ckEditor.focusManager.blur(true);
+							activeElement.focus();
+						}
+					},
+					0
+				);
+			};
+
+			ckEditor.on(
+				'instanceReady',
+				function() {
+					var editorWrapper = A.one('#cke_<%= name %>');
+
+					if (editorWrapper) {
+						editorWrapper.once(
+							'mouseenter',
+							function(event) {
+								ckEditor.once('focus', onBlur.bind(this, document.activeElement));
+								ckEditor.focus();
+							}
+						);
+					}
+				}
+			);
+		}
 	};
 
 	<%

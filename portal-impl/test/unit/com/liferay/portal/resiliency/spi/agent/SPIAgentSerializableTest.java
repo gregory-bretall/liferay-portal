@@ -14,6 +14,7 @@
 
 package com.liferay.portal.resiliency.spi.agent;
 
+import com.liferay.petra.lang.ClassLoaderPool;
 import com.liferay.portal.kernel.io.BigEndianCodec;
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayOutputStream;
@@ -33,10 +34,10 @@ import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.CodeCoverageAssertor;
 import com.liferay.portal.kernel.test.rule.NewEnv;
-import com.liferay.portal.kernel.util.ClassLoaderPool;
 import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtilAdvice;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.ThreadLocalDistributor;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -98,6 +99,8 @@ public class SPIAgentSerializableTest {
 			new URL[0], currentThread.getContextClassLoader());
 
 		ClassLoaderPool.register(_SERVLET_CONTEXT_NAME, _classLoader);
+
+		ClassLoaderPool.unregister(ClassLoaderPool.class.getClassLoader());
 	}
 
 	@Test
@@ -165,9 +168,10 @@ public class SPIAgentSerializableTest {
 			LogRecord logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Nonserializable distributed request attribute name " +
-					distributedNonserializable + " with value " +
-						distributedNonserializable,
+				StringBundler.concat(
+					"Nonserializable distributed request attribute name ",
+					distributedNonserializable, " with value ",
+					distributedNonserializable),
 				logRecord.getMessage());
 
 			Assert.assertEquals(
@@ -190,16 +194,18 @@ public class SPIAgentSerializableTest {
 			logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Nonserializable distributed request attribute name " +
-					distributedNonserializable + " with value " +
-						distributedNonserializable,
+				StringBundler.concat(
+					"Nonserializable distributed request attribute name ",
+					distributedNonserializable, " with value ",
+					distributedNonserializable),
 				logRecord.getMessage());
 
 			logRecord = logRecords.get(1);
 
 			Assert.assertEquals(
-				"Nondistributed request attribute name " + nondistributed +
-					" with direction DUPLEX and value " + nondistributed,
+				StringBundler.concat(
+					"Nondistributed request attribute name ", nondistributed,
+					" with direction DUPLEX and value ", nondistributed),
 				logRecord.getMessage());
 
 			Assert.assertEquals(
@@ -425,9 +431,10 @@ public class SPIAgentSerializableTest {
 			LogRecord logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Nonserializable session attribute name " +
-					nonserializableAttribute + " with value " +
-						nonserializableAttribute,
+				StringBundler.concat(
+					"Nonserializable session attribute name ",
+					nonserializableAttribute, " with value ",
+					nonserializableAttribute),
 				logRecord.getMessage());
 
 			Assert.assertEquals(
@@ -456,17 +463,19 @@ public class SPIAgentSerializableTest {
 			logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Nonserializable session attribute name " +
-					nonserializableAttribute + " with value " +
-						nonserializableAttribute,
+				StringBundler.concat(
+					"Nonserializable session attribute name ",
+					nonserializableAttribute, " with value ",
+					nonserializableAttribute),
 				logRecord.getMessage());
 
 			logRecord = logRecords.get(1);
 
 			Assert.assertEquals(
-				"Nonserializable session attribute name " +
-					nonserializableAttribute + " with value " +
-						nonserializableAttribute,
+				StringBundler.concat(
+					"Nonserializable session attribute name ",
+					nonserializableAttribute, " with value ",
+					nonserializableAttribute),
 				logRecord.getMessage());
 
 			Assert.assertEquals(

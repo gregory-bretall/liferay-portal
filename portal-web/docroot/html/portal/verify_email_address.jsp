@@ -23,10 +23,10 @@ if (referer.equals(themeDisplay.getPathMain() + "/portal/update_email_address"))
 	referer = themeDisplay.getPathMain() + "?doAsUserId=" + themeDisplay.getDoAsUserId();
 }
 
-PasswordPolicy passwordPolicy = user.getPasswordPolicy();
-
 String ticketKey = ParamUtil.getString(request, "ticketKey");
 %>
+
+<%@ include file="/html/portal/select_language.jspf" %>
 
 <aui:form action='<%= themeDisplay.getPathMain() + "/portal/verify_email_address" %>' method="post" name="fm">
 	<aui:input name="p_l_id" type="hidden" value="<%= layout.getPlid() %>" />

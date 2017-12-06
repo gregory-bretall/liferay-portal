@@ -14,8 +14,8 @@
 
 package com.liferay.portal.dao.orm.custom.sql;
 
-import com.liferay.portal.kernel.concurrent.ConcurrentReferenceKeyHashMap;
-import com.liferay.portal.kernel.memory.FinalizeManager;
+import com.liferay.petra.concurrent.ConcurrentReferenceKeyHashMap;
+import com.liferay.petra.memory.FinalizeManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 
 /**
- * @author Peter Fellwock
+ * @author     Peter Fellwock
  * @deprecated As of 1.0.0, with no direct replacement
  */
 @Deprecated

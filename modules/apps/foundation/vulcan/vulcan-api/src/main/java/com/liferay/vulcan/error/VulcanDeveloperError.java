@@ -15,11 +15,33 @@
 package com.liferay.vulcan.error;
 
 /**
+ * Represents the errors that can occur while using Vulcan. Each error is a
+ * nested error subclass.
+ *
  * @author Alejandro Hernández
  * @author Jorge Ferrer
  */
 public class VulcanDeveloperError extends Error {
 
+	/**
+	 * Represents the error the developer should throw when an exception
+	 * converter is missing.
+	 */
+	public static class MustHaveExceptionConverter
+		extends VulcanDeveloperError {
+
+		public MustHaveExceptionConverter(Class<?> exceptionClass) {
+			super(
+				"Exception class " + exceptionClass.getName() +
+					" does not have a converter");
+		}
+
+	}
+
+	/**
+	 * Represents the error the developer should throw when a message mapper is
+	 * missing.
+	 */
 	public static class MustHaveMessageMapper extends VulcanDeveloperError {
 
 		public MustHaveMessageMapper(String mediaType, Class<?> modelClass) {
@@ -30,6 +52,38 @@ public class VulcanDeveloperError extends Error {
 
 	}
 
+	/**
+	 * Represents the error the developer should throw when an identifier's path
+	 * mapper is missing.
+	 */
+	public static class MustHavePathIdentifierMapper
+		extends VulcanDeveloperError {
+
+		public MustHavePathIdentifierMapper(Class<?> identifier) {
+			super("Identifier " + identifier + " does not have a path mapper");
+		}
+
+	}
+
+	/**
+	 * Represents the error the developer should throw when a problem JSON error
+	 * message mapper is missing.
+	 */
+	public static class MustHaveProblemJSONErrorMessageMapper
+		extends VulcanDeveloperError {
+
+		public MustHaveProblemJSONErrorMessageMapper() {
+			super(
+				"Media type application/problem+json does not have a message " +
+					"mapper");
+		}
+
+	}
+
+	/**
+	 * Represents the error the developer should throw when a provider is
+	 * missing.
+	 */
 	public static class MustHaveProvider extends VulcanDeveloperError {
 
 		public MustHaveProvider(Class<?> modelClass) {
@@ -40,6 +94,10 @@ public class VulcanDeveloperError extends Error {
 
 	}
 
+	/**
+	 * Represents the error the developer should throw when a generic container
+	 * has an invalid generic type.
+	 */
 	public static class MustHaveValidGenericType extends VulcanDeveloperError {
 
 		public MustHaveValidGenericType(Class clazz) {
@@ -49,12 +107,31 @@ public class VulcanDeveloperError extends Error {
 
 	}
 
+	/**
+	 * Represents the error the developer should throw when the identifier used
+	 * for a related collection isn't the same as the one required by the
+	 * collection.
+	 */
+	public static class MustUseSameIdentifier extends VulcanDeveloperError {
+
+		public MustUseSameIdentifier(
+			Class<?> identifierClass, Class<?> collectionIdentifierClass) {
+
+			super(
+				"Identifier " + identifierClass + " must be " +
+					collectionIdentifierClass);
+		}
+
+	}
+
+	/**
+	 * Represents the error the developer should throw when a URI can't be
+	 * resolved.
+	 */
 	public static class UnresolvableURI extends VulcanDeveloperError {
 
-		public UnresolvableURI(Class<?> modelClass) {
-			super(
-				"Unable to resolve URI for model class " +
-					modelClass.getName());
+		public UnresolvableURI(String className) {
+			super("Unable to resolve URI for model class " + className);
 		}
 
 	}

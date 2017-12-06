@@ -14,7 +14,7 @@
 
 package com.liferay.portal.kernel.servlet;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 
@@ -213,7 +213,6 @@ public class MetaInfoCacheServletResponse extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public void flushBuffer() throws IOException {
 		_committed = true;
 	}

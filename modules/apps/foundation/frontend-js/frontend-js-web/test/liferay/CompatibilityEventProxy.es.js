@@ -1,253 +1,275 @@
 'use strict';
 
 import EventEmitter from 'metal-events/src/EventEmitter';
+
 import CompatibilityEventProxy from '../../src/main/resources/META-INF/resources/liferay/CompatibilityEventProxy.es';
 
 describe('CompatibilityEventProxy', () => {
+	/**
+	 * Mocks a target so it can be used for testing
+	 * @param {string} event The event to configure for the target
+	 * @param {boolean} emitFacade Whether the configured event should use a Facade or not
+	 * @return {Object} The mocked target object
+	 */
 	function createMockedTarget(event, emitFacade) {
-		let mockedTarget = {
-			fire: function() {
-
-			},
+		const mockedTarget = {
+			fire: function() {},
 
 			_yuievt: {
-				events: {}
-			}
+				events: {},
+			},
 		};
 
-		if (event) {
+		if (event) {
 			mockedTarget._yuievt.events[event] = {
-				emitFacade: emitFacade
+				emitFacade: emitFacade,
 			};
 		}
 
 		return mockedTarget;
 	}
 
-	let eventNameToEmit = 'eventToEmit';
+	const eventNameToEmit = 'eventToEmit';
 
-	let eventObjectToEmit = {
-		key: eventNameToEmit
+	const eventObjectToEmit = {
+		key: eventNameToEmit,
 	};
 
-	let eventFacadeObjectToEmit = {
-		type: eventNameToEmit
+	const eventFacadeObjectToEmit = {
+		type: eventNameToEmit,
 	};
 
-	let	host;
+	let host;
 
-	beforeEach((done) => {
+	beforeEach(done => {
 		host = new EventEmitter();
 		done();
 	});
 
-	afterEach((done) => {
+	afterEach(done => {
 		host.dispose();
 		done();
 	});
 
-	let namespace = 'namespace';
+	const namespace = 'namespace';
 
-	it('should not emit any event when no targets have been added', (done) => {
-		let component = new CompatibilityEventProxy({
-			host: host
-		});
-
-		let spy = sinon.spy(component, 'emitCompatibleEvents_');
-
-		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
-
-		assert.strictEqual(false, spy.called);
-
-		done();
-	});
-
-	it('should not crash if target has no method fire', (done) => {
-		let mockedTarget = {};
-
-		let component = new CompatibilityEventProxy({
-			host: host
-		});
-
-		let spy = sinon.spy(component, 'emitCompatibleEvents_');
-
-		component.addTarget(mockedTarget);
-
-		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
-
-		assert.strictEqual(undefined, spy.exceptions[0]);
-
-		done();
-	});
-
-	it('should emit adapted event with event name and event params to given targets when no namespace is specified', (done) => {
-		let mockedTarget = createMockedTarget(eventNameToEmit);
-
-		let spy = sinon.spy(mockedTarget, 'fire');
-
-		let component = new CompatibilityEventProxy({
-			host: host
-		});
-
-		component.addTarget(mockedTarget);
-
-		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
-
-		assert.strictEqual(true, spy.calledWith(eventNameToEmit, eventObjectToEmit));
-
-		done();
-	});
-
-	it('should emit adapted event with event name and event params to given targets when namespace is specified', (done) => {
-		let namespacedEventNameToEmit = namespace + ':' + eventNameToEmit;
-
-		let mockedTarget = createMockedTarget(namespacedEventNameToEmit);
-
-		let spy = sinon.spy(mockedTarget, 'fire');
-
-		let component = new CompatibilityEventProxy({
+	it('should not emit any event when no targets have been added', done => {
+		const component = new CompatibilityEventProxy({
 			host: host,
-			namespace: namespace
+		});
+
+		const spy = jest.spyOn(component, 'emitCompatibleEvents_');
+
+		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
+
+		expect(spy).not.toHaveBeenCalled();
+
+		spy.mockReset();
+		spy.mockRestore();
+
+		done();
+	});
+
+	it('should not crash if target has no method fire', done => {
+		const mockedTarget = {};
+
+		const component = new CompatibilityEventProxy({
+			host: host,
+		});
+
+		const spy = jest.spyOn(component, 'emitCompatibleEvents_');
+
+		component.addTarget(mockedTarget);
+
+		expect(() => {
+			host.emit(
+				eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
+		}).not.toThrow();
+
+		spy.mockReset();
+		spy.mockRestore();
+
+		done();
+	});
+
+	it('should emit adapted event with event name and event params to given targets when no namespace is specified', done => {
+		const mockedTarget = createMockedTarget(eventNameToEmit);
+
+		const spy = jest.spyOn(mockedTarget, 'fire');
+
+		const component = new CompatibilityEventProxy({
+			host: host,
 		});
 
 		component.addTarget(mockedTarget);
 
 		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
 
-		assert.strictEqual(true, spy.calledWith(namespacedEventNameToEmit, eventObjectToEmit));
+		expect(spy).toHaveBeenCalledWith(eventNameToEmit, eventObjectToEmit);
+
+		spy.mockReset();
+		spy.mockRestore();
 
 		done();
 	});
 
-	it('should emit adapted event to given targets when target is not listening', (done) => {
-		let mockedTarget = createMockedTarget();
+	it('should emit adapted event with event name and event params to given targets when namespace is specified', done => {
+		const namespacedEventNameToEmit = namespace + ':' + eventNameToEmit;
 
-		let spy = sinon.spy(mockedTarget, 'fire');
+		const mockedTarget = createMockedTarget(namespacedEventNameToEmit);
 
-		let component = new CompatibilityEventProxy({
-			host: host
+		const spy = jest.spyOn(mockedTarget, 'fire');
+
+		const component = new CompatibilityEventProxy({
+			host: host,
+			namespace: namespace,
 		});
 
 		component.addTarget(mockedTarget);
 
 		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
 
-		assert.strictEqual(true, spy.calledWith(eventNameToEmit, eventObjectToEmit));
+		expect(spy).toHaveBeenCalledWith(
+			namespacedEventNameToEmit,
+			eventObjectToEmit
+		);
 
 		done();
 	});
 
-	it('should emit adapted event to given targets when target is listening', (done) => {
-		let mockedTarget = createMockedTarget(eventNameToEmit);
+	it('should emit adapted event to given targets when target is not listening', done => {
+		const mockedTarget = createMockedTarget();
 
-		let spy = sinon.spy(mockedTarget, 'fire');
+		const spy = jest.spyOn(mockedTarget, 'fire');
 
-		let component = new CompatibilityEventProxy({
-			host: host
+		const component = new CompatibilityEventProxy({
+			host: host,
 		});
 
 		component.addTarget(mockedTarget);
 
 		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
 
-		assert.strictEqual(true, spy.calledWith(eventNameToEmit, eventObjectToEmit));
+		expect(spy).toHaveBeenCalledWith(eventNameToEmit, eventObjectToEmit);
 
 		done();
 	});
 
-	it('should maintain target original state of emitFacade after emiting events', (done) => {
-		let emitFacade = false;
+	it('should emit adapted event to given targets when target is listening', done => {
+		const mockedTarget = createMockedTarget(eventNameToEmit);
 
-		let mockedTarget = createMockedTarget(eventNameToEmit, emitFacade);
+		const spy = jest.spyOn(mockedTarget, 'fire');
 
-		let spy = sinon.spy(mockedTarget, 'fire');
-
-		let component = new CompatibilityEventProxy({
-			host: host
+		const component = new CompatibilityEventProxy({
+			host: host,
 		});
 
 		component.addTarget(mockedTarget);
 
 		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
 
-		assert.strictEqual(true, spy.calledWith(eventNameToEmit, eventObjectToEmit));
-		assert.strictEqual(emitFacade, mockedTarget._yuievt.events[eventNameToEmit].emitFacade);
+		expect(spy).toHaveBeenCalledWith(eventNameToEmit, eventObjectToEmit);
 
 		done();
 	});
 
-	it('should maintain target original state of emitFacade after emiting events when component emitFacade is true', (done) => {
-		let emitFacade = false;
+	it('should maintain target original state of emitFacade after emiting events', done => {
+		const emitFacade = false;
 
-		let mockedTarget = createMockedTarget(eventNameToEmit, emitFacade);
+		const mockedTarget = createMockedTarget(eventNameToEmit, emitFacade);
 
-		let spy = sinon.spy(mockedTarget, 'fire');
+		const spy = jest.spyOn(mockedTarget, 'fire');
 
-		let component = new CompatibilityEventProxy({
+		const component = new CompatibilityEventProxy({
+			host: host,
+		});
+
+		component.addTarget(mockedTarget);
+
+		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
+
+		expect(spy).toHaveBeenCalledWith(eventNameToEmit, eventObjectToEmit);
+		expect(emitFacade).toEqual(
+			mockedTarget._yuievt.events[eventNameToEmit].emitFacade
+		);
+
+		done();
+	});
+
+	it('should maintain target original state of emitFacade after emiting events when component emitFacade is true', done => {
+		const emitFacade = false;
+
+		const mockedTarget = createMockedTarget(eventNameToEmit, emitFacade);
+
+		const spy = jest.spyOn(mockedTarget, 'fire');
+
+		const component = new CompatibilityEventProxy({
 			emitFacade: true,
-			host: host
+			host: host,
 		});
 
 		component.addTarget(mockedTarget);
 
 		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
 
-		assert.strictEqual(true, spy.calledWith(eventNameToEmit, eventObjectToEmit));
-		assert.strictEqual(emitFacade, mockedTarget._yuievt.events[eventNameToEmit].emitFacade);
+		expect(spy).toHaveBeenCalledWith(eventNameToEmit, eventObjectToEmit);
+		expect(emitFacade).toEqual(
+			mockedTarget._yuievt.events[eventNameToEmit].emitFacade
+		);
 
 		done();
 	});
 
-	it('should adapt the events according to specified RegExp', (done) => {
-		let eventNameToEmit = 'eventChanged';
+	it('should adapt the events according to specified RegExp', done => {
+		const eventNameToEmit = 'eventChanged';
 
-		let eventObjectToEmit = {
-			key: eventNameToEmit
+		const eventObjectToEmit = {
+			key: eventNameToEmit,
 		};
 
-		let eventFacadeObjectToEmit = {
-			type: eventNameToEmit
+		const eventFacadeObjectToEmit = {
+			type: eventNameToEmit,
 		};
 
-		let adaptedEventNameToEmit = 'eventChange';
+		const adaptedEventNameToEmit = 'eventChange';
 
-		let mockedTarget = createMockedTarget(eventNameToEmit);
+		const mockedTarget = createMockedTarget(eventNameToEmit);
 
-		let spy = sinon.spy(mockedTarget, 'fire');
+		const spy = jest.spyOn(mockedTarget, 'fire');
 
-		let component = new CompatibilityEventProxy({
+		const component = new CompatibilityEventProxy({
 			adaptedEvents: {
 				match: /(.*)(Changed)$/,
-				replace: '$1Change'
+				replace: '$1Change',
 			},
-			host: host
+			host: host,
 		});
 
 		component.addTarget(mockedTarget);
 
 		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
 
-		assert.strictEqual(true, spy.getCall(0).args[0] === adaptedEventNameToEmit);
+		expect(spy.mock.calls[0][0]).toEqual(adaptedEventNameToEmit);
 
 		done();
 	});
 
-	it('should emit events even if the event does not have a key property', (done) => {
-		let eventObjectToEmit = {};
+	it('should emit events even if the event does not have a key property', done => {
+		const eventObjectToEmit = {};
 
-		let mockedTarget = createMockedTarget(eventNameToEmit);
+		const mockedTarget = createMockedTarget(eventNameToEmit);
 
-		let spy = sinon.spy(mockedTarget, 'fire');
+		const spy = jest.spyOn(mockedTarget, 'fire');
 
-		let component = new CompatibilityEventProxy({
-			host: host
+		const component = new CompatibilityEventProxy({
+			host: host,
 		});
 
 		component.addTarget(mockedTarget);
 
 		host.emit(eventNameToEmit, eventObjectToEmit, eventFacadeObjectToEmit);
 
-		assert.strictEqual(true, spy.calledWith(eventNameToEmit, eventObjectToEmit));
+		expect(spy).toHaveBeenCalledWith(eventNameToEmit, eventObjectToEmit);
 
 		done();
 	});

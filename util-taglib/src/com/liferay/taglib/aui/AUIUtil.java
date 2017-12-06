@@ -14,7 +14,7 @@
 
 package com.liferay.taglib.aui;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -123,7 +123,7 @@ public class AUIUtil {
 			if (inlineField) {
 				sb.append("class=\"");
 				sb.append(baseType);
-				sb.append("-inline\" ");
+				sb.append("-inline\"");
 			}
 		}
 		else {
@@ -137,7 +137,7 @@ public class AUIUtil {
 		}
 
 		if (showForLabel) {
-			sb.append("for=\"");
+			sb.append(" for=\"");
 			sb.append(HtmlUtil.escapeAttribute(forLabel));
 			sb.append("\"");
 		}

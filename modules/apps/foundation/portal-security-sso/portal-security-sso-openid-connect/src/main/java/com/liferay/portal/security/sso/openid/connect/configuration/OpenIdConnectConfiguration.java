@@ -25,11 +25,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.security.sso.openid.connect.configuration.OpenIdConnectConfiguration",
 	localization = "content/Language",
-	name = "open.id.connect.configuration.name"
+	name = "open-id-connect-configuration-name"
 )
 public interface OpenIdConnectConfiguration {
 
-	@Meta.AD(deflt = "false", description = "enabled-help", required = false)
+	@Meta.AD(
+		deflt = "false", description = "enabled-help", name = "enabled",
+		required = false
+	)
 	public boolean enabled();
 
 }

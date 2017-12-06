@@ -16,6 +16,7 @@ package com.liferay.calendar.web.internal.portlet;
 
 import com.liferay.asset.kernel.exception.AssetCategoryException;
 import com.liferay.asset.kernel.exception.AssetTagException;
+import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.calendar.constants.CalendarPortletKeys;
 import com.liferay.calendar.exception.CalendarBookingDurationException;
 import com.liferay.calendar.exception.CalendarBookingRecurrenceException;
@@ -59,6 +60,7 @@ import com.liferay.calendar.web.internal.constants.CalendarWebKeys;
 import com.liferay.calendar.web.internal.display.context.CalendarDisplayContext;
 import com.liferay.calendar.web.internal.upgrade.CalendarWebUpgrade;
 import com.liferay.calendar.workflow.CalendarBookingWorkflowConstants;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.dao.orm.custom.sql.CustomSQLUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -69,6 +71,7 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
@@ -91,7 +94,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -119,6 +121,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -504,6 +507,8 @@ public class CalendarPortlet extends MVCPortlet {
 
 		long[] childCalendarIds = ParamUtil.getLongValues(
 			actionRequest, "childCalendarIds");
+		long[] reinvitableCalendarIds = ParamUtil.getLongValues(
+			actionRequest, "reinvitableCalendarIds");
 		Map<Locale, String> titleMap = LocalizationUtil.getLocalizationMap(
 			actionRequest, "title");
 		Map<Locale, String> descriptionMap =
@@ -528,8 +533,9 @@ public class CalendarPortlet extends MVCPortlet {
 			CalendarBooking.class.getName(), actionRequest);
 
 		CalendarBooking calendarBooking = updateCalendarBooking(
-			calendarBookingId, calendar, childCalendarIds, titleMap,
-			descriptionMap, location, startTimeJCalendar.getTimeInMillis(),
+			calendarBookingId, calendar, childCalendarIds,
+			reinvitableCalendarIds, titleMap, descriptionMap, location,
+			startTimeJCalendar.getTimeInMillis(),
 			endTimeJCalendar.getTimeInMillis(), allDay, recurrence, reminders,
 			remindersType, instanceIndex, updateCalendarBookingInstance,
 			allFollowing, serviceContext);
@@ -607,15 +613,35 @@ public class CalendarPortlet extends MVCPortlet {
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			CalendarBooking.class.getName(), actionRequest);
 
-		calendarBooking = updateCalendarBooking(
-			calendarBookingId, calendar, childCalendarIds, titleMap,
-			descriptionMap, location, startTimeJCalendar.getTimeInMillis(),
-			endTimeJCalendar.getTimeInMillis(), allDay, recurrence, reminders,
-			remindersType, instanceIndex, updateInstance, allFollowing,
-			serviceContext);
+		JSONObject jsonObject = null;
 
-		JSONObject jsonObject = CalendarUtil.toCalendarBookingJSONObject(
-			themeDisplay, calendarBooking, timeZone);
+		try {
+			calendarBooking = updateCalendarBooking(
+				calendarBookingId, calendar, childCalendarIds, new long[0],
+				titleMap, descriptionMap, location,
+				startTimeJCalendar.getTimeInMillis(),
+				endTimeJCalendar.getTimeInMillis(), allDay, recurrence,
+				reminders, remindersType, instanceIndex, updateInstance,
+				allFollowing, serviceContext);
+
+			jsonObject = CalendarUtil.toCalendarBookingJSONObject(
+				themeDisplay, calendarBooking, timeZone);
+		}
+		catch (PortalException pe) {
+			jsonObject = JSONFactoryUtil.createJSONObject();
+
+			String errorMessage = "";
+
+			if (pe instanceof AssetCategoryException) {
+				AssetCategoryException ace = (AssetCategoryException)pe;
+
+				errorMessage = getErrorMessageForException(ace, themeDisplay);
+			}
+
+			jsonObject.put("exception", errorMessage);
+		}
+
+		hideDefaultSuccessMessage(actionRequest);
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
@@ -670,6 +696,20 @@ public class CalendarPortlet extends MVCPortlet {
 		else {
 			super.doDispatch(renderRequest, renderResponse);
 		}
+	}
+
+	protected Set<Long> filterReinvitedCalendarIds(
+		long[] childCalendarIds, long[] reinvitableCalendarIds) {
+
+		Set<Long> reinvitedCalendarIds = new HashSet<>();
+
+		for (long childCalendarId : childCalendarIds) {
+			if (ArrayUtil.contains(reinvitableCalendarIds, childCalendarId)) {
+				reinvitedCalendarIds.add(childCalendarId);
+			}
+		}
+
+		return reinvitedCalendarIds;
 	}
 
 	protected void getCalendar(PortletRequest portletRequest) throws Exception {
@@ -780,6 +820,39 @@ public class CalendarPortlet extends MVCPortlet {
 			calendar.getCalendarId());
 
 		return editCalendarURL;
+	}
+
+	protected String getErrorMessageForException(
+		AssetCategoryException assetCategoryException,
+		ThemeDisplay themeDisplay) {
+
+		String errorMessage = "";
+
+		AssetVocabulary assetVocabulary =
+			assetCategoryException.getVocabulary();
+
+		String vocabularyTitle = StringPool.BLANK;
+
+		if (assetVocabulary != null) {
+			vocabularyTitle = assetVocabulary.getTitle(
+				themeDisplay.getLocale());
+		}
+
+		if (assetCategoryException.getType() ==
+				AssetCategoryException.AT_LEAST_ONE_CATEGORY) {
+
+			errorMessage = themeDisplay.translate(
+				"please-select-at-least-one-category-for-x", vocabularyTitle);
+		}
+		else if (assetCategoryException.getType() ==
+					AssetCategoryException.TOO_MANY_CATEGORIES) {
+
+			errorMessage = themeDisplay.translate(
+				"you-cannot-select-more-than-one-category-for-x",
+				vocabularyTitle);
+		}
+
+		return errorMessage;
 	}
 
 	protected CalendarBooking getFirstCalendarBookingInstance(
@@ -1155,9 +1228,11 @@ public class CalendarPortlet extends MVCPortlet {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
+		Group group = themeDisplay.getScopeGroup();
+
 		List<CalendarBooking> childCalendarBookings =
 			_calendarBookingService.getChildCalendarBookings(
-				parentCalendarBookingId);
+				parentCalendarBookingId, group.isStagingGroup());
 
 		Collection<CalendarResource> calendarResources =
 			CalendarUtil.getCalendarResources(childCalendarBookings);
@@ -1318,6 +1393,13 @@ public class CalendarPortlet extends MVCPortlet {
 			if (calendarResource.isActive()) {
 				Group group = _groupLocalService.getGroup(
 					calendar.getGroupId());
+
+				long layoutSetPrototypeClassNameId = _portal.getClassNameId(
+					LayoutSetPrototype.class);
+
+				if (group.getClassNameId() == layoutSetPrototypeClassNameId) {
+					continue;
+				}
 
 				if (group.hasStagingGroup()) {
 					Group stagingGroup = group.getStagingGroup();
@@ -1573,7 +1655,8 @@ public class CalendarPortlet extends MVCPortlet {
 		CalendarDisplayContext calendarDisplayContext =
 			new CalendarDisplayContext(
 				_groupLocalService, _calendarBookingLocalService,
-				_calendarService, _calendarLocalService, themeDisplay);
+				_calendarBookingService, _calendarLocalService,
+				_calendarService, themeDisplay);
 
 		renderRequest.setAttribute(
 			CalendarWebKeys.CALENDAR_DISPLAY_CONTEXT, calendarDisplayContext);
@@ -1586,10 +1669,11 @@ public class CalendarPortlet extends MVCPortlet {
 
 	protected CalendarBooking updateCalendarBooking(
 			long calendarBookingId, Calendar calendar, long[] childCalendarIds,
-			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			String location, long startTime, long endTime, boolean allDay,
-			Recurrence recurrence, long[] reminders, String[] remindersType,
-			int instanceIndex, boolean updateInstance, boolean allFollowing,
+			long[] reinvitableCalendarIds, Map<Locale, String> titleMap,
+			Map<Locale, String> descriptionMap, String location, long startTime,
+			long endTime, boolean allDay, Recurrence recurrence,
+			long[] reminders, String[] remindersType, int instanceIndex,
+			boolean updateInstance, boolean allFollowing,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -1670,6 +1754,33 @@ public class CalendarPortlet extends MVCPortlet {
 					calendarBooking.getEndTime(), allDay,
 					RecurrenceSerializer.serialize(recurrence), reminders[0],
 					remindersType[0], reminders[1], remindersType[1],
+					serviceContext);
+			}
+
+			Set<Long> reinvitedCalendarIds = filterReinvitedCalendarIds(
+				childCalendarIds, reinvitableCalendarIds);
+
+			List<CalendarBooking> childCalendarBookings =
+				calendarBooking.getChildCalendarBookings();
+
+			for (CalendarBooking childCalendarBooking : childCalendarBookings) {
+				long childCalendarId = childCalendarBooking.getCalendarId();
+
+				if (!reinvitedCalendarIds.contains(childCalendarId)) {
+					continue;
+				}
+
+				Calendar childCalendar = childCalendarBooking.getCalendar();
+
+				if (_calendarBookingLocalService.hasExclusiveCalendarBooking(
+						childCalendar, startTime, endTime)) {
+
+					continue;
+				}
+
+				_calendarBookingLocalService.updateStatus(
+					childCalendarBooking.getUserId(), childCalendarBooking,
+					CalendarBookingWorkflowConstants.STATUS_PENDING,
 					serviceContext);
 			}
 		}

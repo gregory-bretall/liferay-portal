@@ -36,8 +36,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.Repository;
@@ -46,7 +44,6 @@ import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ImageLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.templateparser.TransformerListener;
@@ -56,6 +53,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.webserver.WebServerServletTokenUtil;
@@ -132,12 +130,8 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
-		Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-			getCompanyId(), GroupConstants.CONTROL_PANEL);
-
 		Repository repository = PortletFileRepositoryUtil.addPortletRepository(
-			controlPanelGroup.getGroupId(), JournalConstants.SERVICE_NAME,
-			serviceContext);
+			getGroupId(), JournalConstants.SERVICE_NAME, serviceContext);
 
 		Folder folder = PortletFileRepositoryUtil.addPortletFolder(
 			getUserId(), repository.getRepositoryId(),
@@ -180,9 +174,10 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return getSmallImageURL();
 		}
 
-		return themeDisplay.getPathImage() + "/journal/article?img_id=" +
-			getSmallImageId() + "&t=" +
-				WebServerServletTokenUtil.getToken(getSmallImageId());
+		return StringBundler.concat(
+			themeDisplay.getPathImage(), "/journal/article?img_id=",
+			String.valueOf(getSmallImageId()), "&t=",
+			WebServerServletTokenUtil.getToken(getSmallImageId()));
 	}
 
 	@Override
@@ -419,12 +414,9 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return new ArrayList<>();
 		}
 
-		Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-			getCompanyId(), GroupConstants.CONTROL_PANEL);
-
 		return PortletFileRepositoryUtil.getPortletFileEntries(
-			controlPanelGroup.getGroupId(), imagesFolderId,
-			WorkflowConstants.STATUS_APPROVED, start, end, obc);
+			getGroupId(), imagesFolderId, WorkflowConstants.STATUS_APPROVED,
+			start, end, obc);
 	}
 
 	@Override
@@ -435,12 +427,8 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return 0;
 		}
 
-		Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-			getCompanyId(), GroupConstants.CONTROL_PANEL);
-
 		return PortletFileRepositoryUtil.getPortletFileEntriesCount(
-			controlPanelGroup.getGroupId(), imagesFolderId,
-			WorkflowConstants.STATUS_APPROVED);
+			getGroupId(), imagesFolderId, WorkflowConstants.STATUS_APPROVED);
 	}
 
 	@Override
@@ -449,19 +437,15 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return _imagesFolderId;
 		}
 
+		Repository repository =
+			PortletFileRepositoryUtil.fetchPortletRepository(
+				getGroupId(), JournalConstants.SERVICE_NAME);
+
+		if (repository == null) {
+			return DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
+		}
+
 		try {
-			Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-				getCompanyId(), GroupConstants.CONTROL_PANEL);
-
-			Repository repository =
-				PortletFileRepositoryUtil.fetchPortletRepository(
-					controlPanelGroup.getGroupId(),
-					JournalConstants.SERVICE_NAME);
-
-			if (repository == null) {
-				return DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
-			}
-
 			Folder folder = PortletFileRepositoryUtil.getPortletFolder(
 				repository.getRepositoryId(),
 				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,

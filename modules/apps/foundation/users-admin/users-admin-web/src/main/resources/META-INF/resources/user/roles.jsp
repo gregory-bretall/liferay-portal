@@ -106,7 +106,7 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 		AUI.$('#<portlet:namespace />selectRegularRoleLink').on(
 			'click',
 			function(event) {
-				var searchContainerName = '<portlet:namespace/>rolesSearchContainer';
+				var searchContainerName = '<portlet:namespace />rolesSearchContainer';
 
 				var searchContainer = Liferay.SearchContainer.get(searchContainerName);
 
@@ -309,6 +309,14 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 							var groupId = item.attr('data-groupid');
 							var roleId = item.attr('data-entityid');
 
+							for (var i = 0; i < <portlet:namespace />addGroupRolesGroupIds.length; i++) {
+								if ((<portlet:namespace />addGroupRolesGroupIds[i] == groupId) && (<portlet:namespace />addGroupRolesRoleIds[i] == roleId)) {
+									Util.toggleDisabled(item, true);
+
+									break;
+								}
+							}
+
 							for (var i = 0; i < <portlet:namespace />deleteGroupRolesGroupIds.length; i++) {
 								if ((<portlet:namespace />deleteGroupRolesGroupIds[i] == groupId) && (<portlet:namespace />deleteGroupRolesRoleIds[i] == roleId)) {
 									Util.toggleDisabled(item, false);
@@ -339,19 +347,6 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 		AUI.$('#<portlet:namespace />selectOrganizationRoleLink').on(
 			'click',
 			function(event) {
-				var searchContainerName = '<portlet:namespace/>organizationRolesSearchContainer';
-
-				var searchContainer = Liferay.SearchContainer.get(searchContainerName);
-
-				var searchContainerData = searchContainer.getData();
-
-				if (!searchContainerData.length) {
-					searchContainerData = [];
-				}
-				else {
-					searchContainerData = searchContainerData.split(',');
-				}
-
 				Liferay.Util.selectEntity(
 					{
 						dialog: {
@@ -364,7 +359,7 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 						%>
 
 						id: '<%= organizationRoleEventName %>',
-						selectedData: searchContainerData,
+						selectedData: [],
 						title: '<liferay-ui:message arguments="organization-role" key="select-x" />',
 
 						<%
@@ -428,8 +423,11 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 				<liferay-ui:search-container-column-text
 					cssClass="table-cell-content"
 					name="site"
-					value="<%= HtmlUtil.escape(userGroupRole.getGroup().getDescriptiveName(locale)) %>"
-				/>
+				>
+					<liferay-staging:descriptive-name
+						group="<%= userGroupRole.getGroup() %>"
+					/>
+				</liferay-ui:search-container-column-text>
 
 				<%
 				boolean membershipProtected = false;
@@ -506,6 +504,14 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 								var groupId = item.attr('data-groupid');
 								var roleId = item.attr('data-entityid');
 
+								for (var i = 0; i < <portlet:namespace />addGroupRolesGroupIds.length; i++) {
+									if ((<portlet:namespace />addGroupRolesGroupIds[i] == groupId) && (<portlet:namespace />addGroupRolesRoleIds[i] == roleId)) {
+										Util.toggleDisabled(item, true);
+
+										break;
+									}
+								}
+
 								for (var i = 0; i < <portlet:namespace />deleteGroupRolesGroupIds.length; i++) {
 									if ((<portlet:namespace />deleteGroupRolesGroupIds[i] == groupId) && (<portlet:namespace />deleteGroupRolesRoleIds[i] == roleId)) {
 										Util.toggleDisabled(item, false);
@@ -521,19 +527,6 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 				A.one('#<portlet:namespace />selectSiteRoleLink').on(
 					'click',
 					function(event) {
-						var searchContainerName = '<portlet:namespace/>siteRolesSearchContainer';
-
-						searchContainer = Liferay.SearchContainer.get(searchContainerName);
-
-						var searchContainerData = searchContainer.getData();
-
-						if (!searchContainerData.length) {
-							searchContainerData = [];
-						}
-						else {
-							searchContainerData = searchContainerData.split(',');
-						}
-
 						Util.selectEntity(
 							{
 								dialog: {
@@ -546,7 +539,7 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 								%>
 
 								id: '<%= siteRoleEventName %>',
-								selectedData: searchContainerData,
+								selectedData: [],
 								title: '<liferay-ui:message arguments="site-role" key="select-x" />',
 
 								<%
@@ -611,8 +604,11 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 			<liferay-ui:search-container-column-text
 				cssClass="table-cell-content"
 				name="site"
-				value="<%= HtmlUtil.escape(userGroupGroupRole.getGroup().getDescriptiveName(locale)) %>"
-			/>
+			>
+				<liferay-staging:descriptive-name
+					group="<%= userGroupGroupRole.getGroup() %>"
+				/>
+			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-text
 				cssClass="table-cell-content"

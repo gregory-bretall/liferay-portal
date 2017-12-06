@@ -50,6 +50,11 @@ import org.json.JSONObject;
 public class AxisBuild extends BaseBuild {
 
 	@Override
+	public void addTimelineData(BaseBuild.TimelineData timelineData) {
+		timelineData.addTimelineData(this);
+	}
+
+	@Override
 	public void findDownstreamBuilds() {
 	}
 
@@ -73,7 +78,10 @@ public class AxisBuild extends BaseBuild {
 			sb.append("/");
 		}
 
-		sb.append(getMaster());
+		JenkinsMaster jenkinsMaster = getJenkinsMaster();
+
+		sb.append(jenkinsMaster.getName());
+
 		sb.append("/");
 		sb.append(getJobName());
 		sb.append("/");
@@ -190,10 +198,13 @@ public class AxisBuild extends BaseBuild {
 
 	@Override
 	public String getBuildURLRegex() {
+		JenkinsMaster jenkinsMaster = getJenkinsMaster();
+
 		StringBuffer sb = new StringBuffer();
 
 		sb.append("http[s]*:\\/\\/");
-		sb.append(JenkinsResultsParserUtil.getRegexLiteral(getMaster()));
+		sb.append(
+			JenkinsResultsParserUtil.getRegexLiteral(jenkinsMaster.getName()));
 		sb.append("[^\\/]*");
 		sb.append("[\\/]+job[\\/]+");
 
@@ -244,7 +255,7 @@ public class AxisBuild extends BaseBuild {
 		Element messageElement = Dom4JUtil.getNewElement(
 			"div", null,
 			Dom4JUtil.getNewAnchorElement(
-				getBuildURL(), null, getDisplayName()));
+				getBuildURL() + "/consoleText", null, getDisplayName()));
 
 		if (result.equals("ABORTED")) {
 			messageElement.add(
@@ -260,7 +271,8 @@ public class AxisBuild extends BaseBuild {
 		}
 
 		if (result.equals("UNSTABLE")) {
-			List<Element> elements = new ArrayList<>();
+			List<Element> failureElements = new ArrayList<>();
+			List<Element> upstreamJobFailureElements = new ArrayList<>();
 
 			for (TestResult testResult : getTestResults(null)) {
 				String testStatus = testResult.getStatus();
@@ -271,10 +283,32 @@ public class AxisBuild extends BaseBuild {
 					continue;
 				}
 
-				elements.add(testResult.getGitHubElement(getTestrayLogsURL()));
+				if (UpstreamFailureUtil.isTestFailingInUpstreamJob(
+						testResult)) {
+
+					upstreamJobFailureElements.add(
+						testResult.getGitHubElement(getTestrayLogsURL()));
+
+					continue;
+				}
+
+				failureElements.add(
+					testResult.getGitHubElement(getTestrayLogsURL()));
 			}
 
-			Dom4JUtil.getOrderedListElement(elements, messageElement, 3);
+			if (!upstreamJobFailureElements.isEmpty()) {
+				upstreamJobFailureMessageElement = messageElement.createCopy();
+
+				Dom4JUtil.getOrderedListElement(
+					upstreamJobFailureElements,
+					upstreamJobFailureMessageElement, 3);
+			}
+
+			Dom4JUtil.getOrderedListElement(failureElements, messageElement, 3);
+
+			if (failureElements.isEmpty()) {
+				return null;
+			}
 		}
 
 		return messageElement;
@@ -368,6 +402,13 @@ public class AxisBuild extends BaseBuild {
 	}
 
 	@Override
+	protected List<Element> getJenkinsReportTableRowElements(
+		String result, String status) {
+
+		return Collections.emptyList();
+	}
+
+	@Override
 	protected String getStopPropertiesTempMapURL() {
 		if (fromArchive) {
 			return getBuildURL() + "/stop-properties.json";
@@ -375,9 +416,13 @@ public class AxisBuild extends BaseBuild {
 
 		TopLevelBuild topLevelBuild = getTopLevelBuild();
 
+		JenkinsMaster topLevelBuildJenkinsMaster =
+			topLevelBuild.getJenkinsMaster();
+
 		return JenkinsResultsParserUtil.combine(
 			"http://cloud-10-0-0-31.lax.liferay.com/osb-jenkins-web/map/",
-			topLevelBuild.getMaster(), "/", topLevelBuild.getJobName(), "/",
+			topLevelBuildJenkinsMaster.getName(), "/",
+			topLevelBuild.getJobName(), "/",
 			Integer.toString(topLevelBuild.getBuildNumber()), "/", getJobName(),
 			"/", getAxisVariable(), "/", getParameterValue("JOB_VARIANT"), "/",
 			"stop.properties");
@@ -425,7 +470,7 @@ public class AxisBuild extends BaseBuild {
 
 		axisVariable = matcher.group("axisVariable");
 		jobName = matcher.group("jobName");
-		master = matcher.group("master");
+		setJenkinsMaster(new JenkinsMaster(matcher.group("master")));
 
 		setBuildNumber(Integer.parseInt(matcher.group("buildNumber")));
 

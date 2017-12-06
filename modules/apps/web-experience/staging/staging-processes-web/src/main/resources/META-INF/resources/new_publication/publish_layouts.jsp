@@ -313,6 +313,8 @@ renderResponse.setTitle(!configuredPublish ? LanguageUtil.get(request, "new-publ
 	function <portlet:namespace />publishPages() {
 		var exportImport = Liferay.component('<portlet:namespace />ExportImportComponent');
 
+		var deletePortletDataBeforeImportingCheckbox = AUI.$('#<portlet:namespace />deletePortletDataBeforeImportingCheckbox');
+
 		var dateChecker = exportImport.getDateRangeChecker();
 
 		if (dateChecker.validRange) {
@@ -324,7 +326,12 @@ renderResponse.setTitle(!configuredPublish ? LanguageUtil.get(request, "new-publ
 				form.fm('<%= PortletDataHandlerKeys.PORTLET_DATA_CONTROL_DEFAULT %>').val(true);
 			}
 
-			submitForm(form);
+			if (deletePortletDataBeforeImportingCheckbox.length && deletePortletDataBeforeImportingCheckbox[0].checked) {
+				confirm('<%= UnicodeLanguageUtil.get(request, "delete-portlet-data-before-importing-confirmation") %>') && submitForm(form);
+			}
+			else {
+				submitForm(form);
+			}
 		}
 		else {
 			exportImport.showNotification(dateChecker);
@@ -341,7 +348,7 @@ renderResponse.setTitle(!configuredPublish ? LanguageUtil.get(request, "new-publ
 	Liferay.Util.toggleRadio('<portlet:namespace />rangeLast', '<portlet:namespace />rangeLastInputs', ['<portlet:namespace />startEndDate']);
 </aui:script>
 
-<aui:script use="liferay-export-import">
+<aui:script use="liferay-staging-processes-export-import">
 	var exportImport = new Liferay.ExportImport(
 		{
 			commentsNode: '#<%= PortletDataHandlerKeys.COMMENTS %>',

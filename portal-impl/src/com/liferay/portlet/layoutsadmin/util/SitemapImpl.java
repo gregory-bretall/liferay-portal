@@ -65,6 +65,14 @@ public class SitemapImpl implements Sitemap {
 
 		locElement.addText(encodeXML(url));
 
+		if (modifiedDate != null) {
+			Element modifiedDateElement = urlElement.addElement("lastmod");
+
+			DateFormat iso8601DateFormat = DateUtil.getISO8601Format();
+
+			modifiedDateElement.addText(iso8601DateFormat.format(modifiedDate));
+		}
+
 		if (typeSettingsProperties == null) {
 			if (Validator.isNotNull(
 					PropsValues.SITES_SITEMAP_DEFAULT_CHANGE_FREQUENCY)) {
@@ -118,14 +126,6 @@ public class SitemapImpl implements Sitemap {
 				priorityElement.addText(
 					PropsValues.SITES_SITEMAP_DEFAULT_PRIORITY);
 			}
-		}
-
-		if (modifiedDate != null) {
-			Element modifiedDateElement = urlElement.addElement("lastmod");
-
-			DateFormat iso8601DateFormat = DateUtil.getISO8601Format();
-
-			modifiedDateElement.addText(iso8601DateFormat.format(modifiedDate));
 		}
 
 		if (alternateURLs != null) {
@@ -186,7 +186,9 @@ public class SitemapImpl implements Sitemap {
 
 		Element rootElement = null;
 
-		if (Validator.isNull(layoutUuid)) {
+		if (Validator.isNull(layoutUuid) &&
+			PropsValues.XML_SITEMAP_INDEX_ENABLED) {
+
 			rootElement = document.addElement(
 				"sitemapindex", "http://www.sitemaps.org/schemas/sitemap/0.9");
 		}
@@ -200,7 +202,9 @@ public class SitemapImpl implements Sitemap {
 		LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
 			groupId, privateLayout);
 
-		if (Validator.isNull(layoutUuid)) {
+		if (Validator.isNull(layoutUuid) &&
+			PropsValues.XML_SITEMAP_INDEX_ENABLED) {
+
 			visitLayoutSet(rootElement, layoutSet, themeDisplay);
 
 			return document.asXML();
@@ -210,8 +214,14 @@ public class SitemapImpl implements Sitemap {
 			SitemapURLProviderRegistryUtil.getSitemapURLProviders();
 
 		for (SitemapURLProvider sitemapURLProvider : sitemapURLProviders) {
-			sitemapURLProvider.visitLayout(
-				rootElement, layoutUuid, layoutSet, themeDisplay);
+			if (Validator.isNull(layoutUuid)) {
+				sitemapURLProvider.visitLayoutSet(
+					rootElement, layoutSet, themeDisplay);
+			}
+			else {
+				sitemapURLProvider.visitLayout(
+					rootElement, layoutUuid, layoutSet, themeDisplay);
+			}
 		}
 
 		return document.asXML();

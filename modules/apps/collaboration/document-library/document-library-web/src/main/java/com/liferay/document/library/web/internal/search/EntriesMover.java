@@ -20,7 +20,8 @@ import com.liferay.portal.kernel.dao.search.RowMoverDropTarget;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
-import com.liferay.trash.kernel.model.TrashEntry;
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.trash.model.TrashEntry;
 
 /**
  * @author Chema Balsas
@@ -54,7 +55,8 @@ public class EntriesMover extends RowMover {
 				TrashEntry.class.getName(), PortletProvider.Action.VIEW);
 
 			moveToTrashRowMoverDropTarget.setSelector(
-				"#_" + productMenuPortletId + "_portlet_" + trashPortletId);
+				StringBundler.concat(
+					"#_", productMenuPortletId, "_portlet_", trashPortletId));
 
 			addRowMoverDropTarget(moveToTrashRowMoverDropTarget);
 		}
