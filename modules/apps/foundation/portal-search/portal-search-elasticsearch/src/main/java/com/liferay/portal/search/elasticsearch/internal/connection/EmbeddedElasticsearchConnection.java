@@ -36,7 +36,11 @@ import java.io.IOException;
 
 import java.net.InetAddress;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.time.StopWatch;
@@ -45,6 +49,9 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.inject.Injector;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.discovery.DiscoveryService;
+import org.elasticsearch.index.IndexService;
+import org.elasticsearch.index.settings.IndexSettingsService;
+import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchService;
@@ -92,27 +99,63 @@ public class EmbeddedElasticsearchConnection
 		catch (ClassNotFoundException cnfe) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Unable to preload " + ByteBufferUtil.class +
-						" to prevent Netty shutdown concurrent class loading " +
-							"interruption issue",
+					StringBundler.concat(
+						"Unable to preload ",
+						String.valueOf(ByteBufferUtil.class),
+						" to prevent Netty shutdown concurrent class loading ",
+						"interruption issue"),
 					cnfe);
 			}
 		}
 
-		Injector injector = _node.injector();
+		if (PortalRunMode.isTestMode()) {
+			settingsBuilder.put("index.refresh_interval", "-1");
+			settingsBuilder.put(
+				"index.translog.flush_threshold_ops", Integer.MAX_VALUE);
+			settingsBuilder.put("index.translog.interval", "1d");
 
-		ThreadPool threadPool = injector.getInstance(ThreadPool.class);
+			Settings settings = settingsBuilder.build();
 
-		threadPool.shutdownNow();
+			Injector injector = _node.injector();
 
-		try {
-			threadPool.awaitTermination(
-				elasticsearchConfiguration.shutdownWaitTime(),
-				TimeUnit.MILLISECONDS);
-		}
-		catch (InterruptedException ie) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Thread pool shutdown wait was interrupted", ie);
+			IndicesService indicesService = injector.getInstance(
+				IndicesService.class);
+
+			Iterator<IndexService> iterator = indicesService.iterator();
+
+			while (iterator.hasNext()) {
+				IndexService indexService = iterator.next();
+
+				injector = indexService.injector();
+
+				IndexSettingsService indexSettingsService =
+					injector.getInstance(IndexSettingsService.class);
+
+				indexSettingsService.refreshSettings(settings);
+			}
+
+			ThreadPool threadPool = injector.getInstance(ThreadPool.class);
+
+			ScheduledExecutorService scheduledExecutorService =
+				threadPool.scheduler();
+
+			if (scheduledExecutorService instanceof ThreadPoolExecutor) {
+				ThreadPoolExecutor threadPoolExecutor =
+					(ThreadPoolExecutor)scheduledExecutorService;
+
+				threadPoolExecutor.setRejectedExecutionHandler(
+					_REJECTED_EXECUTION_HANDLER);
+			}
+
+			scheduledExecutorService.shutdown();
+
+			try {
+				scheduledExecutorService.awaitTermination(1, TimeUnit.HOURS);
+			}
+			catch (InterruptedException ie) {
+				if (_log.isWarnEnabled()) {
+					_log.warn("Thread pool shutdown wait was interrupted", ie);
+				}
 			}
 		}
 
@@ -303,7 +346,7 @@ public class EmbeddedElasticsearchConnection
 			sb.append("Remote Elasticsearch connections can be configured in ");
 			sb.append("the Control Panel.");
 
-			_log.warn(sb);
+			_log.warn(sb.toString());
 		}
 
 		if (_log.isDebugEnabled()) {
@@ -322,9 +365,10 @@ public class EmbeddedElasticsearchConnection
 			stopWatch.stop();
 
 			_log.debug(
-				"Finished starting " +
-					elasticsearchConfiguration.clusterName() + " in " +
-						stopWatch.getTime() + " ms");
+				StringBundler.concat(
+					"Finished starting ",
+					elasticsearchConfiguration.clusterName(), " in ",
+					String.valueOf(stopWatch.getTime()), " ms"));
 		}
 
 		return client;
@@ -416,8 +460,14 @@ public class EmbeddedElasticsearchConnection
 
 		if (PortalRunMode.isTestMode()) {
 			settingsBuilder.put("index.refresh_interval", "1ms");
+			settingsBuilder.put(
+				"index.search.slowlog.threshold.fetch.warn", "-1");
+			settingsBuilder.put(
+				"index.search.slowlog.threshold.query.warn", "-1");
 			settingsBuilder.put("index.translog.flush_threshold_ops", "1");
 			settingsBuilder.put("index.translog.interval", "1ms");
+			settingsBuilder.put(
+				"monitor.jvm.enabled", Boolean.FALSE.toString());
 		}
 	}
 
@@ -473,6 +523,27 @@ public class EmbeddedElasticsearchConnection
 
 			});
 	}
+
+	/**
+	 * Keep this as a static field to avoid the class loading failure during
+	 * Tomcat shutdown.
+	 */
+	private static final RejectedExecutionHandler _REJECTED_EXECUTION_HANDLER =
+		new RejectedExecutionHandler() {
+
+			@Override
+			public void rejectedExecution(
+				Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
+
+				if (_log.isInfoEnabled()) {
+					_log.info(
+						StringBundler.concat(
+							"Discarded ", String.valueOf(runnable), " on ",
+							String.valueOf(threadPoolExecutor)));
+				}
+			}
+
+		};
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		EmbeddedElasticsearchConnection.class);

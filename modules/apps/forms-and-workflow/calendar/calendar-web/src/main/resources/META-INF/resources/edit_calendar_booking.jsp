@@ -226,7 +226,7 @@ while (manageableCalendarsIterator.hasNext()) {
 			);
 
 			var destroyInstance = function(event) {
-				if (event.portletId === '<%= portletDisplay.getRootPortletId() %>') {
+				if (event.portletId === '<%= portletDisplay.getId() %>') {
 					calendarContainer.destroy();
 
 					Liferay.component('<portlet:namespace />calendarContainer', null);
@@ -251,7 +251,7 @@ while (manageableCalendarsIterator.hasNext()) {
 			);
 
 			var destroyInstance = function(event) {
-				if (event.portletId === '<%= portletDisplay.getRootPortletId() %>') {
+				if (event.portletId === '<%= portletDisplay.getId() %>') {
 					remoteServices.destroy();
 
 					Liferay.component('<portlet:namespace />remoteServices', null);
@@ -277,10 +277,11 @@ while (manageableCalendarsIterator.hasNext()) {
 		<liferay-portlet:param name="calendarBookingId" value="<%= String.valueOf(calendarBookingId) %>" />
 	</liferay-portlet:renderURL>
 
-	<aui:input name="redirect" type="hidden" value="<%= redirectURL %>" />
+	<aui:input name="redirect" type="hidden" value="<%= calendarDisplayContext.getEditCalendarBookingRedirectURL(request, redirectURL) %>" />
 	<aui:input name="calendarBookingId" type="hidden" value="<%= calendarBookingId %>" />
 	<aui:input name="instanceIndex" type="hidden" value="<%= instanceIndex %>" />
 	<aui:input name="childCalendarIds" type="hidden" />
+	<aui:input name="reinvitableCalendarIds" type="hidden" />
 	<aui:input name="allFollowing" type="hidden" />
 	<aui:input name="updateCalendarBookingInstance" type="hidden" />
 	<aui:input name="workflowAction" type="hidden" value="<%= WorkflowConstants.ACTION_PUBLISH %>" />
@@ -289,9 +290,9 @@ while (manageableCalendarsIterator.hasNext()) {
 		<liferay-ui:error exception="<%= CalendarBookingDurationException.class %>" message="please-enter-a-start-date-that-comes-before-the-end-date" />
 		<liferay-ui:error exception="<%= CalendarBookingRecurrenceException.class %>" message="the-last-repeating-date-should-come-after-the-event-start-date" />
 
-		<liferay-ui:asset-categories-error />
+		<liferay-asset:asset-categories-error />
 
-		<liferay-ui:asset-tags-error />
+		<liferay-asset:asset-tags-error />
 
 		<aui:model-context bean="<%= calendarBooking %>" model="<%= CalendarBooking.class %>" />
 
@@ -366,9 +367,9 @@ while (manageableCalendarsIterator.hasNext()) {
 					</c:if>
 				</liferay-ui:panel>
 
-				<liferay-ui:panel collapsible="<%= true %>" defaultState='<%= BrowserSnifferUtil.isMobile(request) ? "closed" : "open" %>' extended="<%= false %>" id="calendarBookingInvitationPanel" markupView="lexicon" persistState="<%= true %>" title="invitations">
+				<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" id="calendarBookingInvitationPanel" markupView="lexicon" persistState="<%= true %>" title="invitations">
 					<c:if test="<%= invitable %>">
-						<aui:input inputCssClass="calendar-portlet-invite-resources-input" label="" name="inviteResource" placeholder="add-people-groups-rooms" type="text" />
+						<aui:input inputCssClass="calendar-portlet-invite-resources-input" label="" name="inviteResource" placeholder="add-people-sites-rooms" type="text" />
 
 						<div class="separator"><!-- --></div>
 					</c:if>
@@ -445,7 +446,7 @@ while (manageableCalendarsIterator.hasNext()) {
 				</liferay-ui:panel>
 
 				<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" id="calendarBookingAssetLinksPanel" markupView="lexicon" persistState="<%= true %>" title="related-assets">
-					<liferay-ui:input-asset-links
+					<liferay-asset:input-asset-links
 						className="<%= CalendarBooking.class.getName() %>"
 						classPK="<%= calendarBookingId %>"
 					/>
@@ -490,7 +491,7 @@ while (manageableCalendarsIterator.hasNext()) {
 
 <aui:script>
 	function <portlet:namespace />filterCalendarBookings(calendarBooking) {
-		return '<%= calendarBookingId %>' !== calendarBooking.calendarBookingId;
+		return calendarBooking.calendarBookingId !== '<%= calendarBookingId %>';
 	}
 
 	function <portlet:namespace />resolver(data) {
@@ -522,6 +523,8 @@ while (manageableCalendarsIterator.hasNext()) {
 				A.Array.remove(childCalendarIds, A.Array.indexOf(childCalendarIds, calendarId));
 
 				A.one('#<portlet:namespace />childCalendarIds').val(childCalendarIds.join(','));
+
+				A.one('#<portlet:namespace />reinvitableCalendarIds').val(<portlet:namespace />reinvitableCalendarIds.join(','));
 			</c:if>
 
 			Liferay.CalendarMessageUtil.promptSchedulerEventUpdate(
@@ -549,7 +552,7 @@ while (manageableCalendarsIterator.hasNext()) {
 	</c:if>
 </aui:script>
 
-<aui:script use="json,liferay-calendar-interval-selector,liferay-calendar-interval-selector-scheduler-event-link,liferay-calendar-list,liferay-calendar-recurrence-util,liferay-calendar-reminders,liferay-calendar-simple-menu,liferay-calendar-util">
+<aui:script use="json,liferay-calendar-date-picker-sanitizer,liferay-calendar-interval-selector,liferay-calendar-interval-selector-scheduler-event-link,liferay-calendar-list,liferay-calendar-recurrence-util,liferay-calendar-reminders,liferay-calendar-simple-menu,liferay-calendar-util">
 	var calendarContainer = Liferay.component('<portlet:namespace />calendarContainer');
 
 	var defaultCalendarId = <%= calendarId %>;
@@ -650,9 +653,20 @@ while (manageableCalendarsIterator.hasNext()) {
 		}
 	).render();
 
+	window.<portlet:namespace />reinvitableCalendarIds = [];
+
 	window.<portlet:namespace />calendarListDeclined = new Liferay.CalendarList(
 		{
 			after: {
+				calendarRemoved: function(event) {
+					var calendar = event.calendar;
+
+					if (calendar) {
+						var calendarId = calendar.get('calendarId');
+
+						window.<portlet:namespace />reinvitableCalendarIds.push(calendarId);
+					}
+				},
 				calendarsChange: function(event) {
 					var instance = this;
 
@@ -701,6 +715,18 @@ while (manageableCalendarsIterator.hasNext()) {
 	</c:if>
 
 	syncCalendarsMap();
+
+	new Liferay.DatePickerSanitizer(
+		{
+			datePickers: [
+				Liferay.component('<portlet:namespace />endTimeDatePicker'),
+				Liferay.component('<portlet:namespace />endTimeDatePicker')
+			],
+			defaultDate: new Date(<%= endTimeYear %>, <%= endTimeMonth %>, <%= endTimeDay %>, <%= endTimeHour %>, <%= endTimeMinute %>),
+			maximumDate: new Date(2099, 11, 31, 23, 59, 59, 999),
+			minimumDate: new Date(0)
+		}
+	);
 
 	var intervalSelector = new Liferay.IntervalSelector(
 		{

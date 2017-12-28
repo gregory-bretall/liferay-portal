@@ -19,11 +19,12 @@ import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderRequest;
 import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderResponse;
 import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderResponseOutput;
 import com.liferay.dynamic.data.mapping.form.evaluator.DDMFormFieldEvaluationResult;
+import com.liferay.petra.string.CharPool;
+import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -111,13 +112,21 @@ public class CallFunction extends BaseDDMFormRuleFunction {
 
 		String[] tokens = StringUtil.split(expression, CharPool.EQUAL);
 
-		if (_ddmFormFieldEvaluationResults.containsKey(tokens[1])) {
-			String ddmFormFieldValue = getDDMFormFieldValue(tokens[1]);
+		String parameterName = tokens[0];
 
-			parameters.put(tokens[0], ddmFormFieldValue);
+		String parameterValue = StringPool.BLANK;
+
+		if (tokens.length == 2) {
+			parameterValue = tokens[1];
+		}
+
+		if (_ddmFormFieldEvaluationResults.containsKey(parameterValue)) {
+			String ddmFormFieldValue = getDDMFormFieldValue(parameterValue);
+
+			parameters.put(parameterName, ddmFormFieldValue);
 		}
 		else {
-			parameters.put(tokens[0], tokens[1]);
+			parameters.put(parameterName, parameterValue);
 		}
 	}
 
@@ -208,7 +217,11 @@ public class CallFunction extends BaseDDMFormRuleFunction {
 		if (options.size() == 1) {
 			KeyValuePair keyValuePair = options.get(0);
 
-			ddmFormFieldEvaluationResult.setValue(keyValuePair.getValue());
+			JSONArray valueJSONArray = _jsonFactory.createJSONArray();
+
+			valueJSONArray.put(keyValuePair.getValue());
+
+			ddmFormFieldEvaluationResult.setValue(valueJSONArray);
 		}
 	}
 
@@ -218,6 +231,8 @@ public class CallFunction extends BaseDDMFormRuleFunction {
 
 		if (ddmFormFieldEvaluationResult != null) {
 			ddmFormFieldEvaluationResult.setValue(value);
+
+			ddmFormFieldEvaluationResult.setProperty("valueChanged", true);
 		}
 	}
 

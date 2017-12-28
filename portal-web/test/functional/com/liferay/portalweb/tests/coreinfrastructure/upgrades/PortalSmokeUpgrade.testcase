@@ -35,6 +35,7 @@
 
 	<command name="ViewPortalSmokeArchive6130" priority="5">
 		<property name="data.archive.type" value="data-archive-portal" />
+		<property name="portal.upgrades" value="true" />
 		<property name="portal.version" value="6.1.30" />
 		<property name="test.assert.warning.exceptions" value="true" />
 
@@ -45,6 +46,7 @@
 
 	<command name="ViewPortalSmokeArchive621015" priority="5">
 		<property name="data.archive.type" value="data-archive-portal" />
+		<property name="portal.upgrades" value="true" />
 		<property name="portal.version" value="6.2.10.15" />
 		<property name="test.assert.warning.exceptions" value="true" />
 
@@ -66,7 +68,30 @@
 
 	<command name="ViewPortalSmokeArchive625" priority="5">
 		<property name="data.archive.type" value="data-archive-portal" />
+		<property name="portal.upgrades" value="true" />
 		<property name="portal.version" value="6.2.5" />
+		<property name="test.assert.warning.exceptions" value="true" />
+
+		<execute macro="Upgrade#viewUpgrade" />
+
+		<execute macro="Upgrade#searchForAssetsAfterUpgrade" />
+	</command>
+
+	<command ignore="true" name="ViewPortalSmokeArchive70106" priority="5">
+		<property name="data.archive.type" value="data-archive-portal" />
+		<property name="portal.upgrades" value="true" />
+		<property name="portal.version" value="7.0.10.6" />
+		<property name="test.assert.warning.exceptions" value="true" />
+
+		<execute macro="Upgrade#viewUpgrade" />
+
+		<execute macro="Upgrade#searchForAssetsAfterUpgrade" />
+	</command>
+
+	<command ignore="true" name="ViewPortalSmokeArchive704" priority="5">
+		<property name="data.archive.type" value="data-archive-portal" />
+		<property name="portal.upgrades" value="true" />
+		<property name="portal.version" value="7.0.4" />
 		<property name="test.assert.warning.exceptions" value="true" />
 
 		<execute macro="Upgrade#viewUpgrade" />

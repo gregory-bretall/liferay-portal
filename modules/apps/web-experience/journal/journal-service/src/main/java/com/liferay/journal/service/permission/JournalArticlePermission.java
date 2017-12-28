@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.BaseModelPermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.util.HashUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.workflow.permission.WorkflowPermissionUtil;
 import com.liferay.portal.util.PropsValues;
 
@@ -123,15 +124,15 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 		Map<Object, Object> permissionChecksMap =
 			permissionChecker.getPermissionChecksMap();
 
-		CacheKey cacheKey = new CacheKey(
+		PermissionCacheKey permissionCacheKey = new PermissionCacheKey(
 			article.getGroupId(), article.getArticleId(), actionId);
 
-		Boolean contains = (Boolean)permissionChecksMap.get(cacheKey);
+		Boolean contains = (Boolean)permissionChecksMap.get(permissionCacheKey);
 
 		if (contains == null) {
 			contains = _contains(permissionChecker, article, actionId);
 
-			permissionChecksMap.put(cacheKey, contains);
+			permissionChecksMap.put(permissionCacheKey, contains);
 		}
 
 		return contains;
@@ -165,8 +166,10 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 
 		if (article == null) {
 			_log.error(
-				"Unable to get journal article with group ID " + groupId +
-					", article ID " + articleId + ", and version " + version);
+				StringBundler.concat(
+					"Unable to get journal article with group ID ",
+					String.valueOf(groupId), ", article ID ", articleId,
+					", and version ", String.valueOf(version)));
 
 			return false;
 		}
@@ -183,8 +186,10 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 
 		if (article == null) {
 			_log.error(
-				"Unable to get journal article with group ID " + groupId +
-					", article ID " + articleId + ", and status " + status);
+				StringBundler.concat(
+					"Unable to get journal article with group ID ",
+					String.valueOf(groupId), ", article ID ", articleId,
+					", and status ", String.valueOf(status)));
 
 			return false;
 		}
@@ -201,8 +206,9 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 
 		if (article == null) {
 			_log.error(
-				"Unable to get journal article with group ID " + groupId +
-					" and article ID " + articleId);
+				StringBundler.concat(
+					"Unable to get journal article with group ID ",
+					String.valueOf(groupId), " and article ID ", articleId));
 
 			return false;
 		}
@@ -266,8 +272,7 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 		else if (article.isPending()) {
 			hasPermission = WorkflowPermissionUtil.hasPermission(
 				permissionChecker, article.getGroupId(),
-				JournalArticle.class.getName(), article.getResourcePrimKey(),
-				actionId);
+				JournalArticle.class.getName(), article.getId(), actionId);
 
 			if (hasPermission != null) {
 				return hasPermission.booleanValue();
@@ -355,7 +360,7 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 	private static JournalArticleLocalService _journalArticleLocalService;
 	private static JournalFolderLocalService _journalFolderLocalService;
 
-	private static class CacheKey {
+	private static class PermissionCacheKey {
 
 		@Override
 		public boolean equals(Object obj) {
@@ -363,15 +368,15 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 				return true;
 			}
 
-			if (!(obj instanceof CacheKey)) {
+			if (!(obj instanceof PermissionCacheKey)) {
 				return false;
 			}
 
-			CacheKey cacheKey = (CacheKey)obj;
+			PermissionCacheKey permissionCacheKey = (PermissionCacheKey)obj;
 
-			if ((_groupId == cacheKey._groupId) &&
-				Objects.equals(_articleId, cacheKey._articleId) &&
-				Objects.equals(_actionId, cacheKey._actionId)) {
+			if ((_groupId == permissionCacheKey._groupId) &&
+				Objects.equals(_articleId, permissionCacheKey._articleId) &&
+				Objects.equals(_actionId, permissionCacheKey._actionId)) {
 
 				return true;
 			}
@@ -388,7 +393,9 @@ public class JournalArticlePermission implements BaseModelPermissionChecker {
 			return HashUtil.hash(hash, _actionId);
 		}
 
-		private CacheKey(long groupId, String articleId, String actionId) {
+		private PermissionCacheKey(
+			long groupId, String articleId, String actionId) {
+
 			_groupId = groupId;
 			_articleId = articleId;
 			_actionId = actionId;

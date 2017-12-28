@@ -4,8 +4,8 @@
 [subrepo]
 	autopull = false
 	cmdver = liferay
-	commit = f8965f86575371aa354ebf801e98f5dd40d8900d
+	commit = 18a38ff09140c707db41b070ad015a911f88b000
 	mergebuttonmergecommits = false
 	mode = push
-	parent = 061f808bbaacb0f84530e13ac9ce30ee3dbb88b5
+	parent = a14994a49473980947339b050b42bd8c28a122ad
 	remote = git@github.com:liferay/com-liferay-xstream.git

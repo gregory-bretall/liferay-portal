@@ -97,9 +97,11 @@ public abstract class UpgradeProcess
 
 			if (_log.isInfoEnabled()) {
 				_log.info(
-					"Completed upgrade process " +
-						ClassUtil.getClassName(this) + " in " +
-							(System.currentTimeMillis() - start) + "ms");
+					StringBundler.concat(
+						"Completed upgrade process ",
+						ClassUtil.getClassName(this), " in ",
+						String.valueOf(System.currentTimeMillis() - start),
+						"ms"));
 			}
 		}
 	}
@@ -355,7 +357,7 @@ public abstract class UpgradeProcess
 					tableName);
 				ResultSet rs2 = databaseMetaData.getIndexInfo(
 					dbInspector.getCatalog(), dbInspector.getSchema(),
-					normalizeName(tableName, databaseMetaData), false, false)) {
+					dbInspector.normalizeName(tableName), false, false)) {
 
 				Set<String> primaryKeyNames = new HashSet<>();
 
@@ -398,8 +400,9 @@ public abstract class UpgradeProcess
 
 						if (alterable.shouldDropIndex(entry.getValue())) {
 							runSQL(
-								"drop index " + entry.getKey() + " on " +
-									tableName);
+								StringBundler.concat(
+									"drop index ", entry.getKey(), " on ",
+									tableName));
 						}
 					}
 
@@ -568,19 +571,19 @@ public abstract class UpgradeProcess
 		return db.isSupportsUpdateWithInnerJoin();
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             DBInspector#normalizeName(java.lang.String,
+	 *             DatabaseMetaData)}
+	 */
+	@Deprecated
 	protected String normalizeName(
 			String name, DatabaseMetaData databaseMetaData)
 		throws SQLException {
 
-		if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			return StringUtil.toLowerCase(name);
-		}
+		DBInspector dbInspector = new DBInspector(connection);
 
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			return StringUtil.toUpperCase(name);
-		}
-
-		return name;
+		return dbInspector.normalizeName(name, databaseMetaData);
 	}
 
 	protected void upgradeTable(String tableName, Object[][] tableColumns)

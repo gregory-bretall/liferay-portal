@@ -14,6 +14,7 @@
 
 package com.liferay.users.admin.demo.data.creator.internal;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -25,7 +26,6 @@ import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.security.RandomUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
@@ -58,6 +58,16 @@ import org.osgi.service.component.annotations.Reference;
 public abstract class BaseUserDemoDataCreator implements UserDemoDataCreator {
 
 	public User createUser(long companyId, String emailAddress)
+		throws PortalException {
+
+		return createUser(
+			companyId, StringPool.BLANK, emailAddress, StringPool.BLANK,
+			StringPool.BLANK);
+	}
+
+	public User createUser(
+			long companyId, String screenName, String emailAddress,
+			String firstName, String lastName)
 		throws PortalException {
 
 		boolean male = true;
@@ -101,7 +111,9 @@ public abstract class BaseUserDemoDataCreator implements UserDemoDataCreator {
 			return user;
 		}
 
-		user = _createBasicUser(companyId, emailAddress, male, birthDate);
+		user = _createBasicUser(
+			companyId, screenName, emailAddress, firstName, lastName, male,
+			birthDate);
 
 		_userIds.add(user.getUserId());
 
@@ -166,20 +178,27 @@ public abstract class BaseUserDemoDataCreator implements UserDemoDataCreator {
 	}
 
 	private User _createBasicUser(
-			long companyId, String emailAddress, boolean male, Date birthDate)
+			long companyId, String screenName, String emailAddress,
+			String firstName, String lastName, boolean male, Date birthDate)
 		throws PortalException {
 
 		String[] fullNameArray = getFullNameArray(emailAddress);
 
-		String firstName = fullNameArray[0];
-		String lastName = fullNameArray[1];
+		if (Validator.isNull(firstName)) {
+			firstName = fullNameArray[0];
+		}
+
+		if (Validator.isNull(lastName)) {
+			lastName = fullNameArray[1];
+		}
 
 		boolean autoPassword = false;
 		String password1 = "test";
 		String password2 = "test";
+		boolean autoScreenName = Validator.isNull(screenName);
 		long facebookId = 0;
 		String openId = StringPool.BLANK;
-		Locale locale = LocaleUtil.SPAIN;
+		Locale locale = LocaleUtil.getDefault();
 		String middleName = StringPool.BLANK;
 		long prefixId = 0;
 		long suffixId = 0;
@@ -201,9 +220,9 @@ public abstract class BaseUserDemoDataCreator implements UserDemoDataCreator {
 
 		return userLocalService.addUser(
 			UserConstants.USER_ID_DEFAULT, companyId, autoPassword, password1,
-			password2, true, StringPool.BLANK, emailAddress, facebookId, openId,
-			locale, firstName, middleName, lastName, prefixId, suffixId, male,
-			birthdayMonth, birthdayDay, birthdayYear, jobTitle, groupIds,
+			password2, autoScreenName, screenName, emailAddress, facebookId,
+			openId, locale, firstName, middleName, lastName, prefixId, suffixId,
+			male, birthdayMonth, birthdayDay, birthdayYear, jobTitle, groupIds,
 			organizationIds, roleIds, userGroupIds, sendMail,
 			new ServiceContext());
 	}

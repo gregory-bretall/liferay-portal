@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -171,16 +172,16 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 
 	@Override
 	public Enumeration<String> getAttributeNames() {
-		List<String> names = new ArrayList<>();
+		Set<String> names = new HashSet<>();
 
 		Enumeration<String> enu = _request.getAttributeNames();
 
-		while (enu.hasMoreElements()) {
-			String name = enu.nextElement();
+		_copyAttributeNames(names, enu);
 
-			if (!name.equals(JavaConstants.JAVAX_SERVLET_INCLUDE_PATH_INFO)) {
-				names.add(name);
-			}
+		if (_portletRequestDispatcherRequest != null) {
+			enu = _portletRequestDispatcherRequest.getAttributeNames();
+
+			_copyAttributeNames(names, enu);
 		}
 
 		return Collections.enumeration(names);
@@ -323,6 +324,10 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 		return _portletName;
 	}
 
+	public HttpServletRequest getPortletRequestDispatcherRequest() {
+		return _portletRequestDispatcherRequest;
+	}
+
 	@Override
 	public PortletSession getPortletSession() {
 		return _session;
@@ -412,7 +417,23 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 
 	@Override
 	public Enumeration<String> getProperties(String name) {
+		if (name == null) {
+			throw new IllegalArgumentException();
+		}
+
 		List<String> values = new ArrayList<>();
+
+		Enumeration<String> enumeration = _request.getHeaders(name);
+
+		if (enumeration != null) {
+			while (enumeration.hasMoreElements()) {
+				String header = enumeration.nextElement();
+
+				if (header != null) {
+					values.add(header);
+				}
+			}
+		}
 
 		String value = _portalContext.getProperty(name);
 
@@ -425,12 +446,39 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 
 	@Override
 	public String getProperty(String name) {
-		return _portalContext.getProperty(name);
+		if (name == null) {
+			throw new IllegalArgumentException();
+		}
+
+		String value = _request.getHeader(name);
+
+		if (value == null) {
+			value = _portalContext.getProperty(name);
+		}
+
+		return value;
 	}
 
 	@Override
 	public Enumeration<String> getPropertyNames() {
-		return _portalContext.getPropertyNames();
+		List<String> names = new ArrayList<>();
+
+		Enumeration<String> headerNamesEnumeration = _request.getHeaderNames();
+
+		if (headerNamesEnumeration != null) {
+			while (headerNamesEnumeration.hasMoreElements()) {
+				names.add(headerNamesEnumeration.nextElement());
+			}
+		}
+
+		Enumeration<String> propertyNamesEnumeration =
+			_portalContext.getPropertyNames();
+
+		while (propertyNamesEnumeration.hasMoreElements()) {
+			names.add(propertyNamesEnumeration.nextElement());
+		}
+
+		return Collections.enumeration(names);
 	}
 
 	@Override
@@ -820,11 +868,15 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 
 			if (getLifecycle().equals(PortletRequest.RENDER_PHASE) &&
 				!LiferayWindowState.isExclusive(request) &&
-				!LiferayWindowState.isPopUp(request) &&
-				(renderParameters != null)) {
+				!LiferayWindowState.isPopUp(request)) {
 
-				RenderParametersPool.put(
-					request, plid, _portletName, renderParameters);
+				if ((renderParameters == null) || renderParameters.isEmpty()) {
+					RenderParametersPool.clear(request, plid, _portletName);
+				}
+				else {
+					RenderParametersPool.put(
+						request, plid, _portletName, renderParameters);
+				}
 			}
 		}
 		else {
@@ -850,7 +902,8 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 		}
 
 		_mergePublicRenderParameters(
-			dynamicRequest, publicRenderParametersMap, preferences);
+			dynamicRequest, publicRenderParametersMap, preferences,
+			getLifecycle());
 
 		_processCheckbox(dynamicRequest);
 
@@ -906,8 +959,8 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #_mergePublicRenderParameters(
-	 *             DynamicServletRequest, Map, PortletPreferences)}
+	 *             #_mergePublicRenderParameters(DynamicServletRequest, Map,
+	 *             PortletPreferences, String)}
 	 */
 	@Deprecated
 	protected void mergePublicRenderParameters(
@@ -915,7 +968,8 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 		long plid) {
 
 		_mergePublicRenderParameters(
-			dynamicRequest, Collections.emptyMap(), preferences);
+			dynamicRequest, Collections.emptyMap(), preferences,
+			getLifecycle());
 	}
 
 	protected String removePortletNamespace(
@@ -928,10 +982,22 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 		return name;
 	}
 
+	private void _copyAttributeNames(
+		Set<String> names, Enumeration<String> enumeration) {
+
+		while (enumeration.hasMoreElements()) {
+			String name = enumeration.nextElement();
+
+			if (!name.equals(JavaConstants.JAVAX_SERVLET_INCLUDE_PATH_INFO)) {
+				names.add(name);
+			}
+		}
+	}
+
 	private void _mergePublicRenderParameters(
 		DynamicServletRequest dynamicRequest,
 		Map<String, String[]> publicRenderParametersMap,
-		PortletPreferences preferences) {
+		PortletPreferences preferences, String lifecycle) {
 
 		Set<PublicRenderParameter> publicRenderParameters =
 			_portlet.getPublicRenderParameters();
@@ -939,6 +1005,8 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 		if (publicRenderParameters.isEmpty()) {
 			return;
 		}
+
+		boolean resourcePhase = lifecycle.equals(PortletRequest.RESOURCE_PHASE);
 
 		Enumeration<String> enumeration = preferences.getNames();
 
@@ -960,7 +1028,14 @@ public abstract class PortletRequestImpl implements LiferayPortletRequest {
 
 				String name = publicRenderParameter.getIdentifier();
 
-				if (dynamicRequest.getParameter(name) == null) {
+				String[] requestValues = dynamicRequest.getParameterValues(
+					name);
+
+				if ((requestValues != null) && resourcePhase) {
+					dynamicRequest.setParameterValues(
+						name, ArrayUtil.append(requestValues, values));
+				}
+				else {
 					dynamicRequest.setParameterValues(name, values);
 				}
 			}

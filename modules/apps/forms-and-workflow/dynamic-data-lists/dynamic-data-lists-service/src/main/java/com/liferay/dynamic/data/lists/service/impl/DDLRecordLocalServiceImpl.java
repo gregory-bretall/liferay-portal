@@ -444,7 +444,6 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 	 *
 	 * @param  ddmStorageId the storage ID associated with the record
 	 * @return the DDM form values
-	 * @throws StorageException
 	 */
 	@Override
 	public DDMFormValues getDDMFormValues(long ddmStorageId)
@@ -868,7 +867,7 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 
 		record.setModifiedDate(serviceContext.getModifiedDate(null));
 
-		ddlRecordPersistence.update(record);
+		record = ddlRecordPersistence.update(record);
 
 		// Record version
 

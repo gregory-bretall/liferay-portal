@@ -12,7 +12,6 @@ import com.liferay.portal.kernel.model.CacheModel;
 import com.liferay.portal.kernel.model.MVCCModel;
 import com.liferay.portal.kernel.util.HashUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -140,7 +139,7 @@ public class ${entity.name}CacheModel implements CacheModel<${entity.name}>, Ext
 				<#else>
 					<#if stringUtil.equals(column.type, "String")>
 						if (${column.name} == null) {
-							${entity.varName}Impl.set${column.methodName}(StringPool.BLANK);
+							${entity.varName}Impl.set${column.methodName}("");
 						}
 						else {
 							${entity.varName}Impl.set${column.methodName}(${column.name});
@@ -201,7 +200,7 @@ public class ${entity.name}CacheModel implements CacheModel<${entity.name}>, Ext
 		</#list>
 
 		<#list cacheFields as cacheField>
-			${cacheField.name} = (${cacheField.type.genericValue})objectInput.readObject();
+			${cacheField.name} = (${serviceBuilder.getGenericValue(cacheField.type)})objectInput.readObject();
 		</#list>
 
 		<#if entity.hasCompoundPK()>
@@ -230,7 +229,7 @@ public class ${entity.name}CacheModel implements CacheModel<${entity.name}>, Ext
 				objectOutput.writeLong(${column.name});
 			<#elseif stringUtil.equals(column.type, "String")>
 				if (${column.name} == null) {
-					objectOutput.writeUTF(StringPool.BLANK);
+					objectOutput.writeUTF("");
 				}
 				else {
 					objectOutput.writeUTF(${column.name});
@@ -258,7 +257,7 @@ public class ${entity.name}CacheModel implements CacheModel<${entity.name}>, Ext
 	</#list>
 
 	<#list cacheFields as cacheField>
-		public ${cacheField.type.genericValue} ${cacheField.name};
+		public ${serviceBuilder.getGenericValue(cacheField.type)} ${cacheField.name};
 	</#list>
 
 	<#if entity.hasCompoundPK()>

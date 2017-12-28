@@ -46,6 +46,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -121,17 +122,17 @@ public class WabProcessorTest {
 				jar.getDirectories();
 			Map<String, Resource> resources = jar.getResources();
 
-			// Check to see that the right number of resources are in the WAB.
+			// Check to see that the right number of resources are in the WAB
 
 			Assert.assertEquals(resources.toString(), 1240, resources.size());
 
-			// Check if the basic metadata is correct.
+			// Check if the basic metadata is correct
 
 			Assert.assertEquals("classic-theme", jar.getBsn());
 			Assert.assertEquals("7.0.0.8", jar.getVersion());
 
 			// Assert that the Bundle-ClassPath is properly formed to our
-			// conventions.
+			// conventions
 
 			Domain domain = Domain.domain(jar.getManifest());
 
@@ -153,7 +154,7 @@ public class WabProcessorTest {
 				else {
 
 					// Check that all the libraries on the Bundle-ClassPath
-					// exist in the WAB.
+					// exist in the WAB
 
 					Assert.assertNotNull(resources.get(bundleClassPathEntry));
 				}
@@ -169,7 +170,7 @@ public class WabProcessorTest {
 
 			// Check if packages declared in portal property
 			// module.framework.web.generator.default.servlet.packages are
-			// included.
+			// included
 
 			Assert.assertTrue(
 				importedPackages.containsKey("com.liferay.portal.model"));
@@ -195,7 +196,7 @@ public class WabProcessorTest {
 			Assert.assertTrue(
 				importedPackages.containsKey("org.apache.naming.java"));
 
-			// Check if packages only referenced in web.xml are imported.
+			// Check if packages only referenced in web.xml are imported
 
 			Assert.assertTrue(
 				importedPackages.containsKey(
@@ -237,17 +238,17 @@ public class WabProcessorTest {
 				jar.getDirectories();
 			Map<String, Resource> resources = jar.getResources();
 
-			// Check to see that the right number of resources are in the WAB.
+			// Check to see that the right number of resources are in the WAB
 
 			Assert.assertEquals(resources.toString(), 207, resources.size());
 
-			// Check if the basic metadata is correct.
+			// Check if the basic metadata is correct
 
 			Assert.assertEquals("sample-struts-portlet", jar.getBsn());
 			Assert.assertEquals("7.0.0.3", jar.getVersion());
 
 			// Assert that the Bundle-ClassPath is properly formed to our
-			// conventions.
+			// conventions
 
 			Domain domain = Domain.domain(jar.getManifest());
 
@@ -269,7 +270,7 @@ public class WabProcessorTest {
 				else {
 
 					// Check that all the libraries on the Bundle-ClassPath
-					// exist in the WAB.
+					// exist in the WAB
 
 					Assert.assertNotNull(resources.get(bundleClassPathEntry));
 				}
@@ -277,7 +278,7 @@ public class WabProcessorTest {
 
 			// Check that a library which was declared in
 			// portal-dependency-jars but which is provided by the portal's
-			// system bundle IS NOT in the WAB.
+			// system bundle IS NOT in the WAB
 
 			Assert.assertNull(
 				resources.get("WEB-INF/lib/commons-beanutils.jar"));
@@ -285,7 +286,7 @@ public class WabProcessorTest {
 
 			// Check that a library which was declared in
 			// portal-dependency-jars but which is NOT provided by the portal's
-			// system bundle IS in the WAB.
+			// system bundle IS in the WAB
 
 			Assert.assertNotNull(resources.get("WEB-INF/lib/jfreechart.jar"));
 			Assert.assertNotNull(
@@ -293,7 +294,7 @@ public class WabProcessorTest {
 			Assert.assertNotNull(resources.get("WEB-INF/lib/struts-core.jar"));
 
 			// Check that JSPs were parsed to add requirements for modular
-			// taglibs.
+			// taglibs
 
 			Parameters requiredCapabilities = domain.getRequireCapability();
 
@@ -313,7 +314,7 @@ public class WabProcessorTest {
 			Assert.assertTrue(
 				importedPackages.containsKey("javax.servlet.http"));
 
-			// Since there are JSPs check that basic JSP packages are imported.
+			// Since there are JSPs check that basic JSP packages are imported
 
 			Assert.assertTrue(
 				importedPackages.containsKey("javax.servlet.jsp"));
@@ -322,7 +323,7 @@ public class WabProcessorTest {
 
 			// Check if packages declared in portal property
 			// module.framework.web.generator.default.servlet.packages are
-			// included.
+			// included
 
 			Assert.assertTrue(
 				importedPackages.containsKey("com.liferay.portal.model"));
@@ -348,7 +349,7 @@ public class WabProcessorTest {
 			Assert.assertTrue(
 				importedPackages.containsKey("org.apache.naming.java"));
 
-			// Check if packages imported by code are included.
+			// Check if packages imported by code are included
 
 			Assert.assertTrue(
 				importedPackages.containsKey(
@@ -358,24 +359,41 @@ public class WabProcessorTest {
 				importedPackages.containsKey("com.liferay.portal.kernel.util"));
 
 			// Check if packages used in the code but available on the
-			// Bundle-ClassPath are not imported.
+			// Bundle-ClassPath are not imported
 
 			Assert.assertFalse(
 				importedPackages.containsKey("org.apache.struts.action"));
 			Assert.assertFalse(importedPackages.containsKey("org.jfree.chart"));
 
-			// Check if packages only referenced in web.xml are imported.
+			// Check if packages only referenced in web.xml are imported
 
 			Assert.assertTrue(
 				importedPackages.containsKey(
 					"com.liferay.portal.kernel.servlet.filters.invoker"));
 			Assert.assertTrue(
 				importedPackages.containsKey("com.liferay.portal.webserver"));
+
+			// Check if packages referenced by the parameter
+			// portalListenerClasses in web.xml are imported
+
+			Assert.assertTrue(
+				importedPackages.containsKey(
+					"com.liferay.portal.kernel.spring.context"));
+
+			// Check if packages referenced by the parameter
+			// portalListenerClasses in web.xml and available on the
+			// Bundle-Classpath are not imported
+
+			Assert.assertFalse(
+				importedPackages.containsKey(
+					"com.liferay.samplestruts.servlet"));
 		}
 	}
 
 	protected ClassLoader getClassLoader() {
-		return getClass().getClassLoader();
+		Class<?> clazz = getClass();
+
+		return clazz.getClassLoader();
 	}
 
 	protected File getFile(String fileName) throws URISyntaxException {
@@ -412,9 +430,9 @@ public class WabProcessorTest {
 
 				File parent = deployDir.getParentFile();
 
-				Files.walk(
-					parent.toPath()
-				).sorted(
+				Stream<Path> pathsStream = Files.walk(parent.toPath());
+
+				pathsStream.sorted(
 					Comparator.reverseOrder()
 				).map(
 					Path::toFile

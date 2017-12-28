@@ -118,6 +118,70 @@ let you set a specific version of NPM to download with the `downloadNode` task.
 - [LPS-72340]: Skip task `npmShrinkwrap` if project does not contain a
 `package.json` file.
 
+## 2.3.0 - 2017-07-07
+
+### Added
+- [LPS-73472]: Add a `npmRum[script]` task for each [script](https://docs.npmjs.com/misc/scripts)
+declared in the `package.json` file.
+- [LPS-73472]: Run the `"build"` script (if declared in the `package.json` file)
+when compiling a Java project.
+
+## 3.0.0 - 2017-07-17
+
+### Added
+- [LPS-73472]: Recreate symbolic links in the `.bin` directories of
+`node_modules` if the `NpmInstallTask`'s `nodeModulesCacheDir` property is set.
+
+### Removed
+- [LPS-73472]: Remove all deprecated methods.
+- [LPS-73472]: The `NpmInstallTask`'s `nodeModulesCacheRemoveBinDirs` property
+is no longer available.
+
+## 3.1.0 - 2017-08-29
+
+### Added
+- [LPS-73070]: Add the ability to run `ExecuteNpmTask` instances concurrently
+even when pointing to a shared NPM's cache directory, if supported.
+- [LPS-73070]: By default, use the current user's NPM cache directory
+concurrently if running on NPM 5. Prior versions of NPM do not allow for
+concurrent access to the cache directory; only one NPM invocation at a time.
+- [LPS-73070]: Delete the `package-lock.json` file when running the `cleanNPM`
+task, if present.
+- [LPS-73070]: Use the `package-lock.json` file to calculate the `node_modules`
+cache digest.
+
+### Fixed
+- [LPS-73472]: Remove spurious files before recreating symbolic links in the
+`.bin` directories of `node_modules`.
+
+## 3.1.1 - 2017-09-18
+
+### Added
+- [LPS-74770]: Run the `"test"` script (if declared in the `package.json` file)
+when executing the `check` task.
+
+## 3.2.0 - 2017-09-28
+
+### Added
+- [LPS-74933]: Add the ability to merge the existing `package.json` of the
+project with the values provided by the task properties of
+`PublishNodeModuleTask` when publishing a package to the NPM registry.
+
+## 3.2.1 - 2017-10-10
+
+### Fixed
+- [LPS-75175]: Fix the `downloadNode` task's circular dependency when setting
+the `node.global` property to `true` in the root project.
+
+## 4.0.0 - 2017-11-20
+
+### Changed
+- [LPS-75965]: Download the Node.js Windows distribution if running on Windows.
+
+### Removed
+- [LPS-75965]: The `downloadNode.nodeExeUrl` and `node.nodeExeUrl` properties
+are no longer available.
+
 [LPS-66906]: https://issues.liferay.com/browse/LPS-66906
 [LPS-67023]: https://issues.liferay.com/browse/LPS-67023
 [LPS-67573]: https://issues.liferay.com/browse/LPS-67573
@@ -133,3 +197,9 @@ let you set a specific version of NPM to download with the `downloadNode` task.
 [LPS-71826]: https://issues.liferay.com/browse/LPS-71826
 [LPS-72152]: https://issues.liferay.com/browse/LPS-72152
 [LPS-72340]: https://issues.liferay.com/browse/LPS-72340
+[LPS-73070]: https://issues.liferay.com/browse/LPS-73070
+[LPS-73472]: https://issues.liferay.com/browse/LPS-73472
+[LPS-74770]: https://issues.liferay.com/browse/LPS-74770
+[LPS-74933]: https://issues.liferay.com/browse/LPS-74933
+[LPS-75175]: https://issues.liferay.com/browse/LPS-75175
+[LPS-75965]: https://issues.liferay.com/browse/LPS-75965

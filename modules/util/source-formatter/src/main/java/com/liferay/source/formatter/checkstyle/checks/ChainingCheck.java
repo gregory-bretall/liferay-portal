@@ -14,23 +14,23 @@
 
 package com.liferay.source.formatter.checkstyle.checks;
 
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.source.formatter.checkstyle.util.DetailASTUtil;
 
-import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FileContents;
+import com.puppycrawl.tools.checkstyle.api.FileText;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Hugo Huijser
  */
-public class ChainingCheck extends AbstractCheck {
+public class ChainingCheck extends BaseCheck {
 
 	@Override
 	public int[] getDefaultTokens() {
@@ -45,17 +45,12 @@ public class ChainingCheck extends AbstractCheck {
 		_allowedMethodNames = StringUtil.split(allowedMethodNames);
 	}
 
+	public void setAllowedVariableTypeNames(String allowedVariableTypeNames) {
+		_allowedVariableTypeNames = StringUtil.split(allowedVariableTypeNames);
+	}
+
 	@Override
-	public void visitToken(DetailAST detailAST) {
-		FileContents fileContents = getFileContents();
-
-		String fileName = StringUtil.replace(
-			fileContents.getFileName(), CharPool.BACK_SLASH, CharPool.SLASH);
-
-		if (fileName.contains("/test/")) {
-			return;
-		}
-
+	protected void doVisitToken(DetailAST detailAST) {
 		List<DetailAST> methodCallASTList = DetailASTUtil.getAllChildTokens(
 			detailAST, true, TokenTypes.METHOD_CALL);
 
@@ -81,18 +76,18 @@ public class ChainingCheck extends AbstractCheck {
 				continue;
 			}
 
+			_checkMethodName(
+				chainedMethodNames, "getClass", methodCallAST, detailAST);
+
+			if (chainedMethodNames.size() == 2) {
+				continue;
+			}
+
 			if (_isAllowedChainingMethodCall(
 					detailAST, methodCallAST, chainedMethodNames)) {
 
 				_checkStyling(methodCallAST);
 
-				continue;
-			}
-
-			_checkMethodName(
-				chainedMethodNames, "getClass", methodCallAST, detailAST);
-
-			if (chainedMethodNames.size() == 2) {
 				continue;
 			}
 
@@ -168,60 +163,6 @@ public class ChainingCheck extends AbstractCheck {
 		}
 	}
 
-	private DetailAST _getClassAST(DetailAST detailAST) {
-		DetailAST parentAST = detailAST.getParent();
-
-		while (true) {
-			if (parentAST.getParent() == null) {
-				break;
-			}
-
-			return parentAST.getParent();
-		}
-
-		return null;
-	}
-
-	private String _getVariableType(DetailAST detailAST, String variableName) {
-		List<DetailAST> definitionASTList = new ArrayList<>();
-
-		if (variableName.matches("_[a-z].*")) {
-			definitionASTList = DetailASTUtil.getAllChildTokens(
-				_getClassAST(detailAST), true, TokenTypes.PARAMETER_DEF,
-				TokenTypes.VARIABLE_DEF);
-		}
-		else if (variableName.matches("[a-z].*")) {
-			definitionASTList = DetailASTUtil.getAllChildTokens(
-				detailAST, true, TokenTypes.PARAMETER_DEF,
-				TokenTypes.VARIABLE_DEF);
-		}
-
-		for (DetailAST definitionAST : definitionASTList) {
-			DetailAST nameAST = definitionAST.findFirstToken(TokenTypes.IDENT);
-
-			if (nameAST == null) {
-				continue;
-			}
-
-			String name = nameAST.getText();
-
-			if (name.equals(variableName)) {
-				DetailAST typeAST = definitionAST.findFirstToken(
-					TokenTypes.TYPE);
-
-				nameAST = typeAST.findFirstToken(TokenTypes.IDENT);
-
-				if (nameAST == null) {
-					return null;
-				}
-
-				return nameAST.getText();
-			}
-		}
-
-		return null;
-	}
-
 	private boolean _isAllowedChainingMethodCall(
 		DetailAST detailAST, DetailAST methodCallAST,
 		List<String> chainedMethodNames) {
@@ -235,22 +176,44 @@ public class ChainingCheck extends AbstractCheck {
 		DetailAST dotAST = methodCallAST.findFirstToken(TokenTypes.DOT);
 
 		if (dotAST == null) {
+			FileContents fileContents = getFileContents();
+
+			FileText fileText = fileContents.getText();
+
+			String content = (String)fileText.getFullText();
+
+			if (content.contains("extends PowerMockito")) {
+				return true;
+			}
+
 			return false;
 		}
 
-		DetailAST nameAST = dotAST.findFirstToken(TokenTypes.IDENT);
+		DetailAST nameAST = null;
+
+		DetailAST firstChild = dotAST.getFirstChild();
+
+		if (firstChild.getType() == TokenTypes.LITERAL_NEW) {
+			nameAST = firstChild.findFirstToken(TokenTypes.IDENT);
+		}
+		else {
+			nameAST = dotAST.findFirstToken(TokenTypes.IDENT);
+		}
 
 		String classOrVariableName = nameAST.getText();
 
-		if (classOrVariableName.matches(".*[Bb]uilder")) {
-			return true;
+		for (String allowedClassName : _allowedClassNames) {
+			if (classOrVariableName.matches(allowedClassName)) {
+				return true;
+			}
 		}
 
-		String variableType = _getVariableType(detailAST, classOrVariableName);
+		Set<String> variableTypeNames = DetailASTUtil.getVariableTypeNames(
+			detailAST, classOrVariableName);
 
-		if (variableType != null) {
-			for (String allowedClassName : _allowedClassNames) {
-				if (variableType.matches(allowedClassName)) {
+		for (String variableTypeName : variableTypeNames) {
+			for (String allowedVariableTypeName : _allowedVariableTypeNames) {
+				if (variableTypeName.matches(allowedVariableTypeName)) {
 					return true;
 				}
 			}
@@ -295,5 +258,6 @@ public class ChainingCheck extends AbstractCheck {
 
 	private String[] _allowedClassNames = new String[0];
 	private String[] _allowedMethodNames = new String[0];
+	private String[] _allowedVariableTypeNames = new String[0];
 
 }

@@ -4,9 +4,7 @@
 	</#if>
 
 	<div class="alert alert-info">
-		<@liferay_ui["message"]
-			key="there-are-no-results"
-		/>
+		<@liferay_ui["message"] key="there-are-no-results" />
 	</div>
 </#if>
 
@@ -127,7 +125,7 @@
 			<#if stringUtil.equals(fieldName, "author")>
 				<@liferay.language key="by" /> ${htmlUtil.escape(portalUtil.getUserName(assetRenderer.getUserId(), assetRenderer.getUserName()))}
 			<#elseif stringUtil.equals(fieldName, "categories")>
-				<@liferay_ui["asset-categories-summary"]
+				<@liferay_asset["asset-categories-summary"]
 					className=entry.getClassName()
 					classPK=entry.getClassPK()
 					portletURL=renderResponse.createRenderURL()
@@ -143,7 +141,7 @@
 			<#elseif stringUtil.equals(fieldName, "publish-date")>
 				${dateUtil.getDate(entry.getPublishDate(), dateFormat, locale)}
 			<#elseif stringUtil.equals(fieldName, "tags")>
-				<@liferay_ui["asset-tags-summary"]
+				<@liferay_asset["asset-tags-summary"]
 					className=entry.getClassName()
 					classPK=entry.getClassPK()
 					portletURL=renderResponse.createRenderURL()
@@ -195,19 +193,18 @@
 
 <#macro getRelatedAssets>
 	<#if getterUtil.getBoolean(enableRelatedAssets)>
-		<@liferay_ui["asset-links"]
+		<@liferay_asset["asset-links"]
 			assetEntryId=entry.getEntryId()
+			viewInContext=!stringUtil.equals(assetLinkBehavior, "showFullContent")
 		/>
 	</#if>
 </#macro>
 
 <#macro getSocialBookmarks>
-	<#if getterUtil.getBoolean(enableSocialBookmarks)>
-		<@liferay_ui["social-bookmarks"]
-			displayStyle="${socialBookmarksDisplayStyle}"
-			target="_blank"
-			title=entry.getTitle(locale)
-			url=viewURL
-		/>
-	</#if>
+	<@liferay_ui["social-bookmarks"]
+		displayStyle="${socialBookmarksDisplayStyle}"
+		target="_blank"
+		title=entry.getTitle(locale)
+		url=viewURL
+	/>
 </#macro>

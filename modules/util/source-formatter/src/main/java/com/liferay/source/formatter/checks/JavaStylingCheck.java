@@ -29,10 +29,6 @@ public class JavaStylingCheck extends BaseFileCheck {
 	protected String doProcess(
 		String fileName, String absolutePath, String content) {
 
-		if (fileName.endsWith("JavaStylingCheck.java")) {
-			return content;
-		}
-
 		if (content.contains("$\n */")) {
 			content = StringUtil.replace(content, "$\n */", "$\n *\n */");
 		}
@@ -49,8 +45,14 @@ public class JavaStylingCheck extends BaseFileCheck {
 
 		content = StringUtil.replace(
 			content,
-			new String[] {";\n/**", "\t/*\n\t *", ";;\n", "\n/**\n *\n *"},
-			new String[] {";\n\n/**", "\t/**\n\t *", ";\n", "\n/**\n *"});
+			new String[] {
+				";\n/**", "\t/*\n\t *", ";;\n", "\n/**\n *\n *",
+				"\n */\npackage "
+			},
+			new String[] {
+				";\n\n/**", "\t/**\n\t *", ";\n", "\n/**\n *",
+				"\n */\n\npackage "
+			});
 
 		content = StringUtil.replace(
 			content,

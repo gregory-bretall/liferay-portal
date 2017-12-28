@@ -15,15 +15,6 @@
 							requires: [
 								'liferay-ddm-form-renderer-field'
 							]
-						},
-						'liferay-ddm-form-field-password-template': {
-							condition: {
-								trigger: 'liferay-ddm-form-renderer'
-							},
-							path: 'password.soy.js',
-							requires: [
-								'soyutils'
-							]
 						}
 					},
 					root: MODULE_PATH + '/'

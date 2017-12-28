@@ -482,9 +482,11 @@ public class DLFileEntryLocalServiceImpl
 		boolean manualCheckinRequired = GetterUtil.getBoolean(
 			serviceContext.getAttribute(DL.MANUAL_CHECK_IN_REQUIRED));
 
-		dlFileEntry.setManualCheckInRequired(manualCheckinRequired);
+		if (dlFileEntry.getManualCheckInRequired() ^ manualCheckinRequired) {
+			dlFileEntry.setManualCheckInRequired(manualCheckinRequired);
 
-		dlFileEntryPersistence.update(dlFileEntry);
+			dlFileEntryPersistence.update(dlFileEntry);
+		}
 
 		String version = dlFileVersion.getVersion();
 
@@ -957,6 +959,38 @@ public class DLFileEntryLocalServiceImpl
 	}
 
 	@Override
+	public void deleteRepositoryFileEntries(long repositoryId)
+		throws PortalException {
+
+		final RepositoryEventTrigger repositoryEventTrigger =
+			RepositoryUtil.getRepositoryEventTrigger(repositoryId);
+
+		int total = dlFileEntryPersistence.countByRepositoryId(repositoryId);
+
+		final IntervalActionProcessor<Void> intervalActionProcessor =
+			new IntervalActionProcessor<>(total);
+
+		intervalActionProcessor.setPerformIntervalActionMethod(
+			(start, end) -> {
+				List<DLFileEntry> dlFileEntries =
+					dlFileEntryPersistence.findByRepositoryId(
+						repositoryId, start, end);
+
+				for (DLFileEntry dlFileEntry : dlFileEntries) {
+					repositoryEventTrigger.trigger(
+						RepositoryEventType.Delete.class, FileEntry.class,
+						new LiferayFileEntry(dlFileEntry));
+
+					dlFileEntryLocalService.deleteFileEntry(dlFileEntry);
+				}
+
+				return null;
+			});
+
+		intervalActionProcessor.performIntervalActions();
+	}
+
+	@Override
 	public void deleteRepositoryFileEntries(long repositoryId, long folderId)
 		throws PortalException {
 
@@ -1027,7 +1061,35 @@ public class DLFileEntryLocalServiceImpl
 
 	@Override
 	public DLFileEntry fetchFileEntryByAnyImageId(long imageId) {
-		return dlFileEntryFinder.fetchByAnyImageId(imageId);
+		DLFileEntry fileEntry =
+			dlFileEntryPersistence.fetchBySmallImageId_First(imageId, null);
+
+		if (fileEntry != null) {
+			return fileEntry;
+		}
+
+		fileEntry = dlFileEntryPersistence.fetchByLargeImageId_First(
+			imageId, null);
+
+		if (fileEntry != null) {
+			return fileEntry;
+		}
+
+		fileEntry = dlFileEntryPersistence.fetchByCustom1ImageId_First(
+			imageId, null);
+
+		if (fileEntry != null) {
+			return fileEntry;
+		}
+
+		fileEntry = dlFileEntryPersistence.fetchByCustom2ImageId_First(
+			imageId, null);
+
+		if (fileEntry != null) {
+			return fileEntry;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -2781,8 +2843,9 @@ public class DLFileEntryLocalServiceImpl
 		}
 
 		throw new InvalidFileEntryTypeException(
-			"Invalid file entry type " + fileEntryTypeId + " for folder " +
-				folderId);
+			StringBundler.concat(
+				"Invalid file entry type ", String.valueOf(fileEntryTypeId),
+				" for folder ", String.valueOf(folderId)));
 	}
 
 	protected void validateFileExtension(String extension)

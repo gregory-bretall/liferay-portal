@@ -215,6 +215,7 @@ if (portletTitleBasedNavigation) {
 					</portlet:actionURL>
 
 					<liferay-ui:icon-delete
+						showIcon="<%= true %>"
 						trash="<%= trashHelper.isTrashEnabled(themeDisplay.getScopeGroupId()) %>"
 						url="<%= deleteURL %>"
 					/>
@@ -231,7 +232,7 @@ if (portletTitleBasedNavigation) {
 	<%
 	MBTreeWalker treeWalker = messageDisplay.getTreeWalker();
 
-	AssetUtil.addLayoutTags(request, AssetTagLocalServiceUtil.getTags(MBMessage.class.getName(), thread.getRootMessageId()));
+	assetHelper.addLayoutTags(request, AssetTagLocalServiceUtil.getTags(MBMessage.class.getName(), thread.getRootMessageId()));
 	%>
 
 	<div class="message-scroll" id="<portlet:namespace />message_0"></div>
@@ -298,7 +299,6 @@ if (portletTitleBasedNavigation) {
 		<c:if test="<%= MBCategoryPermission.contains(permissionChecker, scopeGroupId, message.getCategoryId(), ActionKeys.REPLY_TO_MESSAGE) && !thread.isLocked() %>">
 
 			<%
-			MBMessage curMessage = message;
 			long replyToMessageId = message.getRootMessageId();
 			%>
 

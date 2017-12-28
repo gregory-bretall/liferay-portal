@@ -17,6 +17,12 @@
 <%@ include file="/init.jsp" %>
 
 <%
+String redirect = ParamUtil.getString(request, "redirect");
+
+String backURL = ParamUtil.getString(request, "backURL", redirect);
+
+String portletResource = ParamUtil.getString(request, "portletResource");
+
 Layout selLayout = layoutsAdminDisplayContext.getSelLayout();
 
 Long groupId = layoutsAdminDisplayContext.getGroupId();
@@ -24,28 +30,17 @@ boolean privateLayout = layoutsAdminDisplayContext.isPrivateLayout();
 long parentPlid = LayoutConstants.DEFAULT_PLID;
 long parentLayoutId = LayoutConstants.DEFAULT_PARENT_LAYOUT_ID;
 
-String selThemeId = null;
-
 if (layout.isTypeControlPanel()) {
 	if (layoutsAdminDisplayContext.getSelPlid() != 0) {
 		selLayout = LayoutLocalServiceUtil.getLayout(layoutsAdminDisplayContext.getSelPlid());
-
-		selThemeId = selLayout.getThemeId();
 
 		privateLayout = selLayout.isPrivateLayout();
 		parentPlid = selLayout.getPlid();
 		parentLayoutId = selLayout.getLayoutId();
 	}
-	else {
-		LayoutSet selLayoutSet = layoutsAdminDisplayContext.getSelLayoutSet();
-
-		selThemeId = selLayoutSet.getThemeId();
-	}
 }
 else {
 	selLayout = layout;
-
-	selThemeId = layout.getThemeId();
 
 	privateLayout = layout.isPrivateLayout();
 	parentPlid = layout.getParentPlid();
@@ -54,18 +49,25 @@ else {
 
 String[] types = LayoutTypeControllerTracker.getTypes();
 
+if (Validator.isNotNull(backURL)) {
+	portletDisplay.setShowBackIcon(true);
+	portletDisplay.setURLBack(backURL);
+}
+
 renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 %>
 
-<portlet:actionURL name="addLayout" var="addLayoutURL">
+<portlet:actionURL name="/layout/add_layout" var="addLayoutURL">
 	<portlet:param name="mvcPath" value="/add_layout.jsp" />
 </portlet:actionURL>
 
-<aui:form action="<%= addLayoutURL %>" cssClass="container-fluid-1280" enctype="multipart/form-data" method="post" name="addPageFm">
+<aui:form action="<%= addLayoutURL %>" cssClass="container-fluid-1280" data-senna-off="true" enctype="multipart/form-data" method="post" name="addPageFm">
+	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 	<aui:input name="groupId" type="hidden" value="<%= String.valueOf(groupId) %>" />
 	<aui:input name="privateLayout" type="hidden" value="<%= privateLayout %>" />
 	<aui:input name="parentPlid" type="hidden" value="<%= parentPlid %>" />
 	<aui:input name="parentLayoutId" type="hidden" value="<%= parentLayoutId %>" />
+	<aui:input name="portletResource" type="hidden" value="<%= portletResource %>" />
 	<aui:input name="type" type="hidden" value="portlet" />
 	<aui:input name="layoutPrototypeId" type="hidden" value="" />
 	<aui:input name="explicitCreation" type="hidden" value="<%= true %>" />
@@ -188,9 +190,9 @@ renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 		</aui:fieldset>
 
 		<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="categorization">
-			<liferay-ui:asset-categories-error />
+			<liferay-asset:asset-categories-error />
 
-			<liferay-ui:asset-tags-error />
+			<liferay-asset:asset-tags-error />
 
 			<liferay-asset:asset-categories-selector className="<%= Layout.class.getName() %>" classPK="<%= selLayout != null ? selLayout.getPrimaryKey() : 0 %>" />
 
@@ -200,6 +202,10 @@ renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 
 	<aui:button-row>
 		<aui:button cssClass="btn-lg" type="submit" value="add-page" />
+
+		<c:if test="<%= Validator.isNotNull(backURL) %>">
+			<aui:button cssClass="btn-lg" href="<%= backURL %>" type="cancel" />
+		</c:if>
 	</aui:button-row>
 </aui:form>
 

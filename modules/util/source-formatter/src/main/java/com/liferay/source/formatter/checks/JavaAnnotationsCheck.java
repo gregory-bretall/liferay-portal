@@ -14,9 +14,9 @@
 
 package com.liferay.source.formatter.checks;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.io.unsync.UnsyncBufferedReader;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.NaturalOrderStringComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -39,9 +39,58 @@ public class JavaAnnotationsCheck extends BaseFileCheck {
 			String fileName, String absolutePath, String content)
 		throws Exception {
 
-		content = _formatAnnotations(content);
+		return _formatAnnotations(fileName, content);
+	}
 
-		return content;
+	private void _checkDelimeter(
+		String fileName, String content, Matcher matcher, String key,
+		String correctDelimeter, String incorrectDelimeter) {
+
+		if (!key.equals(matcher.group(1))) {
+			return;
+		}
+
+		String value = matcher.group(2);
+
+		if (!value.contains(incorrectDelimeter)) {
+			return;
+		}
+
+		StringBundler sb = new StringBundler(7);
+
+		sb.append("Value '");
+		sb.append(value);
+		sb.append("' for key '");
+		sb.append(key);
+		sb.append("' should use '");
+		sb.append(correctDelimeter);
+		sb.append("' as delimeter");
+
+		addMessage(
+			fileName, sb.toString(), "meta_annotations.markdown",
+			getLineCount(content, content.indexOf(matcher.group())));
+	}
+
+	private void _checkMetaAnnotationKeys(
+		String fileName, String content, String annotation) {
+
+		if (!annotation.contains("@Meta.")) {
+			return;
+		}
+
+		Matcher matcher = _annotationMetaValueKeyPattern.matcher(annotation);
+
+		while (matcher.find()) {
+			_checkDelimeter(
+				fileName, content, matcher, "description", StringPool.DASH,
+				StringPool.PERIOD);
+			_checkDelimeter(
+				fileName, content, matcher, "id", StringPool.PERIOD,
+				StringPool.DASH);
+			_checkDelimeter(
+				fileName, content, matcher, "name", StringPool.DASH,
+				StringPool.PERIOD);
+		}
 	}
 
 	private String _fixAnnotationLineBreaks(String annotation, String indent) {
@@ -83,14 +132,90 @@ public class JavaAnnotationsCheck extends BaseFileCheck {
 			annotation, StringPool.PERCENT, StringPool.BLANK, matcher.start());
 	}
 
-	private String _formatAnnotations(String content) throws Exception {
+	private String _formatAnnotationParameterProperties(String annotation) {
+		if (!annotation.contains("@Component(")) {
+			return annotation;
+		}
+
+		Matcher matcher = _annotationParameterPropertyPattern.matcher(
+			annotation);
+
+		while (matcher.find()) {
+			int x = matcher.end();
+
+			while (true) {
+				x = annotation.indexOf(CharPool.CLOSE_CURLY_BRACE, x + 1);
+
+				if (!ToolsUtil.isInsideQuotes(annotation, x)) {
+					break;
+				}
+			}
+
+			String parameterProperties = annotation.substring(matcher.end(), x);
+
+			String newParameterProperties = StringUtil.replace(
+				parameterProperties, new String[] {" =", "= "},
+				new String[] {"=", "="});
+
+			if (!parameterProperties.equals(newParameterProperties)) {
+				return StringUtil.replaceFirst(
+					annotation, parameterProperties, newParameterProperties);
+			}
+
+			parameterProperties = StringUtil.replace(
+				parameterProperties,
+				new String[] {
+					StringPool.TAB, StringPool.FOUR_SPACES, StringPool.NEW_LINE
+				},
+				new String[] {
+					StringPool.BLANK, StringPool.BLANK, StringPool.SPACE
+				});
+
+			parameterProperties = StringUtil.trim(parameterProperties);
+
+			if (parameterProperties.startsWith(StringPool.AT)) {
+				continue;
+			}
+
+			String[] parameterPropertiesArray = StringUtil.split(
+				parameterProperties, StringPool.COMMA_AND_SPACE);
+
+			AnnotationParameterPropertyComparator comparator =
+				new AnnotationParameterPropertyComparator(matcher.group(1));
+
+			for (int i = 1; i < parameterPropertiesArray.length; i++) {
+				String parameterProperty = parameterPropertiesArray[i];
+				String previousParameterProperty =
+					parameterPropertiesArray[i - 1];
+
+				if (comparator.compare(
+						previousParameterProperty, parameterProperty) > 0) {
+
+					annotation = StringUtil.replaceFirst(
+						annotation, previousParameterProperty,
+						parameterProperty);
+					annotation = StringUtil.replaceLast(
+						annotation, parameterProperty,
+						previousParameterProperty);
+
+					return annotation;
+				}
+			}
+		}
+
+		return annotation;
+	}
+
+	private String _formatAnnotations(String fileName, String content)
+		throws Exception {
+
 		List<String> annotationsBlocks = _getAnnotationsBlocks(content);
 
 		for (String annotationsBlock : annotationsBlocks) {
 			String indent = _getIndent(annotationsBlock);
 
 			String newAnnotationsBlock = _formatAnnotations(
-				annotationsBlock, indent, true);
+				fileName, content, annotationsBlock, indent, true);
 
 			content = StringUtil.replace(
 				content, "\n" + annotationsBlock, "\n" + newAnnotationsBlock);
@@ -100,7 +225,8 @@ public class JavaAnnotationsCheck extends BaseFileCheck {
 	}
 
 	private String _formatAnnotations(
-			String annotationsBlock, String indent, boolean sortAnnotations)
+			String fileName, String content, String annotationsBlock,
+			String indent, boolean sortAnnotations)
 		throws Exception {
 
 		List<String> annotations = _splitAnnotations(annotationsBlock, indent);
@@ -113,11 +239,13 @@ public class JavaAnnotationsCheck extends BaseFileCheck {
 			if (newAnnotation.contains(StringPool.OPEN_PARENTHESIS)) {
 				newAnnotation = _fixAnnotationLineBreaks(newAnnotation, indent);
 				newAnnotation = _fixAnnotationMetaTypeProperties(newAnnotation);
-				newAnnotation = _sortAnnotationParameterProperties(
+				newAnnotation = _formatAnnotationParameterProperties(
 					newAnnotation);
 
+				_checkMetaAnnotationKeys(fileName, content, newAnnotation);
+
 				newAnnotation = _formatAnnotations(
-					newAnnotation, indent + "\t\t", false);
+					fileName, content, newAnnotation, indent + "\t\t", false);
 
 				annotationsBlock = StringUtil.replace(
 					annotationsBlock, annotation, newAnnotation);
@@ -186,71 +314,6 @@ public class JavaAnnotationsCheck extends BaseFileCheck {
 		return sb.toString();
 	}
 
-	private String _sortAnnotationParameterProperties(String annotation) {
-		if (!annotation.contains("@Component(")) {
-			return annotation;
-		}
-
-		Matcher matcher = _annotationParameterPropertyPattern.matcher(
-			annotation);
-
-		while (matcher.find()) {
-			int x = matcher.end();
-
-			while (true) {
-				x = annotation.indexOf(CharPool.CLOSE_CURLY_BRACE, x + 1);
-
-				if (!ToolsUtil.isInsideQuotes(annotation, x)) {
-					break;
-				}
-			}
-
-			String parameterProperties = annotation.substring(matcher.end(), x);
-
-			parameterProperties = StringUtil.replace(
-				parameterProperties,
-				new String[] {
-					StringPool.TAB, StringPool.FOUR_SPACES, StringPool.NEW_LINE
-				},
-				new String[] {
-					StringPool.BLANK, StringPool.BLANK, StringPool.SPACE
-				});
-
-			parameterProperties = StringUtil.trim(parameterProperties);
-
-			if (parameterProperties.startsWith(StringPool.AT)) {
-				continue;
-			}
-
-			String[] parameterPropertiesArray = StringUtil.split(
-				parameterProperties, StringPool.COMMA_AND_SPACE);
-
-			AnnotationParameterPropertyComparator comparator =
-				new AnnotationParameterPropertyComparator(matcher.group(1));
-
-			for (int i = 1; i < parameterPropertiesArray.length; i++) {
-				String parameterProperty = parameterPropertiesArray[i];
-				String previousParameterProperty =
-					parameterPropertiesArray[i - 1];
-
-				if (comparator.compare(
-						previousParameterProperty, parameterProperty) > 0) {
-
-					annotation = StringUtil.replaceFirst(
-						annotation, previousParameterProperty,
-						parameterProperty);
-					annotation = StringUtil.replaceLast(
-						annotation, parameterProperty,
-						previousParameterProperty);
-
-					return annotation;
-				}
-			}
-		}
-
-		return annotation;
-	}
-
 	private List<String> _splitAnnotations(
 			String annotationsBlock, String indent)
 		throws Exception {
@@ -305,6 +368,8 @@ public class JavaAnnotationsCheck extends BaseFileCheck {
 		"=(\n\t*)\"");
 	private final Pattern _annotationMetaTypePattern = Pattern.compile(
 		"[\\s\\(](name|description) = \"%");
+	private final Pattern _annotationMetaValueKeyPattern = Pattern.compile(
+		"\\s(\\w+) = \"([\\w\\.\\-]+?)\"");
 	private final Pattern _annotationParameterPropertyPattern = Pattern.compile(
 		"\t(\\w+) = \\{");
 	private final Pattern _modifierPattern = Pattern.compile(

@@ -20,6 +20,9 @@ import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.friendly.url.model.FriendlyURLEntry;
+import com.liferay.friendly.url.model.FriendlyURLEntryLocalization;
+import com.liferay.friendly.url.service.FriendlyURLEntryLocalServiceUtil;
 import com.liferay.journal.constants.JournalConstants;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleResource;
@@ -31,13 +34,12 @@ import com.liferay.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.journal.transformer.JournalTransformerListenerRegistryUtil;
 import com.liferay.journal.transformer.LocaleTransformerListener;
 import com.liferay.journal.util.impl.JournalUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.Repository;
@@ -46,7 +48,6 @@ import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ImageLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.templateparser.TransformerListener;
@@ -56,7 +57,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.webserver.WebServerServletTokenUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -132,12 +133,8 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
-		Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-			getCompanyId(), GroupConstants.CONTROL_PANEL);
-
 		Repository repository = PortletFileRepositoryUtil.addPortletRepository(
-			controlPanelGroup.getGroupId(), JournalConstants.SERVICE_NAME,
-			serviceContext);
+			getGroupId(), JournalConstants.SERVICE_NAME, serviceContext);
 
 		Folder folder = PortletFileRepositoryUtil.addPortletFolder(
 			getUserId(), repository.getRepositoryId(),
@@ -180,9 +177,10 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return getSmallImageURL();
 		}
 
-		return themeDisplay.getPathImage() + "/journal/article?img_id=" +
-			getSmallImageId() + "&t=" +
-				WebServerServletTokenUtil.getToken(getSmallImageId());
+		return StringBundler.concat(
+			themeDisplay.getPathImage(), "/journal/article?img_id=",
+			String.valueOf(getSmallImageId()), "&t=",
+			WebServerServletTokenUtil.getToken(getSmallImageId()));
 	}
 
 	@Override
@@ -397,6 +395,64 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 	}
 
 	@Override
+	public Map<Locale, String> getFriendlyURLMap() throws PortalException {
+		Map<Locale, String> friendlyURLMap = new HashMap<>();
+
+		long classNameId = PortalUtil.getClassNameId(JournalArticle.class);
+
+		List<FriendlyURLEntry> friendlyURLEntries =
+			FriendlyURLEntryLocalServiceUtil.getFriendlyURLEntries(
+				getGroupId(), classNameId, getResourcePrimKey());
+
+		if (friendlyURLEntries.isEmpty()) {
+			friendlyURLMap.put(
+				LocaleUtil.fromLanguageId(getDefaultLanguageId()),
+				getUrlTitle());
+
+			return friendlyURLMap;
+		}
+
+		FriendlyURLEntry friendlyURLEntry =
+			FriendlyURLEntryLocalServiceUtil.getMainFriendlyURLEntry(
+				classNameId, getResourcePrimKey());
+
+		List<FriendlyURLEntryLocalization> friendlyURLEntryLocalizations =
+			FriendlyURLEntryLocalServiceUtil.getFriendlyURLEntryLocalizations(
+				friendlyURLEntry.getFriendlyURLEntryId());
+
+		for (FriendlyURLEntryLocalization friendlyURLEntryLocalization :
+				friendlyURLEntryLocalizations) {
+
+			Locale locale = LocaleUtil.fromLanguageId(
+				friendlyURLEntryLocalization.getLanguageId());
+
+			friendlyURLMap.put(
+				locale, friendlyURLEntryLocalization.getUrlTitle());
+		}
+
+		Locale defaultSiteLocale = LocaleUtil.getSiteDefault();
+
+		if (Validator.isNull(friendlyURLMap.get(defaultSiteLocale))) {
+			Locale defaultLocale = LocaleUtil.fromLanguageId(
+				getDefaultLanguageId());
+
+			friendlyURLMap.put(
+				defaultSiteLocale, friendlyURLMap.get(defaultLocale));
+		}
+
+		return friendlyURLMap;
+	}
+
+	@Override
+	public String getFriendlyURLsXML() throws PortalException {
+		Map<Locale, String> friendlyURLMap = getFriendlyURLMap();
+
+		return LocalizationUtil.updateLocalization(
+			friendlyURLMap, StringPool.BLANK, "FriendlyURL",
+			LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()));
+	}
+
+	@Override
 	public List<FileEntry> getImagesFileEntries() throws PortalException {
 		return getImagesFileEntries(QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 	}
@@ -419,12 +475,9 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return new ArrayList<>();
 		}
 
-		Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-			getCompanyId(), GroupConstants.CONTROL_PANEL);
-
 		return PortletFileRepositoryUtil.getPortletFileEntries(
-			controlPanelGroup.getGroupId(), imagesFolderId,
-			WorkflowConstants.STATUS_APPROVED, start, end, obc);
+			getGroupId(), imagesFolderId, WorkflowConstants.STATUS_APPROVED,
+			start, end, obc);
 	}
 
 	@Override
@@ -435,12 +488,8 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return 0;
 		}
 
-		Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-			getCompanyId(), GroupConstants.CONTROL_PANEL);
-
 		return PortletFileRepositoryUtil.getPortletFileEntriesCount(
-			controlPanelGroup.getGroupId(), imagesFolderId,
-			WorkflowConstants.STATUS_APPROVED);
+			getGroupId(), imagesFolderId, WorkflowConstants.STATUS_APPROVED);
 	}
 
 	@Override
@@ -449,19 +498,15 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			return _imagesFolderId;
 		}
 
+		Repository repository =
+			PortletFileRepositoryUtil.fetchPortletRepository(
+				getGroupId(), JournalConstants.SERVICE_NAME);
+
+		if (repository == null) {
+			return DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
+		}
+
 		try {
-			Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-				getCompanyId(), GroupConstants.CONTROL_PANEL);
-
-			Repository repository =
-				PortletFileRepositoryUtil.fetchPortletRepository(
-					controlPanelGroup.getGroupId(),
-					JournalConstants.SERVICE_NAME);
-
-			if (repository == null) {
-				return DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
-			}
-
 			Folder folder = PortletFileRepositoryUtil.getPortletFolder(
 				repository.getRepositoryId(),
 				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
@@ -633,6 +678,16 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 	@Override
 	public long getTrashEntryClassPK() {
 		return getResourcePrimKey();
+	}
+
+	public String getUrlTitle(Locale locale) throws PortalException {
+		String urlTitle = getFriendlyURLMap().get(locale);
+
+		if (Validator.isNull(urlTitle)) {
+			return getUrlTitle();
+		}
+
+		return urlTitle;
 	}
 
 	@Override

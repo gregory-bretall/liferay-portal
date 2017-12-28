@@ -14,8 +14,8 @@
 
 package com.liferay.sync.internal.messaging;
 
-import com.liferay.document.library.kernel.model.DLSyncEvent;
-import com.liferay.document.library.kernel.service.DLSyncEventLocalService;
+import com.liferay.document.library.sync.model.DLSyncEvent;
+import com.liferay.document.library.sync.service.DLSyncEventLocalService;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
@@ -156,10 +156,6 @@ public class SyncMaintenanceMessageListener extends BaseMessageListener {
 		SyncDLObjectLocalService syncDLObjectLocalService) {
 
 		_syncDLObjectLocalService = syncDLObjectLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setTriggerFactory(TriggerFactory triggerFactory) {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

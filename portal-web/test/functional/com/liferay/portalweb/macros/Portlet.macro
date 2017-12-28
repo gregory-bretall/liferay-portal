@@ -1,6 +1,10 @@
 <definition>
 	<command name="_clickAddPortlet">
-		<execute function="AssertClick#pauseMakeVisibleAssertTextEqualsClickAt" locator1="ControlMenuAddPanel#ADD_PORTLET_LINK" value1="Add" />
+		<execute function="MouseOver" locator1="ControlMenuAddPanel#ADD_PORTLET_DRAG_LINK" />
+
+		<execute function="MouseOver" locator1="ControlMenuAddPanel#ADD_PORTLET_LINK" />
+
+		<execute function="Click" locator1="ControlMenuAddPanel#ADD_PORTLET_LINK" value1="Add" />
 	</command>
 
 	<command name="_mobileClickAddPortlet">
@@ -188,20 +192,29 @@
 	</command>
 
 	<command name="changeDisplayStyle">
-		<var method="StringUtil#upperCase('${displayStyle}')" name="displayStyle" />
-
 		<if>
-			<condition function="IsElementNotPresent" locator1="Icon#DISPLAY_STYLE_${displayStyle}_ACTIVE" />
+			<condition function="IsElementNotPresent" locator1="Icon#DISPLAY_STYLE_ACTIVE">
+				<var method="StringUtil#toLowerCase('${displayStyle}')" name="key_displayStyle" />
+			</condition>
+
 			<then>
-				<execute function="Click" locator1="Icon#DISPLAY_STYLE_${displayStyle}" />
+				<execute function="Click" locator1="Icon#DISPLAY_STYLE">
+					<var method="StringUtil#toLowerCase('${displayStyle}')" name="key_displayStyle" />
+				</execute>
 			</then>
 		</if>
 
-		<execute function="AssertElementPresent" locator1="Icon#DISPLAY_STYLE_${displayStyle}_ACTIVE" />
+		<execute function="AssertElementPresent" locator1="Icon#DISPLAY_STYLE_ACTIVE">
+			<var method="StringUtil#toLowerCase('${displayStyle}')" name="key_displayStyle" />
+		</execute>
 	</command>
 
 	<command name="clickPortletPlusIconPG">
-		<execute function="Click#makeVisibleClickAt" locator1="Portlet#ICON_PLUS_SIGN">
+		<execute function="MouseOver#mouseOverNotVisible" locator1="Portlet#ICON_PLUS_SIGN">
+			<var name="key_portletName" value="${portletName}" />
+		</execute>
+
+		<execute function="Click" locator1="Portlet#ICON_PLUS_SIGN">
 			<var name="key_portletName" value="${portletName}" />
 		</execute>
 	</command>
@@ -215,8 +228,6 @@
 	</command>
 
 	<command name="configureCustomStylesViaLookandfeelPG">
-		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
-
 		<execute macro="Navigator#gotoNavTab">
 			<var name="navTab" value="Text Styles" />
 		</execute>
@@ -230,11 +241,11 @@
 		</execute>
 
 		<execute function="Type" locator1="Portlet#BORDER_WIDTH_TOP_INPUT" value1="20" />
-
-		<execute macro="PortletEntry#save" />
 	</command>
 
 	<command name="configureCustomTitleViaLookandfeelPG">
+		<execute macro="IFrame#selectConfigurationFrame" />
+
 		<execute macro="Navigator#gotoNavTab">
 			<var name="navTab" value="General" />
 		</execute>
@@ -247,9 +258,13 @@
 	<command name="deletePG">
 		<var name="key_portletName" value="${portletName}" />
 
-		<execute function="Click#makeVisibleClickAt" locator1="Portlet#SPECIFIC_ELLIPSIS_ICON" />
+		<execute function="MouseOver#mouseOverNotVisible" locator1="Portlet#SPECIFIC_ELLIPSIS_ICON" />
 
-		<execute function="AssertClickNoError" locator1="MenuItem#REMOVE" value1="Remove" />
+		<execute function="Click" locator1="Portlet#SPECIFIC_ELLIPSIS_ICON" />
+
+		<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Remove">
+			<var name="key_menuItem" value="Remove" />
+		</execute>
 
 		<execute function="Confirm" value1="Are you sure you want to remove this component?" />
 	</command>
@@ -280,10 +295,14 @@
 			<then>
 				<var name="key_portletName" value="${portletName}" />
 
-				<execute function="Click#makeVisibleClickAt" locator1="Portlet#SPECIFIC_BORDERLESS_ELLIPSIS_ICON" />
+				<execute function="MouseOver#mouseOverNotVisible" locator1="Portlet#SPECIFIC_BORDERLESS_ELLIPSIS_ICON" />
+
+				<execute function="Click" locator1="Portlet#SPECIFIC_BORDERLESS_ELLIPSIS_ICON" />
 			</then>
 			<else>
-				<execute function="Click#makeVisibleClickAt" locator1="Portlet#OPTIONS_ICON" />
+				<execute function="MouseOver#mouseOverNotVisible" locator1="Portlet#OPTIONS_ICON" />
+
+				<execute function="Click" locator1="Portlet#OPTIONS_ICON" />
 			</else>
 		</if>
 
@@ -302,11 +321,7 @@
 	</command>
 
 	<command name="selectApplicationDecorator">
-		<execute macro="IFrame#selectConfigurationFrame" />
-
 		<execute function="Select" locator1="Select#APPLICATION_DECORATORS" value1="${decorator}" />
-
-		<execute macro="PortletEntry#save" />
 	</command>
 
 	<command name="selectTreeNode">
@@ -339,6 +354,12 @@
 			<then>
 				<execute function="AntCommand" locator1="build-test.xml" value1="start-app-server -Ddelete.liferay.home=false" />
 			</then>
+			<elseif>
+				<equals arg1="${keepCachedAppServerData}" arg2="true" />
+				<then>
+					<execute function="AntCommand" locator1="build-test.xml" value1="start-app-server -Dkeep.cached.app.server.data=true" />
+				</then>
+			</elseif>
 			<else>
 				<execute function="AntCommand" locator1="build-test.xml" value1="start-app-server" />
 			</else>
@@ -419,9 +440,9 @@
 	</command>
 
 	<command name="viewDefaultDisplayStyle">
-		<var method="StringUtil#upperCase('${displayStyle}')" name="displayStyleUppercase" />
-
-		<execute function="AssertElementPresent" locator1="Icon#DISPLAY_STYLE_${displayStyleUppercase}_ACTIVE" />
+		<execute function="AssertElementPresent" locator1="Icon#DISPLAY_STYLE_ACTIVE">
+			<var name="key_displayStyle" value="${displayStyle}" />
+		</execute>
 	</command>
 
 	<command name="viewDisplayStyles">
@@ -494,14 +515,33 @@
 	</command>
 
 	<command name="viewPortletOptionsMenulist">
-		<execute function="Click#makeVisibleClickAt" locator1="Portlet#OPTIONS_ICON" />
+		<execute function="MouseOver#mouseOverNotVisible" locator1="Portlet#OPTIONS_ICON" />
 
-		<execute function="AssertTextEquals" locator1="MenuItem#LOOK_AND_FEEL" value1="Look and Feel Configuration" />
-		<execute function="AssertTextEquals" locator1="MenuItem#CONFIGURATION_PORTLET_OPTION" value1="Configuration" />
-		<execute function="AssertTextEquals" locator1="MenuItem#TEMPLATES" value1="Configuration Templates" />
-		<execute function="AssertTextEquals" locator1="MenuItem#EXPORT_IMPORT" value1="Export / Import" />
-		<execute function="AssertTextEquals" locator1="MenuItem#PERMISSIONS" value1="Permissions" />
-		<execute function="AssertTextEquals" locator1="MenuItem#REMOVE" value1="Remove" />
+		<execute function="Click" locator1="Portlet#OPTIONS_ICON" />
+
+		<execute function="AssertTextEquals" locator1="MenuItem#ANY_MENU_ITEM" value1="Look and Feel Configuration">
+			<var name="key_menuItem" value="Look and Feel Configuration" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="MenuItem#ANY_MENU_ITEM" value1="Configuration">
+			<var name="key_menuItem" value="Configuration" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="MenuItem#ANY_MENU_ITEM" value1="Configuration Templates">
+			<var name="key_menuItem" value="Configuration Templates" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="MenuItem#ANY_MENU_ITEM" value1="Export / Import">
+			<var name="key_menuItem" value="Export / Import" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="MenuItem#ANY_MENU_ITEM" value1="Permissions">
+			<var name="key_menuItem" value="Permissions" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="MenuItem#ANY_MENU_ITEM" value1="Remove">
+			<var name="key_menuItem" value="Remove" />
+		</execute>
 	</command>
 
 	<command name="viewSpecificPG">

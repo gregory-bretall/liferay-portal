@@ -14,7 +14,6 @@
 
 package com.liferay.petra.json.web.service.client.internal;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -23,21 +22,21 @@ import org.junit.Test;
 /**
  * @author Igor Beslic
  */
-public class JSONWebServiceClientImplTest {
+public class JSONWebServiceClientImplTest extends JSONWebServiceClientBaseTest {
 
 	@Test
-	public void testActivateForBasicProxy() {
+	public void testActivateForBasicProxy() throws Exception {
 		JSONWebServiceClientImpl jsonWebServiceClientImpl =
 			new JSONWebServiceClientImpl();
 
-		Map<String, Object> properties = _getBaseProperties();
+		Map<String, Object> properties = getBaseProperties();
 
 		properties.put("proxyHostName", "proxyhost.net");
 		properties.put("proxyHostPort", "443");
 		properties.put("proxyLogin", "proxylogin");
 		properties.put("proxyPassword", "proxypass");
 
-		jsonWebServiceClientImpl.activate(null, properties);
+		jsonWebServiceClientImpl.activate(properties);
 
 		Assert.assertEquals(
 			properties.get("hostName"), jsonWebServiceClientImpl.getHostName());
@@ -61,17 +60,17 @@ public class JSONWebServiceClientImplTest {
 	}
 
 	@Test
-	public void testActivateForNTLMProxy() {
+	public void testActivateForNTLMProxy() throws Exception {
 		JSONWebServiceClientImpl jsonWebServiceClientImpl =
 			new JSONWebServiceClientImpl();
 
-		Map<String, Object> properties = _getBaseProperties();
+		Map<String, Object> properties = getBaseProperties();
 
 		properties.put("proxyAuthType", "ntlm");
 		properties.put("proxyDomain", "liferay.com");
 		properties.put("proxyWorkstation", "lrdcom2003");
 
-		jsonWebServiceClientImpl.activate(null, properties);
+		jsonWebServiceClientImpl.activate(properties);
 
 		Assert.assertEquals(
 			properties.get("proxyAuthType"),
@@ -85,30 +84,20 @@ public class JSONWebServiceClientImplTest {
 	}
 
 	@Test
-	public void testActivateWithHeaders() {
+	public void testActivateWithHeaders() throws Exception {
 		JSONWebServiceClientImpl jsonWebServiceClientImpl =
 			new JSONWebServiceClientImpl();
 
-		Map<String, Object> properties = _getBaseProperties();
+		Map<String, Object> properties = getBaseProperties();
 
 		properties.put(
 			"headers", "headerKey1=headerValue1;headerKey2=headerValue2");
 
-		jsonWebServiceClientImpl.activate(null, properties);
+		jsonWebServiceClientImpl.activate(properties);
 
 		Map<String, String> headers = jsonWebServiceClientImpl.getHeaders();
 
 		Assert.assertTrue(headers.containsKey("headerKey1"));
-	}
-
-	private Map<String, Object> _getBaseProperties() {
-		Map<String, Object> properties = new HashMap<>();
-
-		properties.put("hostName", "localhost");
-		properties.put("hostPort", "9090");
-		properties.put("protocol", "https");
-
-		return properties;
 	}
 
 }

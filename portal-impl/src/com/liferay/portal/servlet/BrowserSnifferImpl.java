@@ -14,11 +14,11 @@
 
 package com.liferay.portal.servlet;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.servlet.BrowserMetadata;
 import com.liferay.portal.kernel.servlet.BrowserSniffer;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -52,7 +52,10 @@ public class BrowserSnifferImpl implements BrowserSniffer {
 	public String getBrowserId(HttpServletRequest request) {
 		BrowserMetadata browserMetadata = getBrowserMetadata(request);
 
-		if (browserMetadata.isIe()) {
+		if (browserMetadata.isEdge()) {
+			return BROWSER_ID_EDGE;
+		}
+		else if (browserMetadata.isIe()) {
 			return BROWSER_ID_IE;
 		}
 		else if (browserMetadata.isFirefox()) {
@@ -132,6 +135,13 @@ public class BrowserSnifferImpl implements BrowserSniffer {
 		BrowserMetadata browserMetadata = getBrowserMetadata(request);
 
 		return browserMetadata.isChrome();
+	}
+
+	@Override
+	public boolean isEdge(HttpServletRequest request) {
+		BrowserMetadata browserMetadata = getBrowserMetadata(request);
+
+		return browserMetadata.isEdge();
 	}
 
 	@Override
@@ -385,7 +395,7 @@ public class BrowserSnifferImpl implements BrowserSniffer {
 	protected static char[] revisionSeparators =
 		{CharPool.BACK_SLASH, CharPool.COLON, CharPool.SLASH, CharPool.SPACE};
 	protected static String[] versionLeadings =
-		{"version", "firefox", "minefield", "chrome"};
+		{"edge", "chrome", "firefox", "version", "minefield"};
 	protected static char[] versionSeparators =
 		{CharPool.BACK_SLASH, CharPool.SLASH};
 

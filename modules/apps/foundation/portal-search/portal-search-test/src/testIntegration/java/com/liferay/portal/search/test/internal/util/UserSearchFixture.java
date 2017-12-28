@@ -34,10 +34,12 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.SearchContextTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * @author André de Oliveira
@@ -60,23 +63,24 @@ public class UserSearchFixture {
 		return group;
 	}
 
-	public User addUser(Group group, String... assetTagNames) throws Exception {
-		User user1 = UserTestUtil.addUser(group.getGroupId());
-
-		_users.add(user1);
+	public User addUser(String screenName, Group group, String... assetTagNames)
+		throws Exception {
 
 		ServiceContext serviceContext = getServiceContext(group);
 
 		serviceContext.setAssetTagNames(assetTagNames);
 
-		User user2 = UserTestUtil.updateUser(user1, serviceContext);
+		User user = _addUser(
+			screenName, new long[] {group.getGroupId()}, serviceContext);
+
+		_users.add(user);
 
 		List<AssetTag> assetTags = AssetTagLocalServiceUtil.getTags(
-			user2.getModelClassName(), user2.getPrimaryKey());
+			user.getModelClassName(), user.getPrimaryKey());
 
 		_assetTags.addAll(assetTags);
 
-		return user2;
+		return user;
 	}
 
 	public List<AssetTag> getAssetTags() {
@@ -102,10 +106,17 @@ public class UserSearchFixture {
 	}
 
 	public void setUp() throws Exception {
+		_companyId = TestPropsValues.getCompanyId();
+
 		_permissionChecker = PermissionThreadLocal.getPermissionChecker();
 
 		PermissionThreadLocal.setPermissionChecker(
 			new DummyPermissionChecker() {
+
+				@Override
+				public long getCompanyId() {
+					return _companyId;
+				}
 
 				@Override
 				public boolean hasPermission(
@@ -118,6 +129,11 @@ public class UserSearchFixture {
 				public boolean hasPermission(
 					long groupId, String name, long primKey, String actionId) {
 
+					return true;
+				}
+
+				@Override
+				public boolean isCompanyAdmin(long companyId) {
 					return true;
 				}
 
@@ -181,10 +197,22 @@ public class UserSearchFixture {
 		}
 	}
 
+	private User _addUser(
+			String screenName, long[] groupIds, ServiceContext serviceContext)
+		throws Exception {
+
+		return UserTestUtil.addUser(
+			_companyId, TestPropsValues.getUserId(), screenName,
+			LocaleUtil.getDefault(), RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), groupIds, serviceContext);
+	}
+
 	private void _filterByGroups(SearchContext searchContext) {
 		BooleanQuery booleanQuery = new BooleanQueryImpl();
 
-		_groups.stream().map(
+		Stream<Group> groupsStream = _groups.stream();
+
+		groupsStream.map(
 			this::_getGroupIdQuery
 		).forEach(
 			query -> _addShouldClause(booleanQuery, query)
@@ -202,6 +230,7 @@ public class UserSearchFixture {
 	}
 
 	private final List<AssetTag> _assetTags = new ArrayList<>();
+	private long _companyId;
 	private final List<Group> _groups = new ArrayList<>();
 	private PermissionChecker _permissionChecker;
 	private String _principal;

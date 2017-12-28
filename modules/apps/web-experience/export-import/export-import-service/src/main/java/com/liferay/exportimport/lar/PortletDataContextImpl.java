@@ -237,7 +237,12 @@ public class PortletDataContextImpl implements PortletDataContext {
 					ExportImportClassedModelUtil.getPrimaryKeyObj(classedModel);
 
 				addAssetLinks(clazz, classPK);
-				addAssetPriority(element, clazz, classPK);
+
+				long classNameId = ExportImportClassedModelUtil.getClassNameId(
+					classedModel);
+
+				_addAssetEntryPriority(
+					element, classNameId, GetterUtil.getLong(classPK));
 
 				addExpando(element, path, classedModel, clazz);
 				addLocks(clazz, String.valueOf(classPK));
@@ -612,7 +617,15 @@ public class PortletDataContextImpl implements PortletDataContext {
 			Element missingReferenceElement = getMissingReferenceElement(
 				classedModel);
 
-			_missingReferencesElement.remove(missingReferenceElement);
+			if (classedModel instanceof Layout) {
+				missingReferenceElement.addAttribute(
+					"element-path", "/manifest.xml");
+			}
+			else {
+				missingReferenceElement.addAttribute(
+					"element-path",
+					ExportImportPathUtil.getPortletDataPath(this));
+			}
 		}
 	}
 
@@ -681,7 +694,14 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public long[] getAssetCategoryIds(Class<?> clazz, Serializable classPK) {
-		return _assetCategoryIdsMap.get(getPrimaryKeyString(clazz, classPK));
+		long[] assetCategoryIds = _assetCategoryIdsMap.get(
+			getPrimaryKeyString(clazz, classPK));
+
+		if (assetCategoryIds == null) {
+			return new long[0];
+		}
+
+		return assetCategoryIds;
 	}
 
 	/**
@@ -728,7 +748,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public String[] getAssetTagNames(Class<?> clazz, Serializable classPK) {
-		return _assetTagNamesMap.get(getPrimaryKeyString(clazz, classPK));
+		return getAssetTagNames(getPrimaryKeyString(clazz, classPK));
 	}
 
 	/**
@@ -743,7 +763,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public String[] getAssetTagNames(String className, Serializable classPK) {
-		return _assetTagNamesMap.get(getPrimaryKeyString(className, classPK));
+		return getAssetTagNames(getPrimaryKeyString(className, classPK));
 	}
 
 	@Override
@@ -990,6 +1010,23 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Override
 	public ManifestSummary getManifestSummary() {
 		return _manifestSummary;
+	}
+
+	@Override
+	public Element getMissingReferenceElement(ClassedModel classedModel) {
+		StringBundler sb = new StringBundler(5);
+
+		sb.append("missing-reference[@class-name='");
+		sb.append(ExportImportClassedModelUtil.getClassName(classedModel));
+		sb.append("' and @class-pk='");
+		sb.append(String.valueOf(classedModel.getPrimaryKeyObj()));
+		sb.append("']");
+
+		XPath xPath = SAXReaderUtil.createXPath(sb.toString());
+
+		Node node = xPath.selectSingleNode(_missingReferencesElement);
+
+		return (Element)node;
 	}
 
 	@Override
@@ -1758,6 +1795,13 @@ public class PortletDataContextImpl implements PortletDataContext {
 				_missingReferencesElement.elements();
 
 			for (Element missingReferenceElement : missingReferenceElements) {
+				if (Validator.isNotNull(
+						missingReferenceElement.attributeValue(
+							"element-path"))) {
+
+					continue;
+				}
+
 				String missingReferenceClassName =
 					missingReferenceElement.attributeValue("class-name");
 				String missingReferenceClassPK =
@@ -2073,6 +2117,10 @@ public class PortletDataContextImpl implements PortletDataContext {
 		addAssetPriority(element, clazz, (Serializable)classPK);
 	}
 
+	/**
+	 * @deprecated As of 4.0.0
+	 */
+	@Deprecated
 	protected void addAssetPriority(
 		Element element, Class<?> clazz, Serializable classPK) {
 
@@ -2172,7 +2220,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 		if (element != null) {
 			Attribute assetPriorityAttribute = element.attribute(
-				"asset-priority");
+				"asset-entry-priority");
 
 			if (assetPriorityAttribute != null) {
 				double assetPriority = GetterUtil.getDouble(
@@ -2377,6 +2425,16 @@ public class PortletDataContextImpl implements PortletDataContext {
 		return referenceElement;
 	}
 
+	protected String[] getAssetTagNames(String key) {
+		String[] assetTagNames = _assetTagNamesMap.get(key);
+
+		if (assetTagNames == null) {
+			return new String[0];
+		}
+
+		return assetTagNames;
+	}
+
 	protected Element getDataElement(
 		Element parentElement, String attribute, String value) {
 
@@ -2431,22 +2489,6 @@ public class PortletDataContextImpl implements PortletDataContext {
 		}
 
 		return groupElement;
-	}
-
-	protected Element getMissingReferenceElement(ClassedModel classedModel) {
-		StringBundler sb = new StringBundler(5);
-
-		sb.append("missing-reference[@class-name='");
-		sb.append(ExportImportClassedModelUtil.getClassName(classedModel));
-		sb.append("' and @class-pk='");
-		sb.append(String.valueOf(classedModel.getPrimaryKeyObj()));
-		sb.append("']");
-
-		XPath xPath = SAXReaderUtil.createXPath(sb.toString());
-
-		Node node = xPath.selectSingleNode(_missingReferencesElement);
-
-		return (Element)node;
 	}
 
 	/**
@@ -2767,6 +2809,16 @@ public class PortletDataContextImpl implements PortletDataContext {
 		if (Validator.isNotNull(attachedClassName)) {
 			element.addAttribute("attached-class-name", attachedClassName);
 		}
+	}
+
+	private void _addAssetEntryPriority(
+		Element element, long classNameId, long classPK) {
+
+		double assetEntryPriority = AssetEntryLocalServiceUtil.getEntryPriority(
+			classNameId, classPK);
+
+		element.addAttribute(
+			"asset-entry-priority", String.valueOf(assetEntryPriority));
 	}
 
 	private static final Class<?>[] _XSTREAM_DEFAULT_ALLOWED_TYPES = {

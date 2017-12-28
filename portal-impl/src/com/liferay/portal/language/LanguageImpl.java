@@ -14,6 +14,7 @@
 
 package com.liferay.portal.language;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.cache.MultiVMPoolUtil;
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.PortalCacheMapSynchronizeUtil;
@@ -32,7 +33,6 @@ import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -965,7 +965,12 @@ public class LanguageImpl implements Language, Serializable {
 
 		try {
 			if (isInheritLocales(groupId)) {
-				return getAvailableLocales();
+				Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+				CompanyLocalesBag companyLocalesBag = _getCompanyLocalesBag(
+					group.getCompanyId());
+
+				return companyLocalesBag.getAvailableLocales();
 			}
 		}
 		catch (Exception e) {
@@ -1580,6 +1585,10 @@ public class LanguageImpl implements Language, Serializable {
 	private static CompanyLocalesBag _getCompanyLocalesBag() {
 		Long companyId = CompanyThreadLocal.getCompanyId();
 
+		return _getCompanyLocalesBag(companyId);
+	}
+
+	private static CompanyLocalesBag _getCompanyLocalesBag(long companyId) {
 		CompanyLocalesBag companyLocalesBag = _companyLocalesBags.get(
 			companyId);
 
@@ -1828,10 +1837,10 @@ public class LanguageImpl implements Language, Serializable {
 	}
 
 	private static final String _COMPANY_LOCALES_PORTAL_CACHE_NAME =
-		LanguageImpl.class + "._companyLocalesPortalCache";
+		LanguageImpl.class.getName() + "._companyLocalesPortalCache";
 
 	private static final String _GROUP_LOCALES_PORTAL_CACHE_NAME =
-		LanguageImpl.class + "._groupLocalesPortalCache";
+		LanguageImpl.class.getName() + "._groupLocalesPortalCache";
 
 	private static final Log _log = LogFactoryUtil.getLog(LanguageImpl.class);
 

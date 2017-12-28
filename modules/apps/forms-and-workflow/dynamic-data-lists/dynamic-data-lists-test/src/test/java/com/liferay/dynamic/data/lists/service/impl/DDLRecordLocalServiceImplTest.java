@@ -11,14 +11,13 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-package com.liferay.dynamic.data.lists.service.impl;
 
-import static com.liferay.portal.kernel.test.util.RandomTestUtil.randomBoolean;
-import static com.liferay.portal.kernel.test.util.RandomTestUtil.randomInt;
-import static com.liferay.portal.kernel.util.StringUtil.randomString;
+package com.liferay.dynamic.data.lists.service.impl;
 
 import com.liferay.dynamic.data.mapping.storage.Field;
 import com.liferay.dynamic.data.mapping.storage.Fields;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.Serializable;
 
@@ -42,7 +41,7 @@ public class DDLRecordLocalServiceImplTest {
 
 	@Test
 	public void testToFieldWithBoolean() throws Exception {
-		boolean fieldValue = randomBoolean();
+		boolean fieldValue = RandomTestUtil.randomBoolean();
 
 		Field field = toField(fieldValue);
 
@@ -52,8 +51,10 @@ public class DDLRecordLocalServiceImplTest {
 
 	@Test
 	public void testToFieldWithBooleanArray() throws Exception {
-		boolean[] fieldValues =
-			new boolean[] {randomBoolean(), randomBoolean(), randomBoolean()};
+		boolean[] fieldValues = {
+			RandomTestUtil.randomBoolean(), RandomTestUtil.randomBoolean(),
+			RandomTestUtil.randomBoolean()
+		};
 
 		Field field = toField(fieldValues);
 
@@ -64,8 +65,8 @@ public class DDLRecordLocalServiceImplTest {
 	public void testToFieldWithBooleanList() throws Exception {
 		List<Serializable> fieldValues = new ArrayList<>();
 
-		fieldValues.add(randomBoolean());
-		fieldValues.add(randomBoolean());
+		fieldValues.add(RandomTestUtil.randomBoolean());
+		fieldValues.add(RandomTestUtil.randomBoolean());
 
 		Field field = toField((Serializable)fieldValues);
 
@@ -76,8 +77,8 @@ public class DDLRecordLocalServiceImplTest {
 	public void testToFieldWithBooleanSet() throws Exception {
 		Set<Serializable> fieldValues = new HashSet<>();
 
-		fieldValues.add(randomBoolean());
-		fieldValues.add(randomBoolean());
+		fieldValues.add(RandomTestUtil.randomBoolean());
+		fieldValues.add(RandomTestUtil.randomBoolean());
 
 		Field field = toField((Serializable)fieldValues);
 
@@ -86,7 +87,7 @@ public class DDLRecordLocalServiceImplTest {
 
 	@Test
 	public void testToFieldWithInteger() throws Exception {
-		int fieldValue = randomInt();
+		int fieldValue = RandomTestUtil.randomInt();
 
 		Field field = toField(fieldValue);
 
@@ -96,7 +97,10 @@ public class DDLRecordLocalServiceImplTest {
 
 	@Test
 	public void testToFieldWithIntegerArray() throws Exception {
-		int[] fieldValues = new int[] {randomInt(), randomInt(), randomInt()};
+		int[] fieldValues = {
+			RandomTestUtil.randomInt(), RandomTestUtil.randomInt(),
+			RandomTestUtil.randomInt()
+		};
 
 		Field field = toField(fieldValues);
 
@@ -107,8 +111,8 @@ public class DDLRecordLocalServiceImplTest {
 	public void testToFieldWithIntegerList() throws Exception {
 		List<Serializable> fieldValues = new ArrayList<>();
 
-		fieldValues.add(randomInt());
-		fieldValues.add(randomInt());
+		fieldValues.add(RandomTestUtil.randomInt());
+		fieldValues.add(RandomTestUtil.randomInt());
 
 		Field field = toField((Serializable)fieldValues);
 
@@ -119,8 +123,8 @@ public class DDLRecordLocalServiceImplTest {
 	public void testToFieldWithIntegerSet() throws Exception {
 		Set<Serializable> fieldValues = new HashSet<>();
 
-		fieldValues.add(randomInt());
-		fieldValues.add(randomInt());
+		fieldValues.add(RandomTestUtil.randomInt());
+		fieldValues.add(RandomTestUtil.randomInt());
 
 		Field field = toField((Serializable)fieldValues);
 
@@ -129,7 +133,7 @@ public class DDLRecordLocalServiceImplTest {
 
 	@Test
 	public void testToFieldWithString() throws Exception {
-		String fieldValue = randomString();
+		String fieldValue = StringUtil.randomString();
 
 		Field field = toField(fieldValue);
 
@@ -139,7 +143,10 @@ public class DDLRecordLocalServiceImplTest {
 
 	@Test
 	public void testToFieldWithStringArray() throws Exception {
-		String[] fieldValues = {randomString(), randomString(), randomString()};
+		String[] fieldValues = {
+			StringUtil.randomString(), StringUtil.randomString(),
+			StringUtil.randomString()
+		};
 
 		Field field = toField(fieldValues);
 
@@ -150,8 +157,8 @@ public class DDLRecordLocalServiceImplTest {
 	public void testToFieldWithStringList() throws Exception {
 		List<Serializable> fieldValues = new ArrayList<>();
 
-		fieldValues.add(randomString());
-		fieldValues.add(randomString());
+		fieldValues.add(StringUtil.randomString());
+		fieldValues.add(StringUtil.randomString());
 
 		Field field = toField((Serializable)fieldValues);
 
@@ -162,8 +169,8 @@ public class DDLRecordLocalServiceImplTest {
 	public void testToFieldWithStringSet() throws Exception {
 		Set<Serializable> fieldValues = new HashSet<>();
 
-		fieldValues.add(randomString());
-		fieldValues.add(randomString());
+		fieldValues.add(StringUtil.randomString());
+		fieldValues.add(StringUtil.randomString());
 
 		Field field = toField((Serializable)fieldValues);
 
@@ -190,7 +197,7 @@ public class DDLRecordLocalServiceImplTest {
 
 		Map<String, Serializable> fieldsMap = new HashMap<>();
 
-		String fieldName = randomString();
+		String fieldName = StringUtil.randomString();
 
 		fieldsMap.put(fieldName, (Serializable)fieldValues);
 
@@ -205,7 +212,7 @@ public class DDLRecordLocalServiceImplTest {
 	protected void assertToFields(Serializable[] fieldValues) throws Exception {
 		Map<String, Serializable> fieldsMap = new HashMap<>();
 
-		String fieldName = randomString();
+		String fieldName = StringUtil.randomString();
 
 		fieldsMap.put(fieldName, (Serializable)fieldValues);
 
@@ -221,7 +228,7 @@ public class DDLRecordLocalServiceImplTest {
 	protected Field toField(Serializable fieldValue) throws Exception {
 		Map<String, Serializable> fieldsMap = new HashMap<>();
 
-		String fieldName = randomString();
+		String fieldName = StringUtil.randomString();
 
 		fieldsMap.put(fieldName, fieldValue);
 

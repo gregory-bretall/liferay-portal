@@ -20,7 +20,7 @@ Here are some of the types of changes documented in this file:
   replaces an old API, in spite of the old API being kept in Liferay Portal for
   backwards compatibility.
 
-*This document has been reviewed through commit `93f3807`.*
+*This document has been reviewed through commit `0a476ab26e9f`.*
 
 ## Breaking Changes Contribution Guidelines
 
@@ -1338,19 +1338,19 @@ always required, but it was hidden by the `ServiceContext` object.
 
 The following tags have been removed:
 
-- `portlet:icon-close`
-- `portlet:icon-configuration`
-- `portlet:icon-edit`
-- `portlet:icon-edit-defaults`
-- `portlet:icon-edit-guest`
-- `portlet:icon-export-import`
-- `portlet:icon-help`
-- `portlet:icon-maximize`
-- `portlet:icon-minimize`
-- `portlet:icon-portlet-css`
-- `portlet:icon-print`
-- `portlet:icon-refresh`
-- `portlet:icon-staging`
+- `liferay-portlet:icon-close`
+- `liferay-portlet:icon-configuration`
+- `liferay-portlet:icon-edit`
+- `liferay-portlet:icon-edit-defaults`
+- `liferay-portlet:icon-edit-guest`
+- `liferay-portlet:icon-export-import`
+- `liferay-portlet:icon-help`
+- `liferay-portlet:icon-maximize`
+- `liferay-portlet:icon-minimize`
+- `liferay-portlet:icon-portlet-css`
+- `liferay-portlet:icon-print`
+- `liferay-portlet:icon-refresh`
+- `liferay-portlet:icon-staging`
 
 #### Who is affected?
 
@@ -1362,7 +1362,8 @@ The tag `liferay-ui:icon` can replace the call to the previous tags. All the
 previous tags have been converted into Java classes that implement the methods
 that the `icon` tag requires.
 
-See the modules `portlet-configuration-icon-*` in the `modules/addons` folder.
+See the modules `portlet-configuration-icon-*` in the
+`modules/apps/web-experience/portlet-configuration` folder.
 
 #### Why was this change made?
 
@@ -4362,5 +4363,77 @@ tag.
 #### Why was this change made?
 
 This change was made as a part of the ongoing strategy to deprecate unused tags.
+
+---------------------------------------
+
+### Build Auto Upgrade
+- **Date:** 2017-Aug-17
+- **JIRA Ticket:** LPS-73967
+
+#### What changed?
+
+The `build.auto.upgrade` property in `service.properties` for Liferay Portal 6.x
+Service Builder portlets applies Liferay Service schema changes on rebuilding
+the services and redeploying the portlets.
+
+Since 7.0, the per portlet property `build.auto.upgrade` is deprecated.
+
+This change reintroduces Build Auto Upgrade in a new global property
+`schema.module.build.auto.upgrade` in the
+`[Liferay_Home]/portal-developer.properties` file.
+
+Setting the global property `schema.module.build.auto.upgrade` to `true` applies
+module schema changes for redeployed modules whose service build numbers have
+incremented. The `build.number` property in the module's `service.properties`
+file indicates the service build number.
+
+#### Who is affected?
+
+This feature is available for developers to use in development only.
+
+**WARNING**: DO NOT USE the Build Auto Upgrade feature in production. Liferay
+DOES NOT support Build Auto Upgrade in production.
+
+#### How should I update my code?
+
+To use this feature in development, set the global property
+`schema.module.build.auto.upgrade` in
+`[Liferay_Home]/portal-developer.properties` to `true`, increment your module's
+`build.number` in the `service.properties` file, and deploy the module.
+
+#### Why was this change made?
+
+This change was made so that 7.0 developers could test database schema changes
+on the fly, without having to write upgrade processes.
+
+---------------------------------------
+
+### Removed Exports from Dynamic Data Lists Web
+- **Date:** 2017-Nov-27
+- **JIRA Ticket:** LPS-75778
+
+#### What changed?
+
+The `Dynamic Data Lists Web` module no longer exports the
+`com.liferay.dynamic.data.lists.web.asset` package.
+
+#### Who is affected?
+
+This change affects anyone who is using the
+`com.liferay.dynamic.data.lists.web.asset` package. This particularly affects
+anyone using
+`com.liferay.dynamic.data.lists.web.asset.DDLRecordAssetRendererFactory` and
+casting the return `AssetRenderer` to
+`com.liferay.dynamic.data.lists.web.asset.DDLRecordAssetRenderer`.
+
+#### How should I update my code?
+
+There are no replacements for this package; you must remove all usages.
+`DDLRecordAssetRendererFactory` can still be used as an OSGi service; however,
+you can no longer cast the returned `AssetRenderer` to `DDLRecordAssetRenderer`.
+
+#### Why was this change made?
+
+This change was made to clean up LPKG dependencies.
 
 ---------------------------------------

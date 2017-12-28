@@ -53,6 +53,7 @@ AUI.add(
 
 				TYPE_EDITOR: {
 					'checkbox': A.CheckboxCellEditor,
+					'ddm-color': FormBuilder.CUSTOM_CELL_EDITORS['color-cell-editor'],
 					'ddm-date': A.DateCellEditor,
 					'ddm-decimal': A.TextCellEditor,
 					'ddm-documentlibrary': FormBuilder.CUSTOM_CELL_EDITORS['document-library-file-entry-cell-editor'],
@@ -145,6 +146,20 @@ AUI.add(
 						scrollableElement.set('scrollLeft', scrollTo);
 					},
 
+					_afterSelectionKey: function(event) {
+						var instance = this;
+
+						var activeCell = instance.get('activeCell');
+
+						var alignNode = event.alignNode || activeCell;
+
+						var column = instance.getColumn(alignNode);
+
+						if (activeCell && (event.keyCode === 13) && (column.type !== 'textarea')) {
+							instance._onEditCell(activeCell);
+						}
+					},
+
 					_normalizeFieldData: function(item, record, fieldsDisplayValues, normalized) {
 						var instance = this;
 
@@ -158,7 +173,7 @@ AUI.add(
 
 							value = JSON.stringify(value);
 						}
-						else if (type === 'radio' || type === 'select') {
+						else if (type === 'select') {
 							if (!isArray(value)) {
 								value = AArray(value);
 							}
@@ -513,7 +528,13 @@ AUI.add(
 									return label;
 								};
 							}
-							else if (type === 'radio' || type === 'select') {
+							else if (type === 'radio') {
+								structureField = instance.findStructureFieldByAttribute(structure, 'name', name);
+
+								config.multiple = false;
+								config.options = instance.getCellEditorOptions(structureField.options, locale);
+							}
+							else if (type === 'select') {
 								structureField = instance.findStructureFieldByAttribute(structure, 'name', name);
 
 								var multiple = A.DataType.Boolean.parse(structureField.multiple);

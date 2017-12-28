@@ -3,11 +3,17 @@
 <#list blogsEntryModels as blogsEntryModel>
 	${dataFactory.toInsertSQL(blogsEntryModel)}
 
-	${dataFactory.toInsertSQL(dataFactory.newFriendlyURLEntryModel(blogsEntryModel))}
+	<#assign friendlyURLEntryModel = dataFactory.newFriendlyURLEntryModel(blogsEntryModel) />
+
+	${dataFactory.toInsertSQL(friendlyURLEntryModel)}
+
+	${dataFactory.toInsertSQL(dataFactory.newFriendlyURLEntryLocalizationModel(friendlyURLEntryModel, blogsEntryModel))}
+
+	${dataFactory.toInsertSQL(dataFactory.newFriendlyURLEntryMapping(friendlyURLEntryModel))}
 
 	<@insertAssetEntry
-		_entry = blogsEntryModel
-		_categoryAndTag = true
+		_categoryAndTag=true
+		_entry=blogsEntryModel
 	/>
 
 	<#assign
@@ -16,12 +22,12 @@
 	/>
 
 	<@insertMBDiscussion
-		_classNameId = dataFactory.blogsEntryClassNameId
-		_classPK = blogsEntryModel.entryId
-		_groupId = groupId
-		_maxCommentCount = dataFactory.maxBlogsEntryCommentCount
-		_mbRootMessageId = mbRootMessageId
-		_mbThreadId = mbThreadId
+		_classNameId=dataFactory.blogsEntryClassNameId
+		_classPK=blogsEntryModel.entryId
+		_groupId=groupId
+		_maxCommentCount=dataFactory.maxBlogsEntryCommentCount
+		_mbRootMessageId=mbRootMessageId
+		_mbThreadId=mbThreadId
 	/>
 
 	${dataFactory.toInsertSQL(dataFactory.newSubscriptionModel(blogsEntryModel))}

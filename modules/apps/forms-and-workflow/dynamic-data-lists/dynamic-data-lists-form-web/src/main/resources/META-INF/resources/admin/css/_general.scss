@@ -5,13 +5,15 @@
 .ddl-form-builder-buttons .icon-spinner,
 .lfr-ddm-form-pagination-controls .icon-spinner,
 .ddl-form-settings-modal .btn-toolbar-button .icon-spinner {
-	line-height: 21px;
 	margin-left: 10px;
-	position: absolute;
 }
 
 .ddl-form-body-content {
 	margin-top: $baseline * 4;
+}
+
+.liferay-ddl-form-builder-rule-builder .form-builder-select-field {
+	width: 200px;
 }
 
 .liferay-ddl-form-builder-rule-builder-content .text-default {
@@ -45,9 +47,9 @@
 
 		.lfr-ddm-form-page {
 			.row {
-				padding: 0px;
 				margin-left: 0px;
 				margin-right: 0px;
+				padding: 0px;
 			}
 		}
 	}

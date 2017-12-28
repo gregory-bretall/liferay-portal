@@ -41,6 +41,7 @@ public class UpgradeUploadServletRequestConfiguration extends UpgradeProcess {
 		_prefsProps = prefsProps;
 	}
 
+	@Override
 	protected void doUpgrade() throws Exception {
 		Configuration configuration = _configurationAdmin.getConfiguration(
 			UploadServletRequestConfiguration.class.getName(),
@@ -80,7 +81,10 @@ public class UpgradeUploadServletRequestConfiguration extends UpgradeProcess {
 
 		PortletPreferences portletPreferences = _prefsProps.getPreferences();
 
-		for (String key : LegacyUploadServletRequestPropsKeys.KEYS) {
+		for (String key :
+				LegacyUploadServletRequestPropsKeys.
+					UPLOAD_SERVLET_REQUEST_IMPL_KEYS) {
+
 			portletPreferences.reset(key);
 		}
 	}

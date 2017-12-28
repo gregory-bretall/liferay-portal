@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.source.formatter.checkstyle.util.DetailASTUtil;
 
-import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
@@ -30,7 +29,7 @@ import java.util.regex.Pattern;
 /**
  * @author Hugo Huijser
  */
-public class VariableNameCheck extends AbstractCheck {
+public class VariableNameCheck extends BaseCheck {
 
 	@Override
 	public int[] getDefaultTokens() {
@@ -38,7 +37,7 @@ public class VariableNameCheck extends AbstractCheck {
 	}
 
 	@Override
-	public void visitToken(DetailAST detailAST) {
+	protected void doVisitToken(DetailAST detailAST) {
 		DetailAST nameAST = detailAST.findFirstToken(TokenTypes.IDENT);
 
 		String name = nameAST.getText();
@@ -161,7 +160,7 @@ public class VariableNameCheck extends AbstractCheck {
 		return false;
 	}
 
-	private static final String[][] _ALL_CAPS_STRINGS = new String[][] {
+	private static final String[][] _ALL_CAPS_STRINGS = {
 		new String[] {"DDL", "Ddl"}, new String[] {"DDM", "Ddm"},
 		new String[] {"DL", "Dl"}, new String[] {"PK", "Pk"}
 	};

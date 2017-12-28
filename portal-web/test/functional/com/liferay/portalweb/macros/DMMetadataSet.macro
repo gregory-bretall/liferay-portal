@@ -1,12 +1,8 @@
 <definition>
 	<command name="add">
-		<execute macro="DMMetadataSet#selectMetadataSetsFrame" />
-
-		<execute function="AssertTextEquals" locator1="Portlet#HEADER" value1="Metadata Sets" />
-
 		<execute function="Click" locator1="Button#PLUS" />
 
-		<execute function="AssertTextEquals" locator1="Portlet#HEADER" value1="New Metadata Set" />
+		<execute function="AssertTextEquals" locator1="Dynamicdatamapping#HEADER_TITLE" value1="New Metadata Set" />
 
 		<execute macro="PortletEntry#inputName">
 			<var name="name" value="${metadataSetName}" />
@@ -58,7 +54,9 @@
 
 		<execute function="AssertClick" locator1="DocumentsAndMediaMetadataSets#METADATA_SETS_TABLE_ACTIONS" value1="Actions" />
 
-		<execute function="AssertClickNoError" locator1="MenuItem#DELETE" value1="Delete" />
+		<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Delete">
+			<var name="key_menuItem" value="Delete" />
+		</execute>
 
 		<execute function="Confirm" value1="Are you sure you want to delete this? It will be deleted immediately." />
 
@@ -73,7 +71,9 @@
 
 		<execute function="AssertClick" locator1="DocumentsAndMediaMetadataSets#METADATA_SETS_TABLE_ACTIONS" value1="Actions" />
 
-		<execute function="AssertClickNoError" locator1="MenuItem#DELETE" value1="Delete" />
+		<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Delete">
+			<var name="key_menuItem" value="Delete" />
+		</execute>
 
 		<execute function="Confirm" value1="Are you sure you want to delete this? It will be deleted immediately." />
 
@@ -100,7 +100,9 @@
 	<command name="tearDownCP">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Documents and Media" />
 		</execute>
 
@@ -117,7 +119,9 @@
 			<then>
 				<execute function="AssertClick" locator1="DocumentsAndMediaMetadataSets#METADATA_SETS_TABLE_ACTIONS_1" value1="Actions" />
 
-				<execute function="AssertClickNoError" locator1="MenuItem#DELETE" value1="Delete" />
+				<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Delete">
+					<var name="key_menuItem" value="Delete" />
+				</execute>
 
 				<execute function="Confirm" value1="Are you sure you want to delete this? It will be deleted immediately." />
 

@@ -277,6 +277,9 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 		javaExec.systemProperty(
 			"findsecbugs.injection.customconfigfile.XssJspDetector",
 			"liferay-config/liferay-XssJspDetector.txt|XSS_JSP_PRINT");
+		javaExec.systemProperty(
+			"findsecbugs.injection.customconfigfile.XssServletDetector",
+			"liferay-config/liferay-XssServletDetector.txt|XSS_SERVLET");
 
 		javaExec.systemProperty("findsecbugs.taint.outputsummaries", "true");
 
@@ -346,7 +349,7 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 			project, WRITE_FIND_BUGS_PROJECT_TASK_NAME,
 			WriteFindBugsProjectTask.class);
 
-		JavaCompile compileJSPTask = (JavaCompile)GradleUtil.getTask(
+		final JavaCompile compileJSPTask = (JavaCompile)GradleUtil.getTask(
 			project, JspCPlugin.COMPILE_JSP_TASK_NAME);
 
 		writeFindBugsProjectTask.dependsOn(
@@ -361,7 +364,14 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 		writeFindBugsProjectTask.setAuxClasspath(auxClasspath);
 
 		FileCollection classpath = project.files(
-			compileJSPTask.getDestinationDir(),
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					return compileJSPTask.getDestinationDir();
+				}
+
+			},
 			new Callable<File>() {
 
 				@Override
@@ -418,11 +428,12 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 		"fsb-include.xml";
 
 	/**
-	 * Copied from <code>com.liferay.gradle.plugins.internal.JspCDefaultsPlugin</code>.
+	 * Copied from
+	 * <code>com.liferay.gradle.plugins.internal.JspCDefaultsPlugin</code>.
 	 */
 	private static final String _UNZIP_JAR_TASK_NAME = "unzipJar";
 
-	private static final String _VERSION = "1.6.0.LIFERAY-PATCHED-4";
+	private static final String _VERSION = "1.6.0.LIFERAY-PATCHED-5";
 
 	private static final Transformer<File, Task> _reportsFileGetter =
 		new Transformer<File, Task>() {

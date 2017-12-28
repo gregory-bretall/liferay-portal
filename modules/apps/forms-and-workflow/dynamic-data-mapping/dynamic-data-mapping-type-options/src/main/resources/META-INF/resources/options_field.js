@@ -246,14 +246,16 @@ AUI.add(
 
 						instance._setValue(value);
 
+						instance.fire('removeOption');
+
+						instance.render();
+
 						if (index > 0 && value.length > 0) {
 							options[index - 1].focus();
 						}
 						else {
 							instance.getLastOption().focus();
 						}
-
-						instance._renderOptions();
 					},
 
 					render: function() {
@@ -317,8 +319,9 @@ AUI.add(
 
 						options.forEach(
 							function(option) {
-								option.set('keyInputEnabled', editable);
-								option.set('generationLocked', !editable);
+								if (option.getValue()) {
+									option.set('generationLocked', !editable);
+								}
 							}
 						);
 					},
@@ -443,12 +446,8 @@ AUI.add(
 					_bindOptionUI: function(option) {
 						var instance = this;
 
-						var editable = instance.get('editable');
-
-						if (editable) {
-							option.after(A.rbind('_afterOptionNormalizeKey', instance, option), option, 'normalizeKey');
-							option.bindContainerEvent('click', A.bind('_onOptionClickClose', instance, option), '.close');
-						}
+						option.after(A.rbind('_afterOptionNormalizeKey', instance, option), option, 'normalizeKey');
+						option.bindContainerEvent('click', A.bind('_onOptionClickClose', instance, option), '.close');
 					},
 
 					_canSortNode: function(event) {

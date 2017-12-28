@@ -14,9 +14,11 @@
 
 package com.liferay.portal.setup;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.events.EventsProcessorUtil;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.dao.jdbc.DataSourceFactoryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -104,7 +106,8 @@ public class SetupWizardUtil {
 	}
 
 	public static void updateLanguage(
-		HttpServletRequest request, HttpServletResponse response) {
+			HttpServletRequest request, HttpServletResponse response)
+		throws PortalException {
 
 		String languageId = ParamUtil.getString(
 			request, "companyLocale", getDefaultLanguageId());
@@ -114,6 +117,9 @@ public class SetupWizardUtil {
 		if (!LanguageUtil.isAvailableLocale(locale)) {
 			return;
 		}
+
+		CompanyLocalServiceUtil.updateDisplay(
+			PortalInstances.getDefaultCompanyId(), languageId, StringPool.UTC);
 
 		HttpSession session = request.getSession();
 
@@ -152,7 +158,7 @@ public class SetupWizardUtil {
 		unicodeProperties.put(
 			PropsKeys.SETUP_WIZARD_ENABLED, String.valueOf(false));
 
-		_updateCompany(request);
+		_updateCompany(request, unicodeProperties);
 
 		_updateAdminUser(request, response, unicodeProperties);
 
@@ -300,6 +306,15 @@ public class SetupWizardUtil {
 		unicodeProperties.put(
 			PropsKeys.ADMIN_EMAIL_FROM_NAME, user.getFullName());
 
+		int index = emailAddress.indexOf(CharPool.AT);
+
+		unicodeProperties.put(
+			PropsKeys.COMPANY_DEFAULT_WEB_ID,
+			emailAddress.substring(index + 1));
+		unicodeProperties.put(
+			PropsKeys.DEFAULT_ADMIN_EMAIL_ADDRESS_PREFIX,
+			emailAddress.substring(0, index));
+
 		HttpSession session = request.getSession();
 
 		session.setAttribute(WebKeys.EMAIL_ADDRESS, emailAddress);
@@ -313,7 +328,8 @@ public class SetupWizardUtil {
 			response);
 	}
 
-	private static void _updateCompany(HttpServletRequest request)
+	private static void _updateCompany(
+			HttpServletRequest request, UnicodeProperties unicodeProperties)
 		throws Exception {
 
 		Company company = CompanyLocalServiceUtil.getCompanyById(
@@ -321,6 +337,8 @@ public class SetupWizardUtil {
 
 		String languageId = ParamUtil.getString(
 			request, "companyLocale", getDefaultLanguageId());
+
+		unicodeProperties.put(PropsKeys.COMPANY_DEFAULT_LOCALE, languageId);
 
 		String companyName = ParamUtil.getString(
 			request, "companyName", PropsValues.COMPANY_DEFAULT_NAME);

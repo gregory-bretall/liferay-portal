@@ -34,12 +34,13 @@ import com.liferay.portal.kernel.util.Html;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PredicateFilter;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.search.summary.SummaryBuilderFactory;
 import com.liferay.portal.search.web.constants.SearchPortletParameterNames;
 import com.liferay.portal.search.web.facet.SearchFacet;
-import com.liferay.portal.search.web.facet.util.SearchFacetTracker;
+import com.liferay.portal.search.web.internal.facet.AssetEntriesSearchFacet;
+import com.liferay.portal.search.web.internal.facet.SearchFacetTracker;
 import com.liferay.portal.search.web.internal.portlet.SearchPortletSearchResultPreferences;
 import com.liferay.portal.search.web.internal.search.request.SearchRequestImpl;
 import com.liferay.portal.search.web.internal.search.request.SearchResponseImpl;
@@ -67,13 +68,17 @@ public class SearchDisplayContext {
 			Portal portal, Html html, Language language,
 			FacetedSearcherManager facetedSearcherManager,
 			IndexSearchPropsValues indexSearchPropsValues,
-			PortletURLFactory portletURLFactory)
+			PortletURLFactory portletURLFactory,
+			SummaryBuilderFactory summaryBuilderFactory,
+			SearchFacetTracker searchFacetTracker)
 		throws PortletException {
 
 		_renderRequest = renderRequest;
 		_portletPreferences = portletPreferences;
 		_indexSearchPropsValues = indexSearchPropsValues;
 		_portletURLFactory = portletURLFactory;
+		_summaryBuilderFactory = summaryBuilderFactory;
+		_searchFacetTracker = searchFacetTracker;
 
 		ThemeDisplaySupplier themeDisplaySupplier =
 			new PortletRequestThemeDisplaySupplier(renderRequest);
@@ -124,6 +129,10 @@ public class SearchDisplayContext {
 
 		searchContext.setKeywords(_keywords.getKeywords());
 
+		searchContext.setEntryClassNames(
+			AssetEntriesSearchFacet.getEntryClassNames(
+				getSearchConfiguration()));
+
 		SearchRequestImpl searchRequestImpl = new SearchRequestImpl(
 			() -> searchContext, searchContainerOptions -> searchContainer,
 			facetedSearcherManager);
@@ -167,15 +176,8 @@ public class SearchDisplayContext {
 		}
 
 		_enabledSearchFacets = ListUtil.filter(
-			SearchFacetTracker.getSearchFacets(),
-			new PredicateFilter<SearchFacet>() {
-
-				@Override
-				public boolean filter(SearchFacet searchFacet) {
-					return isDisplayFacet(searchFacet.getClassName());
-				}
-
-			});
+			getSearchFacets(),
+			searchFacet -> isDisplayFacet(searchFacet.getClassName()));
 
 		return _enabledSearchFacets;
 	}
@@ -301,6 +303,10 @@ public class SearchDisplayContext {
 		return _searchContext;
 	}
 
+	public List<SearchFacet> getSearchFacets() {
+		return _searchFacetTracker.getSearchFacets();
+	}
+
 	public SearchResultPreferences getSearchResultPreferences() {
 		return _searchResultPreferences;
 	}
@@ -332,6 +338,10 @@ public class SearchDisplayContext {
 			"searchScope", StringPool.BLANK);
 
 		return _searchScopePreferenceString;
+	}
+
+	public SummaryBuilderFactory getSummaryBuilderFactory() {
+		return _summaryBuilderFactory;
 	}
 
 	public boolean isCollatedSpellCheckResultEnabled() {
@@ -454,7 +464,7 @@ public class SearchDisplayContext {
 	}
 
 	public boolean isShowMenu() {
-		for (SearchFacet searchFacet : SearchFacetTracker.getSearchFacets()) {
+		for (SearchFacet searchFacet : getSearchFacets()) {
 			if (isDisplayFacet(searchFacet.getClassName())) {
 				return true;
 			}
@@ -504,6 +514,7 @@ public class SearchDisplayContext {
 			isCollatedSpellCheckResultEnabled());
 		queryConfig.setCollatedSpellCheckResultScoresThreshold(
 			getCollatedSpellCheckResultDisplayThreshold());
+		queryConfig.setHighlightEnabled(isHighlightEnabled());
 		queryConfig.setQueryIndexingEnabled(isQueryIndexingEnabled());
 		queryConfig.setQueryIndexingThreshold(getQueryIndexingThreshold());
 		queryConfig.setQuerySuggestionEnabled(isQuerySuggestionsEnabled());
@@ -539,7 +550,7 @@ public class SearchDisplayContext {
 		groupIdOptional.ifPresent(
 			groupId -> {
 				searchSettings.addCondition(
-					new BooleanClauseImpl(
+					new BooleanClauseImpl<>(
 						new TermQueryImpl(
 							Field.GROUP_ID, String.valueOf(groupId)),
 						BooleanClauseOccur.MUST));
@@ -610,8 +621,10 @@ public class SearchDisplayContext {
 	private String _searchConfiguration;
 	private final SearchContainer<Document> _searchContainer;
 	private final SearchContext _searchContext;
+	private final SearchFacetTracker _searchFacetTracker;
 	private final SearchResultPreferences _searchResultPreferences;
 	private String _searchScopePreferenceString;
+	private final SummaryBuilderFactory _summaryBuilderFactory;
 	private final ThemeDisplaySupplier _themeDisplaySupplier;
 	private Boolean _useAdvancedSearchSyntax;
 

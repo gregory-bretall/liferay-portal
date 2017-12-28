@@ -31,16 +31,15 @@ import com.liferay.journal.service.JournalArticleResourceLocalServiceUtil;
 import com.liferay.journal.service.JournalArticleServiceUtil;
 import com.liferay.journal.service.JournalFolderServiceUtil;
 import com.liferay.journal.test.util.JournalTestUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.ClassedModel;
 import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.WorkflowedModel;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
@@ -52,7 +51,6 @@ import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -332,25 +330,22 @@ public class JournalArticleTrashHandlerTest
 
 		long folderId = article.getImagesFolderId();
 
-		Group controlPanelGroup = GroupLocalServiceUtil.getGroup(
-			group.getCompanyId(), GroupConstants.CONTROL_PANEL);
-
 		Assert.assertEquals(
 			1,
 			PortletFileRepositoryUtil.getPortletFileEntriesCount(
-				controlPanelGroup.getGroupId(), folderId));
+				group.getGroupId(), folderId));
 
 		moveBaseModelToTrash((Long)baseModel.getPrimaryKeyObj());
 
 		Assert.assertEquals(
 			0,
 			PortletFileRepositoryUtil.getPortletFileEntriesCount(
-				controlPanelGroup.getGroupId(), folderId,
+				group.getGroupId(), folderId,
 				WorkflowConstants.STATUS_APPROVED));
 		Assert.assertEquals(
 			1,
 			PortletFileRepositoryUtil.getPortletFileEntriesCount(
-				controlPanelGroup.getGroupId(), folderId,
+				group.getGroupId(), folderId,
 				WorkflowConstants.STATUS_IN_TRASH));
 
 		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
@@ -361,7 +356,7 @@ public class JournalArticleTrashHandlerTest
 		Assert.assertEquals(
 			0,
 			PortletFileRepositoryUtil.getPortletFileEntriesCount(
-				controlPanelGroup.getGroupId(), folderId));
+				group.getGroupId(), folderId));
 	}
 
 	@Override

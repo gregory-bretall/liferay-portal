@@ -23,7 +23,7 @@ import com.liferay.dynamic.data.mapping.annotations.DDMFormLayoutRow;
 import com.liferay.dynamic.data.mapping.annotations.DDMFormRule;
 import com.liferay.dynamic.data.mapping.form.field.type.DefaultDDMFormFieldTypeSettings;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldOptions;
-import com.liferay.dynamic.data.mapping.model.DDMFormFieldValidation;
+import com.liferay.dynamic.data.mapping.model.LocalizedValue;
 
 /**
  * @author Marcellus Tavares
@@ -32,9 +32,22 @@ import com.liferay.dynamic.data.mapping.model.DDMFormFieldValidation;
 	rules = {
 		@DDMFormRule(
 			actions = {
-				"call('getDataProviderInstanceOutputParameters', 'dataProviderInstanceId=ddmDataProviderInstanceId', 'ddmDataProviderInstanceOutput=outputParameterNames')"
+				"call('getDataProviderInstanceOutputParameters', concat('dataProviderInstanceId=', getValue('ddmDataProviderInstanceId')), 'ddmDataProviderInstanceOutput=outputParameterNames')"
 			},
-			condition = "not(equals(getValue('ddmDataProviderInstanceId'), 0))"
+			condition = "not(equals(getValue('ddmDataProviderInstanceId'), ''))"
+		),
+		@DDMFormRule(
+			actions = {
+				"setOptions('predefinedValue', getValue('options'))",
+				"setRequired('ddmDataProviderInstanceId', equals(getValue('dataSourceType'), \"data-provider\"))",
+				"setRequired('ddmDataProviderInstanceOutput', equals(getValue('dataSourceType'), \"data-provider\"))",
+				"setRequired('options', equals(getValue('dataSourceType'), \"manual\"))",
+				"setVisible('ddmDataProviderInstanceId', equals(getValue('dataSourceType'), \"data-provider\"))",
+				"setVisible('ddmDataProviderInstanceOutput', equals(getValue('dataSourceType'), \"data-provider\"))",
+				"setVisible('options', equals(getValue('dataSourceType'), \"manual\"))",
+				"setVisible('validation', false)"
+			},
+			condition = "TRUE"
 		)
 	}
 )
@@ -42,7 +55,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormFieldValidation;
 	paginationMode = com.liferay.dynamic.data.mapping.model.DDMFormLayout.TABBED_MODE,
 	value = {
 		@DDMFormLayoutPage(
-			title = "basic",
+			title = "%basic",
 			value = {
 				@DDMFormLayoutRow(
 					{
@@ -59,7 +72,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormFieldValidation;
 			}
 		),
 		@DDMFormLayoutPage(
-			title = "properties",
+			title = "%properties",
 			value = {
 				@DDMFormLayoutRow(
 					{
@@ -83,9 +96,9 @@ public interface SelectDDMFormFieldTypeSettings
 
 	@DDMFormField(
 		label = "%create-list",
-		optionLabels = {"%manually", "%from-data-provider"},
-		optionValues = {"manual", "data-provider"}, predefinedValue = "manual",
-		type = "radio"
+		optionLabels = {"%manually", "%from-data-provider", "%from-autofill"},
+		optionValues = {"manual", "data-provider", "from-autofill"},
+		predefinedValue = "manual", type = "radio"
 	)
 	public String dataSourceType();
 
@@ -95,8 +108,7 @@ public interface SelectDDMFormFieldTypeSettings
 			"dataSourceType=data-provider",
 			"ddmDataProviderInstanceId=getDataProviderInstances"
 		},
-		required = true, type = "select",
-		visibilityExpression = "equals(dataSourceType, \"data-provider\")"
+		type = "select"
 	)
 	public long ddmDataProviderInstanceId();
 
@@ -105,8 +117,7 @@ public interface SelectDDMFormFieldTypeSettings
 		properties = {
 			"tooltip=%choose-an-output-parameter-for-a-data-provider-previously-created"
 		},
-		required = true, type = "select",
-		visibilityExpression = "equals(dataSourceType, \"data-provider\")"
+		type = "select"
 	)
 	public String ddmDataProviderInstanceOutput();
 
@@ -118,13 +129,19 @@ public interface SelectDDMFormFieldTypeSettings
 
 	@DDMFormField(
 		dataType = "ddm-options", label = "%options",
-		properties = {"showLabel=false"}, required = true, type = "options",
-		visibilityExpression = "equals(dataSourceType, \"manual\")"
+		properties = {"showLabel=false"}, type = "options"
 	)
 	public DDMFormFieldOptions options();
 
-	@DDMFormField(visibilityExpression = "FALSE")
+	@DDMFormField(
+		label = "%predefined-value",
+		properties = {
+			"placeholder=%enter-a-default-value",
+			"tooltip=%enter-a-default-value-that-is-submitted-if-no-other-value-is-entered"
+		},
+		type = "select"
+	)
 	@Override
-	public DDMFormFieldValidation validation();
+	public LocalizedValue predefinedValue();
 
 }

@@ -14,7 +14,7 @@
 
 package com.liferay.source.formatter.checks;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -69,12 +69,24 @@ public abstract class LineBreakCheck extends BaseFileCheck {
 
 			int x = line.indexOf(" = ");
 
-			if (x != -1) {
+			if ((x != -1) && (getLevel(line, "{", "}") == 0)) {
 				int y = line.indexOf(CharPool.QUOTE);
 
 				if ((y == -1) || (x < y)) {
 					addMessage(
 						fileName, "There should be a line break after '='",
+						lineCount);
+				}
+			}
+
+			x = line.indexOf(" -> ");
+
+			if ((x != -1) && (getLevel(line, "{", "}") == 0)) {
+				int y = line.indexOf(CharPool.QUOTE);
+
+				if ((y == -1) || (x < y)) {
+					addMessage(
+						fileName, "There should be a line break after '->'",
 						lineCount);
 				}
 			}

@@ -25,32 +25,32 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.asset.publisher.web.configuration.AssetPublisherWebConfiguration",
 	localization = "content/Language",
-	name = "asset.publisher.web.configuration.name"
+	name = "asset-publisher-web-configuration-name"
 )
 public interface AssetPublisherWebConfiguration {
 
 	/**
 	 * Set the interval in hours on how often CheckAssetEntryMessageListener
-	 * will run to check for new assets. Users will be notified via email of
-	 * new assets.
+	 * will run to check for new assets. Users will be notified via email of new
+	 * assets.
 	 *
 	 * @return interval in hours on how often to check for new assets.
 	 */
 	@Meta.AD(
-		deflt = "24", description = "check.interval.key.description",
-		required = false
+		deflt = "24", description = "check-interval-key-description",
+		name = "check-interval", required = false
 	)
 	public int checkInterval();
 
 	/**
-	 * Set this to true to enable exporting contents related to asset entries
-	 * for dynamic selection.
+	 * Set this to <code>true</code> to enable exporting contents related to
+	 * asset entries for dynamic selection.
 	 *
 	 * @return <code>true</code> if dynamic export is enabled.
 	 */
 	@Meta.AD(
-		deflt = "true", description = "dynamic.export.enabled.key.description",
-		required = false
+		deflt = "true", description = "dynamic-export-enabled-key-description",
+		name = "dynamic-export-enabled", required = false
 	)
 	public boolean dynamicExportEnabled();
 
@@ -61,8 +61,8 @@ public interface AssetPublisherWebConfiguration {
 	 * @return maximum number of entries to export for dynamic selection.
 	 */
 	@Meta.AD(
-		deflt = "20", description = "dynamic.export.limit.key.description",
-		required = false
+		deflt = "20", description = "dynamic-export-limit-key-description",
+		name = "dynamic-export-limit", required = false
 	)
 	public int dynamicExportLimit();
 
@@ -74,47 +74,49 @@ public interface AssetPublisherWebConfiguration {
 	 */
 	@Meta.AD(
 		deflt = "20",
-		description = "dynamic.subscription.limit.key.description",
-		required = false
+		description = "dynamic-subscription-limit-key-description",
+		name = "dynamic-subscription-limit", required = false
 	)
 	public int dynamicSubscriptionLimit();
 
 	/**
-	 * Set this to true to enable exporting contents related to asset entries
-	 * for manual selection.
+	 * Set this to <code>true</code> to enable exporting contents related to
+	 * asset entries for manual selection.
 	 *
 	 * @return <code>true</code> if manual export is enabled.
 	 */
 	@Meta.AD(
-		deflt = "true", description = "manual.export.enabled.key.description",
-		required = false
+		deflt = "true", description = "manual-export-enabled-key-description",
+		name = "manual-export-enabled", required = false
 	)
 	public boolean manualExportEnabled();
 
 	/**
-	 * Set this to true to search assets in Asset Publisher from the index. Set
-	 * this to false to search assets in Asset Publisher from the database.
+	 * Set this to <code>true</code> to search assets in Asset Publisher from
+	 * the index. Set this to <code>false</code> to search assets in Asset
+	 * Publisher from the database.
 	 *
 	 * @return <code>true</code> search with index is enabled.
 	 */
 	@Meta.AD(
-		deflt = "true", description = "search.with.index.key.description",
-		required = false
+		deflt = "true", description = "search-with-index-key-description",
+		name = "search-with-index", required = false
 	)
 	public boolean searchWithIndex();
 
 	/**
-	 * Set this to true to allow users to configure Asset Publisher, Most Viewed
-	 * Assets, and Highest Rated Assets to skip the permissions checking on the
-	 * displayed assets. Enabling this property will allow regular users to view
-	 * assets that they do not have permission to view.
+	 * Set this to <code>true</code> to allow users to configure Asset
+	 * Publisher, Most Viewed Assets, and Highest Rated Assets to skip the
+	 * permissions checking on the displayed assets. Enabling this property will
+	 * allow regular users to view assets that they do not have permission to
+	 * view.
 	 *
 	 * @return <code>true</code> if permission checking is configurable.
 	 */
 	@Meta.AD(
 		deflt = "false",
-		description = "permission.checking.configurable.key.description",
-		required = false
+		description = "permission-checking-configurable-key-description",
+		name = "permission-checking-configurable", required = false
 	)
 	public boolean permissionCheckingConfigurable();
 

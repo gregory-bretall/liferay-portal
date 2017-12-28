@@ -28,11 +28,11 @@
 
 		<execute macro="SetupWizard#configureDatabasePG">
 			<var name="databaseName" value="lportal" />
-			<var name="databasePassword" property-value="database.mysql.password" />
+			<var method="TestPropsUtil#get('database.mysql.password')" name="databasePassword" />
 			<var name="databaseType" value="MySQL" />
-			<var name="databaseUserName" property-value="database.mysql.username" />
-			<var name="jdbcDriverClassName" property-value="database.mysql.driver" />
-			<var name="jdbcURL" property-value="database.mysql.url" />
+			<var method="TestPropsUtil#get('database.mysql.username')" name="databaseUserName" />
+			<var method="TestPropsUtil#get('database.mysql.driver')" name="jdbcDriverClassName" />
+			<var method="TestPropsUtil#get('database.mysql.url')" name="jdbcURL" />
 		</execute>
 
 		<execute macro="SetupWizard#finishConfigurationPG" />
@@ -78,8 +78,12 @@
 			<var name="userFirstName" value="TestSetupWizardFN" />
 		</execute>
 
-		<execute macro="Page#gotoMyAccount">
-			<var name="portletName" value="Account Settings" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="My Account" />
+			<var name="panel" value="User" />
+			<var name="portlet" value="Account Settings" />
 		</execute>
 
 		<execute function="AssertTextEquals" locator1="TextInput#EMAIL_ADDRESS" value1="testsetupwizard@liferay.com" />
@@ -90,7 +94,7 @@
 
 	<command name="MySQLtoMySQLLportal1" priority="5">
 		<property name="databases.size" value="1" />
-		<property name="portal.acceptance.tomcat.mysql" value="true" />
+		<property name="portal.acceptance.tomcat.mysql" value="quarantine" />
 		<property name="test.name.skip.portal.instance" value="SetupWizardMySQL#MySQLtoMySQLLportal1" />
 
 		<execute macro="SetupWizard#configurePG">
@@ -98,11 +102,11 @@
 			<var name="administratorFirstName" value="Test" />
 			<var name="administratorLastName" value="Test" />
 			<var name="databaseName" value="lportal1" />
-			<var name="databasePassword" property-value="database.mysql.password" />
+			<var method="TestPropsUtil#get('database.mysql.password')" name="databasePassword" />
 			<var name="databaseType" value="MySQL" />
-			<var name="databaseUserName" property-value="database.mysql.username" />
-			<var name="jdbcDriverClassName" property-value="database.mysql.driver" />
-			<var name="jdbcURL" property-value="database.mysql.url" />
+			<var method="TestPropsUtil#get('database.mysql.username')" name="databaseUserName" />
+			<var method="TestPropsUtil#get('database.mysql.driver')" name="jdbcDriverClassName" />
+			<var method="TestPropsUtil#get('database.mysql.url')" name="jdbcURL" />
 		</execute>
 
 		<execute macro="Smoke#viewWelcomePage">
@@ -115,7 +119,7 @@
 
 	<command name="MySQLtoMySQLLportal1SampleDataDisabled" priority="5">
 		<property name="databases.size" value="1" />
-		<property name="portal.acceptance.tomcat.mysql" value="true" />
+		<property name="portal.acceptance.tomcat.mysql" value="quarantine" />
 		<property name="test.name.skip.portal.instance" value="SetupWizardMySQL#MySQLtoMySQLLportal1SampleDataDisabled" />
 
 		<execute macro="SetupWizard#configurePG">
@@ -124,11 +128,11 @@
 			<var name="administratorFirstName" value="Test" />
 			<var name="administratorLastName" value="Test" />
 			<var name="databaseName" value="lportal1" />
-			<var name="databasePassword" property-value="database.mysql.password" />
+			<var method="TestPropsUtil#get('database.mysql.password')" name="databasePassword" />
 			<var name="databaseType" value="MySQL" />
-			<var name="databaseUserName" property-value="database.mysql.username" />
-			<var name="jdbcDriverClassName" property-value="database.mysql.driver" />
-			<var name="jdbcURL" property-value="database.mysql.url" />
+			<var method="TestPropsUtil#get('database.mysql.username')" name="databaseUserName" />
+			<var method="TestPropsUtil#get('database.mysql.driver')" name="jdbcDriverClassName" />
+			<var method="TestPropsUtil#get('database.mysql.url')" name="jdbcURL" />
 		</execute>
 
 		<execute macro="Smoke#viewWelcomePage" />

@@ -31,6 +31,7 @@ import com.liferay.knowledge.base.exception.KBArticleStatusException;
 import com.liferay.knowledge.base.exception.KBArticleTitleException;
 import com.liferay.knowledge.base.exception.KBArticleUrlTitleException;
 import com.liferay.knowledge.base.exception.NoSuchArticleException;
+import com.liferay.knowledge.base.internal.importer.KBArchiveFactory;
 import com.liferay.knowledge.base.internal.importer.KBArticleImporter;
 import com.liferay.knowledge.base.internal.util.KBArticleLocalSiblingNavigationHelper;
 import com.liferay.knowledge.base.model.KBArticle;
@@ -42,6 +43,7 @@ import com.liferay.knowledge.base.service.util.KnowledgeBaseConstants;
 import com.liferay.knowledge.base.util.KnowledgeBaseUtil;
 import com.liferay.knowledge.base.util.comparator.KBArticlePriorityComparator;
 import com.liferay.knowledge.base.util.comparator.KBArticleVersionComparator;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.orm.Conjunction;
@@ -75,10 +77,11 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.systemevent.SystemEventHierarchyEntryThreadLocal;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SubscriptionSender;
@@ -288,6 +291,9 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		try {
 			WorkflowThreadLocal.setEnabled(false);
+
+			KBArticleImporter kbArticleImporter = new KBArticleImporter(
+				kbArchiveFactory, this, portal);
 
 			return kbArticleImporter.processZipFile(
 				userId, groupId, parentKbFolderId, prioritizeByNumericalPrefix,
@@ -659,9 +665,10 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		if (kbArticle == null) {
 			throw new NoSuchArticleException(
-				"No KBArticle exists with the key {groupId=" + groupId +
-					", kbFolderId=" + kbFolderId + ", urlTitle=" + urlTitle +
-						"}");
+				StringBundler.concat(
+					"No KBArticle exists with the key {groupId=",
+					String.valueOf(groupId), ", kbFolderId=",
+					String.valueOf(kbFolderId), ", urlTitle=", urlTitle, "}"));
 		}
 
 		return kbArticle;
@@ -680,9 +687,10 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		if (kbArticle == null) {
 			throw new NoSuchArticleException(
-				"No KBArticle with the key {groupId=" + groupId +
-					", urlTitle=" + urlTitle + "} found in a folder with URL " +
-						"title " + kbFolderUrlTitle);
+				StringBundler.concat(
+					"No KBArticle with the key {groupId=",
+					String.valueOf(groupId), ", urlTitle=", urlTitle,
+					"} found in a folder with URL title ", kbFolderUrlTitle));
 		}
 
 		return kbArticle;
@@ -716,7 +724,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		List<KBArticle> kbArticles = new ArrayList<>();
 
-		Long[][] params = new Long[][] {ArrayUtil.toArray(resourcePrimKeys)};
+		Long[][] params = {ArrayUtil.toArray(resourcePrimKeys)};
 
 		while ((params = KnowledgeBaseUtil.getParams(params[0])) != null) {
 			List<KBArticle> curKBArticles = null;
@@ -828,9 +836,11 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		if (latestKBArticle == null) {
 			throw new NoSuchArticleException(
-				"No KBArticle exists with the key {groupId=" + groupId +
-					", kbFolderId=" + kbFolderId + ", urlTitle=" + urlTitle +
-						", status=" + status + "}");
+				StringBundler.concat(
+					"No KBArticle exists with the key {groupId=",
+					String.valueOf(groupId), ", kbFolderId=",
+					String.valueOf(kbFolderId), ", urlTitle=", urlTitle,
+					", status=", String.valueOf(status), "}"));
 		}
 
 		return latestKBArticle;
@@ -1743,7 +1753,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	}
 
 	protected String normalizeUrlTitle(String urlTitle) {
-		if (urlTitle == null) {
+		if (Validator.isNull(urlTitle)) {
 			return null;
 		}
 
@@ -2054,8 +2064,11 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	@ServiceReference(type = IndexWriterHelper.class)
 	protected IndexWriterHelper indexWriterHelper;
 
-	@ServiceReference(type = KBArticleImporter.class)
-	protected KBArticleImporter kbArticleImporter;
+	@ServiceReference(type = KBArchiveFactory.class)
+	protected KBArchiveFactory kbArchiveFactory;
+
+	@ServiceReference(type = Portal.class)
+	protected Portal portal;
 
 	@BeanReference(type = PortletFileRepository.class)
 	protected PortletFileRepository portletFileRepository;

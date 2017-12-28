@@ -16,6 +16,7 @@ package com.liferay.document.library.verify.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
+import com.liferay.document.library.kernel.exception.NoSuchFileVersionException;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryMetadata;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
@@ -27,8 +28,11 @@ import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryMetadataLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileVersionLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFolderLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLTrashServiceUtil;
+import com.liferay.document.library.kernel.store.DLStoreUtil;
+import com.liferay.document.library.kernel.util.DLValidator;
 import com.liferay.dynamic.data.mapping.io.DDMFormXSDDeserializer;
 import com.liferay.dynamic.data.mapping.kernel.DDMForm;
 import com.liferay.dynamic.data.mapping.kernel.DDMFormField;
@@ -39,6 +43,7 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
 import com.liferay.dynamic.data.mapping.util.DDMBeanTranslatorUtil;
+import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -55,21 +60,21 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerTestRule;
 import com.liferay.portal.verify.VerifyProcess;
 import com.liferay.portal.verify.test.BaseVerifyProcessTestCase;
 import com.liferay.portlet.documentlibrary.util.test.DLTestUtil;
-import com.liferay.registry.Filter;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
-import com.liferay.registry.ServiceTracker;
 
 import java.io.ByteArrayInputStream;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -78,7 +83,6 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -101,25 +105,10 @@ public class DLServiceVerifyProcessTest extends BaseVerifyProcessTestCase {
 			PermissionCheckerTestRule.INSTANCE,
 			SynchronousDestinationTestRule.INSTANCE);
 
-	@BeforeClass
-	public static void setUpClass() {
-		Registry registry = RegistryUtil.getRegistry();
-
-		Filter filter = registry.getFilter(
-			"(&(objectClass=" + VerifyProcess.class.getName() +
-				")(verify.process.name=com.liferay.document.library.service))");
-
-		_serviceTracker = registry.trackServices(filter);
-
-		_serviceTracker.open();
-	}
-
 	@Before
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-
-		setUpDDMFormXSDDeserializer();
 
 		_group = GroupTestUtil.addGroup();
 	}
@@ -274,6 +263,44 @@ public class DLServiceVerifyProcessTest extends BaseVerifyProcessTestCase {
 		Assert.assertNotNull(
 			AssetEntryLocalServiceUtil.fetchEntry(
 				DLFileEntry.class.getName(), fileEntryId));
+	}
+
+	@Test
+	public void testDLFileEntryWithNoDLFileVersionAndNoFile() throws Exception {
+		DLFileEntry dlFileEntry = addDLFileEntry();
+
+		DLFileVersion dlFileVersion = dlFileEntry.getLatestFileVersion(true);
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group, TestPropsValues.getUserId());
+
+		DLFileEntryLocalServiceUtil.updateStatus(
+			TestPropsValues.getUserId(), dlFileVersion.getFileVersionId(),
+			WorkflowConstants.STATUS_APPROVED, serviceContext, new HashMap<>());
+
+		DLFileVersionLocalServiceUtil.deleteDLFileVersion(
+			dlFileEntry.getFileVersion());
+
+		DLStoreUtil.deleteFile(
+			dlFileEntry.getCompanyId(), dlFileEntry.getDataRepositoryId(),
+			dlFileEntry.getName(), dlFileEntry.getVersion());
+
+		try {
+			dlFileEntry.getFileVersion();
+
+			Assert.fail();
+		}
+		catch (NoSuchFileVersionException nsfve) {
+		}
+
+		try (ConfigurationTemporarySwapper configurationTemporarySwapper =
+				_getConfigurationTemporarySwapper("fileExtensions", ".jpg")) {
+
+			doVerify();
+
+			Assert.assertNotNull(dlFileEntry.getFileVersion());
+		}
 	}
 
 	@Test
@@ -509,19 +536,31 @@ public class DLServiceVerifyProcessTest extends BaseVerifyProcessTestCase {
 
 	@Override
 	protected VerifyProcess getVerifyProcess() {
-		return _serviceTracker.getService();
+		return _verifyProcess;
 	}
 
-	protected void setUpDDMFormXSDDeserializer() {
-		Registry registry = RegistryUtil.getRegistry();
+	private static ConfigurationTemporarySwapper
+			_getConfigurationTemporarySwapper(String key, Object value)
+		throws Exception {
 
-		_ddmFormXSDDeserializer = registry.getService(
-			DDMFormXSDDeserializer.class);
+		Dictionary<String, Object> dictionary = new HashMapDictionary<>();
+
+		dictionary.put(key, value);
+
+		return new ConfigurationTemporarySwapper(
+			DLValidator.class,
+			"com.liferay.document.library.configuration.DLConfiguration",
+			dictionary);
 	}
 
-	private static ServiceTracker<VerifyProcess, VerifyProcess> _serviceTracker;
+	@Inject
+	private static DDMFormXSDDeserializer _ddmFormXSDDeserializer;
 
-	private DDMFormXSDDeserializer _ddmFormXSDDeserializer;
+	@Inject(
+		filter = "verify.process.name=com.liferay.document.library.service",
+		type = VerifyProcess.class
+	)
+	private static VerifyProcess _verifyProcess;
 
 	@DeleteAfterTestRun
 	private Group _group;

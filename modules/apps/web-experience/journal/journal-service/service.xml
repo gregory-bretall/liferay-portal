@@ -61,9 +61,6 @@
 
 		<!-- Finder methods -->
 
-		<finder name="ResourcePrimKey" return-type="Collection">
-			<finder-column name="resourcePrimKey" />
-		</finder>
 		<finder name="GroupId" return-type="Collection">
 			<finder-column name="groupId" />
 		</finder>
@@ -516,6 +513,7 @@
 		<exception>ArticleContent</exception>
 		<exception>ArticleDisplayDate</exception>
 		<exception>ArticleExpirationDate</exception>
+		<exception>ArticleFriendlyURL</exception>
 		<exception>ArticleId</exception>
 		<exception>ArticleReviewDate</exception>
 		<exception>ArticleSmallImageName</exception>

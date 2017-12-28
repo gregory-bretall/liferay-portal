@@ -25,6 +25,7 @@ import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.permission.DDMTemplatePermission;
+import com.liferay.journal.constants.JournalContentPortletKeys;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.constants.JournalWebKeys;
 import com.liferay.journal.content.asset.addon.entry.common.ContentMetadataAssetAddonEntry;
@@ -32,7 +33,6 @@ import com.liferay.journal.content.asset.addon.entry.common.ContentMetadataAsset
 import com.liferay.journal.content.asset.addon.entry.common.UserToolAssetAddonEntry;
 import com.liferay.journal.content.asset.addon.entry.common.UserToolAssetAddonEntryTracker;
 import com.liferay.journal.content.web.configuration.JournalContentPortletInstanceConfiguration;
-import com.liferay.journal.content.web.constants.JournalContentPortletKeys;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleDisplay;
 import com.liferay.journal.service.JournalArticleLocalServiceUtil;
@@ -40,10 +40,12 @@ import com.liferay.journal.service.permission.JournalArticlePermission;
 import com.liferay.journal.service.permission.JournalPermission;
 import com.liferay.journal.util.JournalContent;
 import com.liferay.journal.web.asset.JournalArticleAssetRenderer;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
@@ -63,7 +65,8 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PredicateFilter;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -77,6 +80,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
@@ -146,6 +150,10 @@ public class JournalContentDisplayContext {
 		long articleResourcePrimKey = ParamUtil.getLong(
 			_portletRequest, "articleResourcePrimKey");
 
+		if (articleResourcePrimKey == -1) {
+			return _article;
+		}
+
 		if (articleResourcePrimKey > 0) {
 			_article = JournalArticleLocalServiceUtil.fetchLatestArticle(
 				articleResourcePrimKey, WorkflowConstants.STATUS_ANY, true);
@@ -184,6 +192,10 @@ public class JournalContentDisplayContext {
 			JournalContent journalContent =
 				(JournalContent)_portletRequest.getAttribute(
 					JournalWebKeys.JOURNAL_CONTENT);
+
+			if (journalContent == null) {
+				return null;
+			}
 
 			_articleDisplay = journalContent.getDisplay(
 				article.getGroupId(), article.getArticleId(),
@@ -301,17 +313,30 @@ public class JournalContentDisplayContext {
 			return _ddmTemplateKey;
 		}
 
-		_ddmTemplateKey = ParamUtil.getString(
-			_portletRequest, "ddmTemplateKey",
-			_journalContentPortletInstanceConfiguration.ddmTemplateKey());
+		_ddmTemplateKey =
+			_journalContentPortletInstanceConfiguration.ddmTemplateKey();
 
-		if (Validator.isNotNull(_ddmTemplateKey)) {
-			return _ddmTemplateKey;
+		String ddmTemplateKey = ParamUtil.getString(
+			_portletRequest, "ddmTemplateKey");
+
+		if (Validator.isNotNull(ddmTemplateKey)) {
+			_ddmTemplateKey = ddmTemplateKey;
 		}
 
 		JournalArticle article = getArticle();
 
-		if (article != null) {
+		if (article == null) {
+			return _ddmTemplateKey;
+		}
+
+		List<DDMTemplate> ddmTemplates = getDDMTemplates();
+
+		Stream<DDMTemplate> stream = ddmTemplates.stream();
+
+		boolean hasTemplate = stream.anyMatch(
+			template -> _ddmTemplateKey.equals(template.getTemplateKey()));
+
+		if (!hasTemplate) {
 			_ddmTemplateKey = article.getDDMTemplateKey();
 		}
 
@@ -868,16 +893,22 @@ public class JournalContentDisplayContext {
 			return _showEditArticleIcon;
 		}
 
-		JournalArticle latestArticle = getLatestArticle();
-
 		_showEditArticleIcon = false;
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)_portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		Group group = themeDisplay.getScopeGroup();
+
+		if (group.hasStagingGroup() && _STAGING_LIVE_GROUP_LOCKING_ENABLED) {
+			return _showEditArticleIcon;
+		}
+
+		JournalArticle latestArticle = getLatestArticle();
 
 		if (latestArticle == null) {
 			return _showEditArticleIcon;
 		}
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)_portletRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
 
 		_showEditArticleIcon = JournalArticlePermission.contains(
 			themeDisplay.getPermissionChecker(), latestArticle,
@@ -945,6 +976,14 @@ public class JournalContentDisplayContext {
 		ThemeDisplay themeDisplay = (ThemeDisplay)_portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		Layout layout = themeDisplay.getLayout();
+
+		if (layout.isLayoutPrototypeLinkActive()) {
+			_showSelectArticleLink = false;
+
+			return _showSelectArticleLink;
+		}
+
 		Group scopeGroup = themeDisplay.getScopeGroup();
 
 		if (!scopeGroup.isStaged() || scopeGroup.isStagingGroup()) {
@@ -1009,6 +1048,10 @@ public class JournalContentDisplayContext {
 
 		return ddmTemplate;
 	}
+
+	private static final boolean _STAGING_LIVE_GROUP_LOCKING_ENABLED =
+		GetterUtil.getBoolean(
+			PropsUtil.get(PropsKeys.STAGING_LIVE_GROUP_LOCKING_ENABLED));
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		JournalContentDisplayContext.class);

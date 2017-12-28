@@ -11,7 +11,13 @@
 
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
 			<var name="pageName" value="Test Page" />
 		</execute>
 	</set-up>
@@ -39,7 +45,7 @@
 
 				<execute macro="Tag#tearDownCP" />
 
-				<execute macro="Page#tearDownPG" />
+				<execute macro="Page#tearDownCP" />
 			</else>
 		</if>
 	</tear-down>
@@ -47,7 +53,9 @@
 	<command name="SearchBlogsEntry" priority="4">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Blogs" />
 		</execute>
 
@@ -188,7 +196,9 @@
 	<command name="SearchBlogsEntryCategory" priority="4">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Categories" />
 		</execute>
 
@@ -203,7 +213,9 @@
 
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Blogs" />
 		</execute>
 
@@ -274,7 +286,9 @@
 	<command name="SearchBlogsEntryCategoryQuotes" priority="4">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Categories" />
 		</execute>
 
@@ -289,7 +303,9 @@
 
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Blogs" />
 		</execute>
 
@@ -305,7 +321,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Category Name"</var>
+			<var name="searchTerm" value="&quot;Category Name&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -315,7 +331,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Category"</var>
+			<var name="searchTerm" value="&quot;Category&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -325,7 +341,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Name"</var>
+			<var name="searchTerm" value="&quot;Name&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -335,43 +351,45 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Category Name1"</var>
+			<var name="searchTerm" value="&quot;Category Name1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Category Name1"</var>
+			<var name="searchTerm" value="&quot;Category Name1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Category1"</var>
+			<var name="searchTerm" value="&quot;Category1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Category1"</var>
+			<var name="searchTerm" value="&quot;Category1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Name1"</var>
+			<var name="searchTerm" value="&quot;Name1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Name1"</var>
+			<var name="searchTerm" value="&quot;Name1&quot;" />
 		</execute>
 	</command>
 
 	<command name="SearchBlogsEntryQuotes" priority="4">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Blogs" />
 		</execute>
 
@@ -385,7 +403,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs Entry Title"</var>
+			<var name="searchTerm" value="&quot;Blogs Entry Title&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -395,7 +413,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Entry Title"</var>
+			<var name="searchTerm" value="&quot;Entry Title&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -405,7 +423,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Title"</var>
+			<var name="searchTerm" value="&quot;Title&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -415,7 +433,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs Entry Content"</var>
+			<var name="searchTerm" value="&quot;Blogs Entry Content&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -425,7 +443,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs Entry"</var>
+			<var name="searchTerm" value="&quot;Blogs Entry&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -435,7 +453,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs"</var>
+			<var name="searchTerm" value="&quot;Blogs&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -445,7 +463,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Entry Content"</var>
+			<var name="searchTerm" value="&quot;Entry Content&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -455,7 +473,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Entry"</var>
+			<var name="searchTerm" value="&quot;Entry&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -465,7 +483,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Content"</var>
+			<var name="searchTerm" value="&quot;Content&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -475,87 +493,89 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs Content"</var>
+			<var name="searchTerm" value="&quot;Blogs Content&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Blogs Content"</var>
+			<var name="searchTerm" value="&quot;Blogs Content&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs1"</var>
+			<var name="searchTerm" value="&quot;Blogs1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Blogs1"</var>
+			<var name="searchTerm" value="&quot;Blogs1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Entry1"</var>
+			<var name="searchTerm" value="&quot;Entry1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Entry1"</var>
+			<var name="searchTerm" value="&quot;Entry1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Title1"</var>
+			<var name="searchTerm" value="&quot;Title1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Title1"</var>
+			<var name="searchTerm" value="&quot;Title1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Content1"</var>
+			<var name="searchTerm" value="&quot;Content1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Content1"</var>
+			<var name="searchTerm" value="&quot;Content1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs Entry Title1"</var>
+			<var name="searchTerm" value="&quot;Blogs Entry Title1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Blogs Entry Title1"</var>
+			<var name="searchTerm" value="&quot;Blogs Entry Title1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"Blogs Entry Content1"</var>
+			<var name="searchTerm" value="&quot;Blogs Entry Content1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"Blogs Entry Content1"</var>
+			<var name="searchTerm" value="&quot;Blogs Entry Content1&quot;" />
 		</execute>
 	</command>
 
 	<command name="SearchBlogsEntryTag" priority="4">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Blogs" />
 		</execute>
 
@@ -625,7 +645,9 @@
 	<command name="SearchBlogsEntryTagQuotes" priority="4">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Blogs" />
 		</execute>
 
@@ -640,7 +662,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"tag name"</var>
+			<var name="searchTerm" value="&quot;tag name&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -650,7 +672,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"tag"</var>
+			<var name="searchTerm" value="&quot;tag&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -660,7 +682,7 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"name"</var>
+			<var name="searchTerm" value="&quot;name&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchResultPG">
@@ -670,36 +692,36 @@
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"tag name1"</var>
+			<var name="searchTerm" value="&quot;tag name1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"tag name1"</var>
+			<var name="searchTerm" value="&quot;tag name1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"tag1"</var>
+			<var name="searchTerm" value="&quot;tag1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"tag1"</var>
+			<var name="searchTerm" value="&quot;tag1&quot;" />
 		</execute>
 
 		<execute macro="Search#searchPG">
-			<var name="searchTerm">"name1"</var>
+			<var name="searchTerm" value="&quot;name1&quot;" />
 		</execute>
 
 		<execute macro="Search#viewSearchNoPG">
 			<var name="searchAssetSummary" value="Blogs Entry Content" />
 			<var name="searchAssetTitle" value="Blogs Entry Title" />
 			<var name="searchNoResults" value="true" />
-			<var name="searchTerm">"name1"</var>
+			<var name="searchTerm" value="&quot;name1&quot;" />
 		</execute>
 	</command>
 
@@ -708,7 +730,9 @@
 
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Documents and Media" />
 		</execute>
 
@@ -837,7 +861,13 @@
 	</command>
 
 	<command name="SearchMessageBoardsThread" priority="4">
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
 			<var name="pageName" value="Message Boards Page" />
 		</execute>
 
@@ -994,7 +1024,9 @@
 			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelUsers">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Users" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
@@ -1005,7 +1037,9 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelUsers">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Users" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
@@ -1089,7 +1123,9 @@
 			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelUsers">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Users" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
@@ -1100,7 +1136,9 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelUsers">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Users" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
@@ -1135,7 +1173,9 @@
 	<command name="SearchWebContent" priority="4">
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoSitesContent">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Content" />
+			<var name="panel" value="Site Administration" />
 			<var name="portlet" value="Web Content" />
 		</execute>
 
@@ -1262,7 +1302,13 @@
 	</command>
 
 	<command name="SearchWikiPage" priority="4">
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
 			<var name="pageName" value="Wiki Test Page" />
 		</execute>
 

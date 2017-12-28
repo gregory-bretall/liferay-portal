@@ -7,9 +7,9 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import com.liferay.portal.kernel.security.access.control.AccessControlled;
 import com.liferay.portal.kernel.service.Base${sessionTypeName}Service;
-import com.liferay.portal.kernel.service.Invokable${sessionTypeName}Service;
 import com.liferay.portal.kernel.service.PermissionedModelLocalService;
 import com.liferay.portal.kernel.service.PersistedModelLocalService;
+import com.liferay.portal.kernel.service.PersistedResourcedModelLocalService;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
@@ -78,15 +78,12 @@ public interface ${entity.name}${sessionTypeName}Service
 
 	<#assign overrideMethodNames = [] />
 
-	<#if validator.isNotNull(pluginName)>
-		, Invokable${sessionTypeName}Service
-
-		<#assign overrideMethodNames = overrideMethodNames + ["invokeMethod"] />
-	</#if>
-
 	<#if stringUtil.equals(sessionTypeName, "Local") && entity.hasColumns()>
 		<#if entity.isPermissionedModel()>
 			, PermissionedModelLocalService
+		<#elseif entity.isResourcedModel()>
+			, PersistedModelLocalService
+			, PersistedResourcedModelLocalService
 		<#else>
 			, PersistedModelLocalService
 		</#if>
@@ -107,12 +104,12 @@ public interface ${entity.name}${sessionTypeName}Service
 	 */
 
 	<#list methods as method>
-		<#if !method.isConstructor() && !method.isStatic() && method.isPublic() && serviceBuilder.isCustomMethod(method)>
+		<#if !method.isStatic() && method.isPublic() && serviceBuilder.isCustomMethod(method)>
 			${serviceBuilder.getJavadocComment(method)}
 
 			<#list method.annotations as annotation>
-				<#if (annotation.type != "java.lang.Override") && (annotation.type != "java.lang.SuppressWarnings")>
-					${serviceBuilder.annotationToString(annotation)}
+				<#if !stringUtil.equals(annotation.type.name, "Override") && !stringUtil.equals(annotation.type.name, "SuppressWarnings")>
+					${serviceBuilder.javaAnnotationToString(annotation)}
 				</#if>
 			</#list>
 
@@ -147,7 +144,7 @@ public interface ${entity.name}${sessionTypeName}Service
 						throws
 					</#if>
 
-					${exception.value}
+					${exception.fullyQualifiedName}
 
 					<#if exception_has_next>
 						,
@@ -159,7 +156,7 @@ public interface ${entity.name}${sessionTypeName}Service
 						throws
 					</#if>
 
-					${exception.value}
+					${exception.fullyQualifiedName}
 
 					<#if exception_has_next>
 						,

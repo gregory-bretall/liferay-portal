@@ -130,7 +130,7 @@ public class ReleaseGraphManagerTest {
 
 		List<String> sinkNodes = releaseGraphManager.getEndVertices();
 
-		Assert.assertTrue(sinkNodes.contains("2.0.0"));
+		Assert.assertTrue(sinkNodes.toString(), sinkNodes.contains("2.0.0"));
 	}
 
 	@Test
@@ -148,8 +148,8 @@ public class ReleaseGraphManagerTest {
 
 		List<String> sinkNodes = releaseGraphManager.getEndVertices();
 
-		Assert.assertTrue(sinkNodes.contains("2.0.0"));
-		Assert.assertTrue(sinkNodes.contains("2.2.0"));
+		Assert.assertTrue(sinkNodes.toString(), sinkNodes.contains("2.0.0"));
+		Assert.assertTrue(sinkNodes.toString(), sinkNodes.contains("2.2.0"));
 	}
 
 	@Test
@@ -251,7 +251,7 @@ public class ReleaseGraphManagerTest {
 
 	protected UpgradeInfo createUpgradeInfo(String from, String to) {
 		return new UpgradeInfo(
-			from, to, new TestUpgradeStep(from + " -> " + to));
+			from, to, 0, new TestUpgradeStep(from + " -> " + to));
 	}
 
 	private static class TestUpgradeStep implements UpgradeStep {
