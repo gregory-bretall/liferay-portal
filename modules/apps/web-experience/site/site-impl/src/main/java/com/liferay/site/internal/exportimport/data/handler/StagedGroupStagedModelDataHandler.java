@@ -24,16 +24,16 @@ import static com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleCon
 import com.liferay.exportimport.controller.PortletExportController;
 import com.liferay.exportimport.controller.PortletImportController;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportHelper;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.exportimport.kernel.lar.ManifestSummary;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
-import com.liferay.exportimport.kernel.lar.PortletDataContextFactoryUtil;
+import com.liferay.exportimport.kernel.lar.PortletDataContextFactory;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.PortletDataHandler;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
-import com.liferay.exportimport.kernel.lar.PortletDataHandlerStatusMessageSenderUtil;
+import com.liferay.exportimport.kernel.lar.PortletDataHandlerStatusMessageSender;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleManager;
@@ -42,13 +42,12 @@ import com.liferay.exportimport.lar.PermissionImporter;
 import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.layout.set.model.adapter.StagedLayoutSet;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
-import com.liferay.portal.kernel.exception.NoSuchLayoutException;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -63,7 +62,6 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
@@ -73,7 +71,7 @@ import com.liferay.sites.kernel.util.SitesUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -152,7 +150,7 @@ public class StagedGroupStagedModelDataHandler
 		throws Exception {
 
 		List<Portlet> dataSiteLevelPortlets =
-			ExportImportHelperUtil.getDataSiteLevelPortlets(
+			_exportImportHelper.getDataSiteLevelPortlets(
 				portletDataContext.getCompanyId());
 
 		Group liveGroup = group;
@@ -161,7 +159,7 @@ public class StagedGroupStagedModelDataHandler
 			liveGroup = liveGroup.getLiveGroup();
 		}
 
-		Set<String> portletIds = new HashSet<>();
+		Set<String> portletIds = new LinkedHashSet<>();
 
 		for (Portlet portlet : dataSiteLevelPortlets) {
 			String portletId = portlet.getRootPortletId();
@@ -176,7 +174,7 @@ public class StagedGroupStagedModelDataHandler
 
 			if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
 				Map<String, Boolean> exportPortletControlsMap =
-					ExportImportHelperUtil.getExportPortletControlsMap(
+					_exportImportHelper.getExportPortletControlsMap(
 						portletDataContext.getCompanyId(), portletId,
 						portletDataContext.getParameterMap(),
 						portletDataContext.getType());
@@ -214,7 +212,7 @@ public class StagedGroupStagedModelDataHandler
 			ManifestSummary manifestSummary =
 				portletDataContext.getManifestSummary();
 
-			PortletDataHandlerStatusMessageSenderUtil.sendStatusMessage(
+			_portletDataHandlerStatusMessageSender.sendStatusMessage(
 				"layout", ArrayUtil.toStringArray(dataSiteLevelPortletIds),
 				manifestSummary);
 
@@ -224,7 +222,7 @@ public class StagedGroupStagedModelDataHandler
 		long[] layoutIds = portletDataContext.getLayoutIds();
 
 		if (stagedGroup.isLayoutPrototype()) {
-			layoutIds = ExportImportHelperUtil.getAllLayoutIds(
+			layoutIds = _exportImportHelper.getAllLayoutIds(
 				stagedGroup.getGroupId(), portletDataContext.isPrivateLayout());
 		}
 
@@ -314,18 +312,10 @@ public class StagedGroupStagedModelDataHandler
 				portletIds.add(portletId);
 			}
 
-			PortletDataHandlerStatusMessageSenderUtil.sendStatusMessage(
+			_portletDataHandlerStatusMessageSender.sendStatusMessage(
 				"layout", ArrayUtil.toStringArray(portletIds),
 				portletDataContext.getManifestSummary());
 		}
-
-		// Import site data portlets
-
-		if (_log.isDebugEnabled() && !sitePortletElements.isEmpty()) {
-			_log.debug("Importing portlets");
-		}
-
-		importSitePortlets(portletDataContext, sitePortletElements);
 
 		// Import services
 
@@ -349,6 +339,14 @@ public class StagedGroupStagedModelDataHandler
 			StagedModelDataHandlerUtil.importStagedModel(
 				portletDataContext, groupElement);
 		}
+
+		// Import site data portlets
+
+		if (_log.isDebugEnabled() && !sitePortletElements.isEmpty()) {
+			_log.debug("Importing portlets");
+		}
+
+		importSitePortlets(portletDataContext, sitePortletElements);
 	}
 
 	protected void exportPortlet(
@@ -366,7 +364,7 @@ public class StagedGroupStagedModelDataHandler
 		portletDataContext.setScopeLayoutUuid(scopeLayoutUuid);
 
 		Map<String, Boolean> exportPortletControlsMap =
-			ExportImportHelperUtil.getExportPortletControlsMap(
+			_exportImportHelper.getExportPortletControlsMap(
 				portletDataContext.getCompanyId(), portletId,
 				portletDataContext.getParameterMap(), type);
 
@@ -374,7 +372,7 @@ public class StagedGroupStagedModelDataHandler
 			_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 				EVENT_PORTLET_EXPORT_STARTED, getProcessFlag(),
 				portletDataContext.getExportImportProcessId(),
-				PortletDataContextFactoryUtil.clonePortletDataContext(
+				_portletDataContextFactory.clonePortletDataContext(
 					portletDataContext));
 
 			_portletExportController.exportPortlet(
@@ -395,14 +393,14 @@ public class StagedGroupStagedModelDataHandler
 			_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 				EVENT_PORTLET_EXPORT_SUCCEEDED, getProcessFlag(),
 				portletDataContext.getExportImportProcessId(),
-				PortletDataContextFactoryUtil.clonePortletDataContext(
+				_portletDataContextFactory.clonePortletDataContext(
 					portletDataContext));
 		}
 		catch (Throwable t) {
 			_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 				EVENT_PORTLET_EXPORT_FAILED, getProcessFlag(),
 				portletDataContext.getExportImportProcessId(),
-				PortletDataContextFactoryUtil.clonePortletDataContext(
+				_portletDataContextFactory.clonePortletDataContext(
 					portletDataContext),
 				t);
 
@@ -458,6 +456,13 @@ public class StagedGroupStagedModelDataHandler
 				if (!ArrayUtil.contains(layoutIds, layout.getLayoutId()) ||
 					!layout.isTypePortlet() || !layout.hasScopeGroup()) {
 
+					continue;
+				}
+
+				LayoutTypePortlet layoutTypePortlet =
+					(LayoutTypePortlet)layout.getLayoutType();
+
+				if (!layoutTypePortlet.hasPortletId(portletId)) {
 					continue;
 				}
 
@@ -534,7 +539,7 @@ public class StagedGroupStagedModelDataHandler
 			portletDataContext.setPortletId(portletId);
 
 			if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
-				PortletDataHandlerStatusMessageSenderUtil.sendStatusMessage(
+				_portletDataHandlerStatusMessageSender.sendStatusMessage(
 					"portlet", portletId,
 					portletDataContext.getManifestSummary());
 			}
@@ -549,14 +554,15 @@ public class StagedGroupStagedModelDataHandler
 			// portlet permissions. The import of the portlet data assumes that
 			// portlet preferences already exist.
 
-			setPortletScope(portletDataContext, portletElement);
+			_exportImportHelper.setPortletScope(
+				portletDataContext, portletElement);
 
 			long portletPreferencesGroupId = portletDataContext.getGroupId();
 
 			Element portletDataElement = portletElement.element("portlet-data");
 
 			Map<String, Boolean> importPortletControlsMap =
-				ExportImportHelperUtil.getImportPortletControlsMap(
+				_exportImportHelper.getImportPortletControlsMap(
 					portletDataContext.getCompanyId(), portletId,
 					portletDataContext.getParameterMap(), portletDataElement,
 					portletDataContext.getManifestSummary());
@@ -569,7 +575,7 @@ public class StagedGroupStagedModelDataHandler
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_IMPORT_STARTED, getProcessFlag(),
 					portletDataContext.getExportImportProcessId(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext));
 
 				// Portlet preferences
@@ -598,14 +604,14 @@ public class StagedGroupStagedModelDataHandler
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_IMPORT_SUCCEEDED, getProcessFlag(),
 					portletDataContext.getExportImportProcessId(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext));
 			}
 			catch (Throwable t) {
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_IMPORT_FAILED, getProcessFlag(),
 					portletDataContext.getExportImportProcessId(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext),
 					t);
 
@@ -659,101 +665,11 @@ public class StagedGroupStagedModelDataHandler
 		}
 	}
 
-	protected void setPortletScope(
-		PortletDataContext portletDataContext, Element portletElement) {
-
-		// Portlet data scope
-
-		String scopeLayoutUuid = GetterUtil.getString(
-			portletElement.attributeValue("scope-layout-uuid"));
-		String scopeLayoutType = GetterUtil.getString(
-			portletElement.attributeValue("scope-layout-type"));
-
-		portletDataContext.setScopeLayoutUuid(scopeLayoutUuid);
-		portletDataContext.setScopeType(scopeLayoutType);
-
-		// Layout scope
-
-		try {
-			Group scopeGroup = null;
-
-			if (scopeLayoutType.equals("company")) {
-				scopeGroup = _groupLocalService.getCompanyGroup(
-					portletDataContext.getCompanyId());
-			}
-			else if (Validator.isNotNull(scopeLayoutUuid)) {
-				Layout scopeLayout =
-					_layoutLocalService.getLayoutByUuidAndGroupId(
-						scopeLayoutUuid, portletDataContext.getGroupId(),
-						portletDataContext.isPrivateLayout());
-
-				scopeGroup = _groupLocalService.checkScopeGroup(
-					scopeLayout, portletDataContext.getUserId(null));
-
-				Group group = scopeLayout.getGroup();
-
-				if (group.isStaged() && !group.isStagedRemotely()) {
-					try {
-						boolean privateLayout = GetterUtil.getBoolean(
-							portletElement.attributeValue("private-layout"));
-
-						Layout oldLayout =
-							_layoutLocalService.getLayoutByUuidAndGroupId(
-								scopeLayoutUuid,
-								portletDataContext.getSourceGroupId(),
-								privateLayout);
-
-						Group oldScopeGroup = oldLayout.getScopeGroup();
-
-						if (group.isStagingGroup()) {
-							scopeGroup.setLiveGroupId(
-								oldScopeGroup.getGroupId());
-
-							_groupLocalService.updateGroup(scopeGroup);
-						}
-						else {
-							oldScopeGroup.setLiveGroupId(
-								scopeGroup.getGroupId());
-
-							_groupLocalService.updateGroup(oldScopeGroup);
-						}
-					}
-					catch (NoSuchLayoutException nsle) {
-						if (_log.isWarnEnabled()) {
-							_log.warn(nsle);
-						}
-					}
-				}
-			}
-
-			if (scopeGroup != null) {
-				portletDataContext.setScopeGroupId(scopeGroup.getGroupId());
-
-				Map<Long, Long> groupIds =
-					(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
-						Group.class);
-
-				long oldScopeGroupId = GetterUtil.getLong(
-					portletElement.attributeValue("scope-group-id"));
-
-				groupIds.put(oldScopeGroupId, scopeGroup.getGroupId());
-			}
-		}
-		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-		}
-		catch (Exception e) {
-			_log.error(e, e);
-		}
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		StagedGroupStagedModelDataHandler.class);
+
+	@Reference
+	private ExportImportHelper _exportImportHelper;
 
 	@Reference
 	private ExportImportLifecycleManager _exportImportLifecycleManager;
@@ -775,6 +691,13 @@ public class StagedGroupStagedModelDataHandler
 
 	private final PermissionImporter _permissionImporter =
 		PermissionImporter.getInstance();
+
+	@Reference
+	private PortletDataContextFactory _portletDataContextFactory;
+
+	@Reference
+	private PortletDataHandlerStatusMessageSender
+		_portletDataHandlerStatusMessageSender;
 
 	@Reference
 	private PortletExportController _portletExportController;

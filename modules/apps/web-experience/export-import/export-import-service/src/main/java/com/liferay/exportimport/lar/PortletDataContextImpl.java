@@ -25,11 +25,13 @@ import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.model.ExpandoColumn;
 import com.liferay.expando.kernel.service.ExpandoColumnLocalServiceUtil;
 import com.liferay.exportimport.internal.util.ExportImportPermissionUtil;
+import com.liferay.exportimport.internal.xstream.converter.TimestampConverter;
 import com.liferay.exportimport.kernel.lar.ExportImportClassedModelUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.exportimport.kernel.lar.ManifestSummary;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.exportimport.kernel.lar.PortletDataContextListener;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
@@ -236,8 +238,12 @@ public class PortletDataContextImpl implements PortletDataContext {
 				Serializable classPK =
 					ExportImportClassedModelUtil.getPrimaryKeyObj(classedModel);
 
-				addAssetLinks(clazz, classPK);
-				addAssetPriority(element, clazz, classPK);
+				long classNameId = ExportImportClassedModelUtil.getClassNameId(
+					classedModel);
+
+				_addAssetLinks(classNameId, GetterUtil.getLong(classPK));
+				_addAssetPriority(
+					element, classNameId, GetterUtil.getLong(classPK));
 
 				addExpando(element, path, classedModel, clazz);
 				addLocks(clazz, String.valueOf(classPK));
@@ -612,7 +618,15 @@ public class PortletDataContextImpl implements PortletDataContext {
 			Element missingReferenceElement = getMissingReferenceElement(
 				classedModel);
 
-			_missingReferencesElement.remove(missingReferenceElement);
+			if (classedModel instanceof Layout) {
+				missingReferenceElement.addAttribute(
+					"element-path", "/manifest.xml");
+			}
+			else {
+				missingReferenceElement.addAttribute(
+					"element-path",
+					ExportImportPathUtil.getPortletDataPath(this));
+			}
 		}
 	}
 
@@ -681,7 +695,14 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public long[] getAssetCategoryIds(Class<?> clazz, Serializable classPK) {
-		return _assetCategoryIdsMap.get(getPrimaryKeyString(clazz, classPK));
+		long[] assetCategoryIds = _assetCategoryIdsMap.get(
+			getPrimaryKeyString(clazz, classPK));
+
+		if (assetCategoryIds == null) {
+			return new long[0];
+		}
+
+		return assetCategoryIds;
 	}
 
 	/**
@@ -728,7 +749,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public String[] getAssetTagNames(Class<?> clazz, Serializable classPK) {
-		return _assetTagNamesMap.get(getPrimaryKeyString(clazz, classPK));
+		return getAssetTagNames(getPrimaryKeyString(clazz, classPK));
 	}
 
 	/**
@@ -743,7 +764,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public String[] getAssetTagNames(String className, Serializable classPK) {
-		return _assetTagNamesMap.get(getPrimaryKeyString(className, classPK));
+		return getAssetTagNames(getPrimaryKeyString(className, classPK));
 	}
 
 	@Override
@@ -990,6 +1011,23 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Override
 	public ManifestSummary getManifestSummary() {
 		return _manifestSummary;
+	}
+
+	@Override
+	public Element getMissingReferenceElement(ClassedModel classedModel) {
+		StringBundler sb = new StringBundler(5);
+
+		sb.append("missing-reference[@class-name='");
+		sb.append(ExportImportClassedModelUtil.getClassName(classedModel));
+		sb.append("' and @class-pk='");
+		sb.append(String.valueOf(classedModel.getPrimaryKeyObj()));
+		sb.append("']");
+
+		XPath xPath = SAXReaderUtil.createXPath(sb.toString());
+
+		Node node = xPath.selectSingleNode(_missingReferencesElement);
+
+		return (Element)node;
 	}
 
 	@Override
@@ -1758,6 +1796,13 @@ public class PortletDataContextImpl implements PortletDataContext {
 				_missingReferencesElement.elements();
 
 			for (Element missingReferenceElement : missingReferenceElements) {
+				if (Validator.isNotNull(
+						missingReferenceElement.attributeValue(
+							"element-path"))) {
+
+					continue;
+				}
+
 				String missingReferenceClassName =
 					missingReferenceElement.attributeValue("class-name");
 				String missingReferenceClassPK =
@@ -1954,8 +1999,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Deprecated
 	@Override
 	public void setPortetDataContextListener(
-		com.liferay.exportimport.kernel.lar.PortletDataContextListener
-			portletDataContextListener) {
+		PortletDataContextListener portletDataContextListener) {
 	}
 
 	@Override
@@ -2047,6 +2091,10 @@ public class PortletDataContextImpl implements PortletDataContext {
 		return _xStream.toXML(object);
 	}
 
+	/**
+	 * @deprecated As of 4.0.0
+	 */
+	@Deprecated
 	protected void addAssetLinks(Class<?> clazz, Serializable classPK) {
 		AssetEntry assetEntry = AssetEntryLocalServiceUtil.fetchEntry(
 			clazz.getName(), GetterUtil.getLong(classPK));
@@ -2073,6 +2121,10 @@ public class PortletDataContextImpl implements PortletDataContext {
 		addAssetPriority(element, clazz, (Serializable)classPK);
 	}
 
+	/**
+	 * @deprecated As of 4.0.0
+	 */
+	@Deprecated
 	protected void addAssetPriority(
 		Element element, Class<?> clazz, Serializable classPK) {
 
@@ -2172,7 +2224,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 		if (element != null) {
 			Attribute assetPriorityAttribute = element.attribute(
-				"asset-priority");
+				"asset-entry-priority");
 
 			if (assetPriorityAttribute != null) {
 				double assetPriority = GetterUtil.getDouble(
@@ -2377,6 +2429,16 @@ public class PortletDataContextImpl implements PortletDataContext {
 		return referenceElement;
 	}
 
+	protected String[] getAssetTagNames(String key) {
+		String[] assetTagNames = _assetTagNamesMap.get(key);
+
+		if (assetTagNames == null) {
+			return new String[0];
+		}
+
+		return assetTagNames;
+	}
+
 	protected Element getDataElement(
 		Element parentElement, String attribute, String value) {
 
@@ -2431,22 +2493,6 @@ public class PortletDataContextImpl implements PortletDataContext {
 		}
 
 		return groupElement;
-	}
-
-	protected Element getMissingReferenceElement(ClassedModel classedModel) {
-		StringBundler sb = new StringBundler(5);
-
-		sb.append("missing-reference[@class-name='");
-		sb.append(ExportImportClassedModelUtil.getClassName(classedModel));
-		sb.append("' and @class-pk='");
-		sb.append(String.valueOf(classedModel.getPrimaryKeyObj()));
-		sb.append("']");
-
-		XPath xPath = SAXReaderUtil.createXPath(sb.toString());
-
-		Node node = xPath.selectSingleNode(_missingReferencesElement);
-
-		return (Element)node;
 	}
 
 	/**
@@ -2676,6 +2722,24 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 		_xStreamConfigurators = xStreamConfigurators;
 
+		try {
+			Class<?> timestampClass = classLoader.loadClass(
+				"com.sybase.jdbc4.tds.SybTimestamp");
+
+			_xStream.alias("sql-timestamp", timestampClass);
+		}
+		catch (ClassNotFoundException cnfe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Unable to load class com.sybase.jdbc4.tds.SybTimestamp " +
+						" because the Sybase driver is not available");
+			}
+		}
+
+		_xStream.registerConverter(
+			new ConverterAdapter(new TimestampConverter()),
+			XStream.PRIORITY_VERY_HIGH);
+
 		if (xStreamConfigurators.isEmpty()) {
 			return;
 		}
@@ -2767,6 +2831,25 @@ public class PortletDataContextImpl implements PortletDataContext {
 		if (Validator.isNotNull(attachedClassName)) {
 			element.addAttribute("attached-class-name", attachedClassName);
 		}
+	}
+
+	private void _addAssetLinks(long classNameId, long classPK) {
+		List<AssetLink> assetLinks = AssetLinkLocalServiceUtil.getLinks(
+			classNameId, classPK);
+
+		for (AssetLink assetLink : assetLinks) {
+			_assetLinkIds.add(assetLink.getLinkId());
+		}
+	}
+
+	private void _addAssetPriority(
+		Element element, long classNameId, long classPK) {
+
+		double assetEntryPriority = AssetEntryLocalServiceUtil.getEntryPriority(
+			classNameId, classPK);
+
+		element.addAttribute(
+			"asset-entry-priority", String.valueOf(assetEntryPriority));
 	}
 
 	private static final Class<?>[] _XSTREAM_DEFAULT_ALLOWED_TYPES = {

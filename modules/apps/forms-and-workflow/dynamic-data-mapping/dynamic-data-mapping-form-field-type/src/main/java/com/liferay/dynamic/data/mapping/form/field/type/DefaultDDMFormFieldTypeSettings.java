@@ -22,7 +22,7 @@ import com.liferay.dynamic.data.mapping.annotations.DDMFormLayoutPage;
 import com.liferay.dynamic.data.mapping.annotations.DDMFormLayoutRow;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldValidation;
 import com.liferay.dynamic.data.mapping.model.LocalizedValue;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.petra.string.StringPool;
 
 /**
  * @author Marcellus Tavares
@@ -74,7 +74,7 @@ public interface DefaultDDMFormFieldTypeSettings
 			"%not-indexable", "%indexable-keyword", "%indexable-text"
 		},
 		optionValues = {StringPool.BLANK, "keyword", "text"},
-		predefinedValue = "keyword", type = "select",
+		predefinedValue = "keyword", type = "radio",
 		visibilityExpression = "FALSE"
 	)
 	public String indexType();

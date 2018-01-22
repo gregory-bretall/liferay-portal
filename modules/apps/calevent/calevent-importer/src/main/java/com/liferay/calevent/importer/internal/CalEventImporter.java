@@ -36,13 +36,19 @@ import com.liferay.calendar.recurrence.Weekday;
 import com.liferay.calendar.service.CalendarBookingLocalService;
 import com.liferay.calendar.service.CalendarResourceLocalService;
 import com.liferay.counter.kernel.service.CounterLocalService;
-import com.liferay.message.boards.kernel.model.MBDiscussion;
+import com.liferay.expando.kernel.model.ExpandoRow;
+import com.liferay.expando.kernel.model.ExpandoTable;
+import com.liferay.expando.kernel.model.ExpandoValue;
+import com.liferay.expando.kernel.service.ExpandoRowLocalService;
+import com.liferay.expando.kernel.service.ExpandoTableLocalService;
+import com.liferay.expando.kernel.service.ExpandoValueLocalService;
 import com.liferay.message.boards.kernel.model.MBMessage;
 import com.liferay.message.boards.kernel.model.MBMessageConstants;
 import com.liferay.message.boards.kernel.model.MBThread;
-import com.liferay.message.boards.kernel.service.MBDiscussionLocalService;
 import com.liferay.message.boards.kernel.service.MBMessageLocalService;
 import com.liferay.message.boards.kernel.service.MBThreadLocalService;
+import com.liferay.message.boards.model.MBDiscussion;
+import com.liferay.message.boards.service.MBDiscussionLocalService;
 import com.liferay.portal.kernel.cal.DayAndPosition;
 import com.liferay.portal.kernel.cal.TZSRecurrence;
 import com.liferay.portal.kernel.dao.db.DBInspector;
@@ -56,16 +62,15 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.ResourceAction;
-import com.liferay.portal.kernel.model.ResourceBlockConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.ResourcePermission;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
-import com.liferay.portal.kernel.service.ResourceBlockLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -94,6 +99,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -509,7 +515,7 @@ public class CalEventImporter {
 		recurrence.setFrequency(frequency);
 		recurrence.setPositionalWeekdays(positionalWeekdays);
 
-		java.util.Calendar untilJCalendar = tzsRecurrence.getUntil();
+		Calendar untilJCalendar = tzsRecurrence.getUntil();
 
 		int ocurrence = tzsRecurrence.getOccurrence();
 
@@ -537,28 +543,24 @@ public class CalEventImporter {
 		return newResourceAction.getBitwiseValue();
 	}
 
-	protected long getActionIds(
+	protected String[] getActionIds(
 		ResourcePermission resourcePermission, String oldClassName,
-		String newClassName) {
+		List<String> modelResourceActions) {
 
-		long actionIds = 0;
+		List<String> actionIds = new ArrayList<>();
 
-		List<ResourceAction> oldResourceActions =
+		List<ResourceAction> resourceActions =
 			_resourceActionLocalService.getResourceActions(oldClassName);
 
-		for (ResourceAction oldResourceAction : oldResourceActions) {
-			boolean hasActionId = _resourcePermissionLocalService.hasActionId(
-				resourcePermission, oldResourceAction);
+		for (ResourceAction resourceAction : resourceActions) {
+			if (resourcePermission.hasAction(resourceAction) &&
+				modelResourceActions.contains(resourceAction.getActionId())) {
 
-			if (!hasActionId) {
-				continue;
+				actionIds.add(resourceAction.getActionId());
 			}
-
-			actionIds = actionIds | getActionId(
-				oldResourceAction, newClassName);
 		}
 
-		return actionIds;
+		return actionIds.toArray(new String[actionIds.size()]);
 	}
 
 	protected AssetCategory getAssetCategory(
@@ -835,25 +837,30 @@ public class CalEventImporter {
 	}
 
 	protected void importCalendarBookingResourcePermission(
-			ResourcePermission resourcePermission, long calendarBookingId)
+			ResourcePermission resourcePermission, long calendarBookingId,
+			List<String> modelResourceActions)
 		throws PortalException {
 
 		CalendarBooking calendarBooking =
 			_calendarBookingLocalService.getCalendarBooking(calendarBookingId);
 
-		long actionIds = getActionIds(
-			resourcePermission, _CLASS_NAME, CalendarBooking.class.getName());
+		String[] actionIds = getActionIds(
+			resourcePermission, _CLASS_NAME, modelResourceActions);
 
-		_resourceBlockLocalService.updateIndividualScopePermissions(
-			calendarBooking.getCompanyId(), calendarBooking.getGroupId(),
-			CalendarBooking.class.getName(), calendarBooking,
-			resourcePermission.getRoleId(), actionIds,
-			ResourceBlockConstants.OPERATOR_SET);
+		_resourcePermissionLocalService.setResourcePermissions(
+			calendarBooking.getCompanyId(), CalendarBooking.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL,
+			String.valueOf(calendarBookingId), resourcePermission.getRoleId(),
+			actionIds);
 	}
 
 	protected void importCalendarBookingResourcePermissions(
 			long companyId, long eventId, long calendarBookingId)
 		throws PortalException {
+
+		List<String> modelResourceActions =
+			ResourceActionsUtil.getModelResourceActions(
+				CalendarBooking.class.getName());
 
 		List<ResourcePermission> resourcePermissions =
 			_resourcePermissionLocalService.getResourcePermissions(
@@ -862,13 +869,13 @@ public class CalEventImporter {
 
 		for (ResourcePermission resourcePermission : resourcePermissions) {
 			importCalendarBookingResourcePermission(
-				resourcePermission, calendarBookingId);
+				resourcePermission, calendarBookingId, modelResourceActions);
 		}
 	}
 
 	protected CalendarBooking importCalEvent(long calEventId) throws Exception {
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
-			StringBundler sb = new StringBundler(5);
+			StringBundler sb = new StringBundler(6);
 
 			sb.append("select uuid_, eventId, groupId, companyId, userId, ");
 			sb.append("userName, createDate, modifiedDate, title, ");
@@ -979,6 +986,10 @@ public class CalEventImporter {
 		importAssets(
 			uuid, companyId, groupId, userId, type, eventId, calendarBookingId);
 
+		// Expando
+
+		importExpando(companyId, eventId, calendarBookingId);
+
 		// Message boards
 
 		importMBDiscussion(eventId, calendarBookingId);
@@ -1002,7 +1013,7 @@ public class CalEventImporter {
 		}
 
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
-			StringBundler sb = new StringBundler(5);
+			StringBundler sb = new StringBundler(6);
 
 			sb.append("select uuid_, eventId, groupId, companyId, userId, ");
 			sb.append("userName, createDate, modifiedDate, title, ");
@@ -1045,6 +1056,42 @@ public class CalEventImporter {
 						recurrence, remindBy, firstReminder, secondReminder);
 				}
 			}
+		}
+	}
+
+	protected void importExpando(
+			long companyId, long eventId, long calendarBookingId)
+		throws PortalException {
+
+		long oldClassNameId = _classNameLocalService.getClassNameId(
+			_CLASS_NAME);
+
+		ExpandoTable expandoTable = _expandoTableLocalService.getTable(
+			companyId, oldClassNameId, "CUSTOM_FIELDS");
+
+		ExpandoRow expandoRow = _expandoRowLocalService.fetchRow(
+			expandoTable.getTableId(), eventId);
+
+		expandoRow.setClassPK(calendarBookingId);
+
+		_expandoRowLocalService.updateExpandoRow(expandoRow);
+
+		long calendarBookingClassNameId = _classNameLocalService.getClassNameId(
+			CalendarBooking.class);
+
+		expandoTable.setClassNameId(calendarBookingClassNameId);
+
+		_expandoTableLocalService.updateExpandoTable(expandoTable);
+
+		List<ExpandoValue> expandoValues =
+			_expandoValueLocalService.getRowValues(expandoRow.getRowId());
+
+		for (ExpandoValue expandoValue : expandoValues) {
+			expandoValue.setClassNameId(calendarBookingClassNameId);
+
+			expandoValue.setClassPK(calendarBookingId);
+
+			_expandoValueLocalService.updateExpandoValue(expandoValue);
 		}
 	}
 
@@ -1248,7 +1295,7 @@ public class CalEventImporter {
 			long entryId1, long entryId2, int type)
 		throws SQLException {
 
-		StringBundler sb = new StringBundler(128);
+		StringBundler sb = new StringBundler(3);
 
 		sb.append("select count(*) from AssetLink where ((entryId1 = ? and ");
 		sb.append("entryId2 = ?) or (entryId2 = ? and entryId1 = ?)) and ");
@@ -1381,13 +1428,6 @@ public class CalEventImporter {
 	}
 
 	@Reference(unbind = "-")
-	protected void setResourceBlockLocalService(
-		ResourceBlockLocalService resourceBlockLocalService) {
-
-		_resourceBlockLocalService = resourceBlockLocalService;
-	}
-
-	@Reference(unbind = "-")
 	protected void setResourcePermissionLocalService(
 		ResourcePermissionLocalService resourcePermissionLocalService) {
 
@@ -1450,13 +1490,13 @@ public class CalEventImporter {
 		_frequencies.put(TZSRecurrence.MONTHLY, Frequency.MONTHLY);
 		_frequencies.put(TZSRecurrence.YEARLY, Frequency.YEARLY);
 
-		_weekdays.put(java.util.Calendar.SUNDAY, Weekday.SUNDAY);
-		_weekdays.put(java.util.Calendar.MONDAY, Weekday.MONDAY);
-		_weekdays.put(java.util.Calendar.TUESDAY, Weekday.TUESDAY);
-		_weekdays.put(java.util.Calendar.WEDNESDAY, Weekday.WEDNESDAY);
-		_weekdays.put(java.util.Calendar.THURSDAY, Weekday.THURSDAY);
-		_weekdays.put(java.util.Calendar.FRIDAY, Weekday.FRIDAY);
-		_weekdays.put(java.util.Calendar.SATURDAY, Weekday.SATURDAY);
+		_weekdays.put(Calendar.SUNDAY, Weekday.SUNDAY);
+		_weekdays.put(Calendar.MONDAY, Weekday.MONDAY);
+		_weekdays.put(Calendar.TUESDAY, Weekday.TUESDAY);
+		_weekdays.put(Calendar.WEDNESDAY, Weekday.WEDNESDAY);
+		_weekdays.put(Calendar.THURSDAY, Weekday.THURSDAY);
+		_weekdays.put(Calendar.FRIDAY, Weekday.FRIDAY);
+		_weekdays.put(Calendar.SATURDAY, Weekday.SATURDAY);
 	}
 
 	private AssetCategoryLocalService _assetCategoryLocalService;
@@ -1467,6 +1507,16 @@ public class CalEventImporter {
 	private CalendarResourceLocalService _calendarResourceLocalService;
 	private ClassNameLocalService _classNameLocalService;
 	private CounterLocalService _counterLocalService;
+
+	@Reference(unbind = "-")
+	private ExpandoRowLocalService _expandoRowLocalService;
+
+	@Reference(unbind = "-")
+	private ExpandoTableLocalService _expandoTableLocalService;
+
+	@Reference(unbind = "-")
+	private ExpandoValueLocalService _expandoValueLocalService;
+
 	private GroupLocalService _groupLocalService;
 	private JSONSerializer _jsonSerializer;
 	private MBDiscussionLocalService _mbDiscussionLocalService;
@@ -1475,7 +1525,6 @@ public class CalEventImporter {
 	private RatingsEntryLocalService _ratingsEntryLocalService;
 	private RatingsStatsLocalService _ratingsStatsLocalService;
 	private ResourceActionLocalService _resourceActionLocalService;
-	private ResourceBlockLocalService _resourceBlockLocalService;
 	private ResourcePermissionLocalService _resourcePermissionLocalService;
 	private RoleLocalService _roleLocalService;
 	private SocialActivityLocalService _socialActivityLocalService;

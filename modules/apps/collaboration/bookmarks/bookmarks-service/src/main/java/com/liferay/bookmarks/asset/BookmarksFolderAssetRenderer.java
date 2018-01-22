@@ -45,15 +45,17 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Eudaldo Alonso
  * @author Alexander Chow
+ * @deprecated As of 1.2.0, with no direct replacement
  */
+@Deprecated
 public class BookmarksFolderAssetRenderer
 	extends BaseJSPAssetRenderer<BookmarksFolder> implements TrashRenderer {
 
 	public static final String TYPE = "bookmarks_folder";
 
 	/**
-	 * @deprecated As of 1.1.0, replaced by {@link #BookmarksFolderAssetRenderer(
-	 *             BookmarksFolder, TrashHelper)}
+	 * @deprecated As of 1.1.0, replaced by {@link
+	 *             #BookmarksFolderAssetRenderer(BookmarksFolder, TrashHelper)}
 	 */
 	@Deprecated
 	public BookmarksFolderAssetRenderer(BookmarksFolder folder) {

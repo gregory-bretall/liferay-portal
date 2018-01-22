@@ -40,10 +40,8 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -103,1393 +101,6 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
 			WikiPageModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
-			new String[] {
-				String.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] { String.class.getName() },
-			WikiPageModelImpl.UUID_COLUMN_BITMASK |
-			WikiPageModelImpl.NODEID_COLUMN_BITMASK |
-			WikiPageModelImpl.TITLE_COLUMN_BITMASK |
-			WikiPageModelImpl.VERSION_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_UUID = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] { String.class.getName() });
-
-	/**
-	 * Returns all the wiki pages where uuid = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @return the matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid(String uuid) {
-		return findByUuid(uuid, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the wiki pages where uuid = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param start the lower bound of the range of wiki pages
-	 * @param end the upper bound of the range of wiki pages (not inclusive)
-	 * @return the range of matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid(String uuid, int start, int end) {
-		return findByUuid(uuid, start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the wiki pages where uuid = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param start the lower bound of the range of wiki pages
-	 * @param end the upper bound of the range of wiki pages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid(String uuid, int start, int end,
-		OrderByComparator<WikiPage> orderByComparator) {
-		return findByUuid(uuid, start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the wiki pages where uuid = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param start the lower bound of the range of wiki pages
-	 * @param end the upper bound of the range of wiki pages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid(String uuid, int start, int end,
-		OrderByComparator<WikiPage> orderByComparator, boolean retrieveFromCache) {
-		boolean pagination = true;
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID;
-			finderArgs = new Object[] { uuid };
-		}
-		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID;
-			finderArgs = new Object[] { uuid, start, end, orderByComparator };
-		}
-
-		List<WikiPage> list = null;
-
-		if (retrieveFromCache) {
-			list = (List<WikiPage>)finderCache.getResult(finderPath,
-					finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (WikiPage wikiPage : list) {
-					if (!Objects.equals(uuid, wikiPage.getUuid())) {
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler query = null;
-
-			if (orderByComparator != null) {
-				query = new StringBundler(3 +
-						(orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				query = new StringBundler(3);
-			}
-
-			query.append(_SQL_SELECT_WIKIPAGE_WHERE);
-
-			boolean bindUuid = false;
-
-			if (uuid == null) {
-				query.append(_FINDER_COLUMN_UUID_UUID_1);
-			}
-			else if (uuid.equals(StringPool.BLANK)) {
-				query.append(_FINDER_COLUMN_UUID_UUID_3);
-			}
-			else {
-				bindUuid = true;
-
-				query.append(_FINDER_COLUMN_UUID_UUID_2);
-			}
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
-					orderByComparator);
-			}
-			else
-			 if (pagination) {
-				query.append(WikiPageModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = query.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query q = session.createQuery(sql);
-
-				QueryPos qPos = QueryPos.getInstance(q);
-
-				if (bindUuid) {
-					qPos.add(uuid);
-				}
-
-				if (!pagination) {
-					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
-							start, end, false);
-
-					Collections.sort(list);
-
-					list = Collections.unmodifiableList(list);
-				}
-				else {
-					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
-							start, end);
-				}
-
-				cacheResult(list);
-
-				finderCache.putResult(finderPath, finderArgs, list);
-			}
-			catch (Exception e) {
-				finderCache.removeResult(finderPath, finderArgs);
-
-				throw processException(e);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Returns the first wiki page in the ordered set where uuid = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching wiki page
-	 * @throws NoSuchPageException if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage findByUuid_First(String uuid,
-		OrderByComparator<WikiPage> orderByComparator)
-		throws NoSuchPageException {
-		WikiPage wikiPage = fetchByUuid_First(uuid, orderByComparator);
-
-		if (wikiPage != null) {
-			return wikiPage;
-		}
-
-		StringBundler msg = new StringBundler(4);
-
-		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		msg.append("uuid=");
-		msg.append(uuid);
-
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
-
-		throw new NoSuchPageException(msg.toString());
-	}
-
-	/**
-	 * Returns the first wiki page in the ordered set where uuid = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching wiki page, or <code>null</code> if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage fetchByUuid_First(String uuid,
-		OrderByComparator<WikiPage> orderByComparator) {
-		List<WikiPage> list = findByUuid(uuid, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Returns the last wiki page in the ordered set where uuid = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching wiki page
-	 * @throws NoSuchPageException if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage findByUuid_Last(String uuid,
-		OrderByComparator<WikiPage> orderByComparator)
-		throws NoSuchPageException {
-		WikiPage wikiPage = fetchByUuid_Last(uuid, orderByComparator);
-
-		if (wikiPage != null) {
-			return wikiPage;
-		}
-
-		StringBundler msg = new StringBundler(4);
-
-		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		msg.append("uuid=");
-		msg.append(uuid);
-
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
-
-		throw new NoSuchPageException(msg.toString());
-	}
-
-	/**
-	 * Returns the last wiki page in the ordered set where uuid = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching wiki page, or <code>null</code> if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage fetchByUuid_Last(String uuid,
-		OrderByComparator<WikiPage> orderByComparator) {
-		int count = countByUuid(uuid);
-
-		if (count == 0) {
-			return null;
-		}
-
-		List<WikiPage> list = findByUuid(uuid, count - 1, count,
-				orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Returns the wiki pages before and after the current wiki page in the ordered set where uuid = &#63;.
-	 *
-	 * @param pageId the primary key of the current wiki page
-	 * @param uuid the uuid
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next wiki page
-	 * @throws NoSuchPageException if a wiki page with the primary key could not be found
-	 */
-	@Override
-	public WikiPage[] findByUuid_PrevAndNext(long pageId, String uuid,
-		OrderByComparator<WikiPage> orderByComparator)
-		throws NoSuchPageException {
-		WikiPage wikiPage = findByPrimaryKey(pageId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			WikiPage[] array = new WikiPageImpl[3];
-
-			array[0] = getByUuid_PrevAndNext(session, wikiPage, uuid,
-					orderByComparator, true);
-
-			array[1] = wikiPage;
-
-			array[2] = getByUuid_PrevAndNext(session, wikiPage, uuid,
-					orderByComparator, false);
-
-			return array;
-		}
-		catch (Exception e) {
-			throw processException(e);
-		}
-		finally {
-			closeSession(session);
-		}
-	}
-
-	protected WikiPage getByUuid_PrevAndNext(Session session,
-		WikiPage wikiPage, String uuid,
-		OrderByComparator<WikiPage> orderByComparator, boolean previous) {
-		StringBundler query = null;
-
-		if (orderByComparator != null) {
-			query = new StringBundler(4 +
-					(orderByComparator.getOrderByConditionFields().length * 3) +
-					(orderByComparator.getOrderByFields().length * 3));
-		}
-		else {
-			query = new StringBundler(3);
-		}
-
-		query.append(_SQL_SELECT_WIKIPAGE_WHERE);
-
-		boolean bindUuid = false;
-
-		if (uuid == null) {
-			query.append(_FINDER_COLUMN_UUID_UUID_1);
-		}
-		else if (uuid.equals(StringPool.BLANK)) {
-			query.append(_FINDER_COLUMN_UUID_UUID_3);
-		}
-		else {
-			bindUuid = true;
-
-			query.append(_FINDER_COLUMN_UUID_UUID_2);
-		}
-
-		if (orderByComparator != null) {
-			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
-
-			if (orderByConditionFields.length > 0) {
-				query.append(WHERE_AND);
-			}
-
-			for (int i = 0; i < orderByConditionFields.length; i++) {
-				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByConditionFields[i]);
-
-				if ((i + 1) < orderByConditionFields.length) {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(WHERE_GREATER_THAN_HAS_NEXT);
-					}
-					else {
-						query.append(WHERE_LESSER_THAN_HAS_NEXT);
-					}
-				}
-				else {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(WHERE_GREATER_THAN);
-					}
-					else {
-						query.append(WHERE_LESSER_THAN);
-					}
-				}
-			}
-
-			query.append(ORDER_BY_CLAUSE);
-
-			String[] orderByFields = orderByComparator.getOrderByFields();
-
-			for (int i = 0; i < orderByFields.length; i++) {
-				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
-
-				if ((i + 1) < orderByFields.length) {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(ORDER_BY_ASC_HAS_NEXT);
-					}
-					else {
-						query.append(ORDER_BY_DESC_HAS_NEXT);
-					}
-				}
-				else {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(ORDER_BY_ASC);
-					}
-					else {
-						query.append(ORDER_BY_DESC);
-					}
-				}
-			}
-		}
-		else {
-			query.append(WikiPageModelImpl.ORDER_BY_JPQL);
-		}
-
-		String sql = query.toString();
-
-		Query q = session.createQuery(sql);
-
-		q.setFirstResult(0);
-		q.setMaxResults(2);
-
-		QueryPos qPos = QueryPos.getInstance(q);
-
-		if (bindUuid) {
-			qPos.add(uuid);
-		}
-
-		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByConditionValues(wikiPage);
-
-			for (Object value : values) {
-				qPos.add(value);
-			}
-		}
-
-		List<WikiPage> list = q.list();
-
-		if (list.size() == 2) {
-			return list.get(1);
-		}
-		else {
-			return null;
-		}
-	}
-
-	/**
-	 * Removes all the wiki pages where uuid = &#63; from the database.
-	 *
-	 * @param uuid the uuid
-	 */
-	@Override
-	public void removeByUuid(String uuid) {
-		for (WikiPage wikiPage : findByUuid(uuid, QueryUtil.ALL_POS,
-				QueryUtil.ALL_POS, null)) {
-			remove(wikiPage);
-		}
-	}
-
-	/**
-	 * Returns the number of wiki pages where uuid = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @return the number of matching wiki pages
-	 */
-	@Override
-	public int countByUuid(String uuid) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID;
-
-		Object[] finderArgs = new Object[] { uuid };
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler query = new StringBundler(2);
-
-			query.append(_SQL_COUNT_WIKIPAGE_WHERE);
-
-			boolean bindUuid = false;
-
-			if (uuid == null) {
-				query.append(_FINDER_COLUMN_UUID_UUID_1);
-			}
-			else if (uuid.equals(StringPool.BLANK)) {
-				query.append(_FINDER_COLUMN_UUID_UUID_3);
-			}
-			else {
-				bindUuid = true;
-
-				query.append(_FINDER_COLUMN_UUID_UUID_2);
-			}
-
-			String sql = query.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query q = session.createQuery(sql);
-
-				QueryPos qPos = QueryPos.getInstance(q);
-
-				if (bindUuid) {
-					qPos.add(uuid);
-				}
-
-				count = (Long)q.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception e) {
-				finderCache.removeResult(finderPath, finderArgs);
-
-				throw processException(e);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
-	private static final String _FINDER_COLUMN_UUID_UUID_1 = "wikiPage.uuid IS NULL";
-	private static final String _FINDER_COLUMN_UUID_UUID_2 = "wikiPage.uuid = ?";
-	private static final String _FINDER_COLUMN_UUID_UUID_3 = "(wikiPage.uuid IS NULL OR wikiPage.uuid = '')";
-	public static final FinderPath FINDER_PATH_FETCH_BY_UUID_G = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
-			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
-			new String[] { String.class.getName(), Long.class.getName() },
-			WikiPageModelImpl.UUID_COLUMN_BITMASK |
-			WikiPageModelImpl.GROUPID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_G = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
-			new String[] { String.class.getName(), Long.class.getName() });
-
-	/**
-	 * Returns the wiki page where uuid = &#63; and groupId = &#63; or throws a {@link NoSuchPageException} if it could not be found.
-	 *
-	 * @param uuid the uuid
-	 * @param groupId the group ID
-	 * @return the matching wiki page
-	 * @throws NoSuchPageException if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage findByUUID_G(String uuid, long groupId)
-		throws NoSuchPageException {
-		WikiPage wikiPage = fetchByUUID_G(uuid, groupId);
-
-		if (wikiPage == null) {
-			StringBundler msg = new StringBundler(6);
-
-			msg.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-			msg.append("uuid=");
-			msg.append(uuid);
-
-			msg.append(", groupId=");
-			msg.append(groupId);
-
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(msg.toString());
-			}
-
-			throw new NoSuchPageException(msg.toString());
-		}
-
-		return wikiPage;
-	}
-
-	/**
-	 * Returns the wiki page where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
-	 *
-	 * @param uuid the uuid
-	 * @param groupId the group ID
-	 * @return the matching wiki page, or <code>null</code> if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage fetchByUUID_G(String uuid, long groupId) {
-		return fetchByUUID_G(uuid, groupId, true);
-	}
-
-	/**
-	 * Returns the wiki page where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
-	 *
-	 * @param uuid the uuid
-	 * @param groupId the group ID
-	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the matching wiki page, or <code>null</code> if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage fetchByUUID_G(String uuid, long groupId,
-		boolean retrieveFromCache) {
-		Object[] finderArgs = new Object[] { uuid, groupId };
-
-		Object result = null;
-
-		if (retrieveFromCache) {
-			result = finderCache.getResult(FINDER_PATH_FETCH_BY_UUID_G,
-					finderArgs, this);
-		}
-
-		if (result instanceof WikiPage) {
-			WikiPage wikiPage = (WikiPage)result;
-
-			if (!Objects.equals(uuid, wikiPage.getUuid()) ||
-					(groupId != wikiPage.getGroupId())) {
-				result = null;
-			}
-		}
-
-		if (result == null) {
-			StringBundler query = new StringBundler(4);
-
-			query.append(_SQL_SELECT_WIKIPAGE_WHERE);
-
-			boolean bindUuid = false;
-
-			if (uuid == null) {
-				query.append(_FINDER_COLUMN_UUID_G_UUID_1);
-			}
-			else if (uuid.equals(StringPool.BLANK)) {
-				query.append(_FINDER_COLUMN_UUID_G_UUID_3);
-			}
-			else {
-				bindUuid = true;
-
-				query.append(_FINDER_COLUMN_UUID_G_UUID_2);
-			}
-
-			query.append(_FINDER_COLUMN_UUID_G_GROUPID_2);
-
-			String sql = query.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query q = session.createQuery(sql);
-
-				QueryPos qPos = QueryPos.getInstance(q);
-
-				if (bindUuid) {
-					qPos.add(uuid);
-				}
-
-				qPos.add(groupId);
-
-				List<WikiPage> list = q.list();
-
-				if (list.isEmpty()) {
-					finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G,
-						finderArgs, list);
-				}
-				else {
-					WikiPage wikiPage = list.get(0);
-
-					result = wikiPage;
-
-					cacheResult(wikiPage);
-
-					if ((wikiPage.getUuid() == null) ||
-							!wikiPage.getUuid().equals(uuid) ||
-							(wikiPage.getGroupId() != groupId)) {
-						finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G,
-							finderArgs, wikiPage);
-					}
-				}
-			}
-			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, finderArgs);
-
-				throw processException(e);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		if (result instanceof List<?>) {
-			return null;
-		}
-		else {
-			return (WikiPage)result;
-		}
-	}
-
-	/**
-	 * Removes the wiki page where uuid = &#63; and groupId = &#63; from the database.
-	 *
-	 * @param uuid the uuid
-	 * @param groupId the group ID
-	 * @return the wiki page that was removed
-	 */
-	@Override
-	public WikiPage removeByUUID_G(String uuid, long groupId)
-		throws NoSuchPageException {
-		WikiPage wikiPage = findByUUID_G(uuid, groupId);
-
-		return remove(wikiPage);
-	}
-
-	/**
-	 * Returns the number of wiki pages where uuid = &#63; and groupId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param groupId the group ID
-	 * @return the number of matching wiki pages
-	 */
-	@Override
-	public int countByUUID_G(String uuid, long groupId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID_G;
-
-		Object[] finderArgs = new Object[] { uuid, groupId };
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler query = new StringBundler(3);
-
-			query.append(_SQL_COUNT_WIKIPAGE_WHERE);
-
-			boolean bindUuid = false;
-
-			if (uuid == null) {
-				query.append(_FINDER_COLUMN_UUID_G_UUID_1);
-			}
-			else if (uuid.equals(StringPool.BLANK)) {
-				query.append(_FINDER_COLUMN_UUID_G_UUID_3);
-			}
-			else {
-				bindUuid = true;
-
-				query.append(_FINDER_COLUMN_UUID_G_UUID_2);
-			}
-
-			query.append(_FINDER_COLUMN_UUID_G_GROUPID_2);
-
-			String sql = query.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query q = session.createQuery(sql);
-
-				QueryPos qPos = QueryPos.getInstance(q);
-
-				if (bindUuid) {
-					qPos.add(uuid);
-				}
-
-				qPos.add(groupId);
-
-				count = (Long)q.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception e) {
-				finderCache.removeResult(finderPath, finderArgs);
-
-				throw processException(e);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
-	private static final String _FINDER_COLUMN_UUID_G_UUID_1 = "wikiPage.uuid IS NULL AND ";
-	private static final String _FINDER_COLUMN_UUID_G_UUID_2 = "wikiPage.uuid = ? AND ";
-	private static final String _FINDER_COLUMN_UUID_G_UUID_3 = "(wikiPage.uuid IS NULL OR wikiPage.uuid = '') AND ";
-	private static final String _FINDER_COLUMN_UUID_G_GROUPID_2 = "wikiPage.groupId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID_C = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid_C",
-			new String[] {
-				String.class.getName(), Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C =
-		new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
-			new String[] { String.class.getName(), Long.class.getName() },
-			WikiPageModelImpl.UUID_COLUMN_BITMASK |
-			WikiPageModelImpl.COMPANYID_COLUMN_BITMASK |
-			WikiPageModelImpl.NODEID_COLUMN_BITMASK |
-			WikiPageModelImpl.TITLE_COLUMN_BITMASK |
-			WikiPageModelImpl.VERSION_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_C = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
-			WikiPageModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
-			new String[] { String.class.getName(), Long.class.getName() });
-
-	/**
-	 * Returns all the wiki pages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @return the matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid_C(String uuid, long companyId) {
-		return findByUuid_C(uuid, companyId, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the wiki pages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param start the lower bound of the range of wiki pages
-	 * @param end the upper bound of the range of wiki pages (not inclusive)
-	 * @return the range of matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid_C(String uuid, long companyId, int start,
-		int end) {
-		return findByUuid_C(uuid, companyId, start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the wiki pages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param start the lower bound of the range of wiki pages
-	 * @param end the upper bound of the range of wiki pages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid_C(String uuid, long companyId, int start,
-		int end, OrderByComparator<WikiPage> orderByComparator) {
-		return findByUuid_C(uuid, companyId, start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the wiki pages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param start the lower bound of the range of wiki pages
-	 * @param end the upper bound of the range of wiki pages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching wiki pages
-	 */
-	@Override
-	public List<WikiPage> findByUuid_C(String uuid, long companyId, int start,
-		int end, OrderByComparator<WikiPage> orderByComparator,
-		boolean retrieveFromCache) {
-		boolean pagination = true;
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C;
-			finderArgs = new Object[] { uuid, companyId };
-		}
-		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID_C;
-			finderArgs = new Object[] {
-					uuid, companyId,
-					
-					start, end, orderByComparator
-				};
-		}
-
-		List<WikiPage> list = null;
-
-		if (retrieveFromCache) {
-			list = (List<WikiPage>)finderCache.getResult(finderPath,
-					finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (WikiPage wikiPage : list) {
-					if (!Objects.equals(uuid, wikiPage.getUuid()) ||
-							(companyId != wikiPage.getCompanyId())) {
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler query = null;
-
-			if (orderByComparator != null) {
-				query = new StringBundler(4 +
-						(orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				query = new StringBundler(4);
-			}
-
-			query.append(_SQL_SELECT_WIKIPAGE_WHERE);
-
-			boolean bindUuid = false;
-
-			if (uuid == null) {
-				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
-			}
-			else if (uuid.equals(StringPool.BLANK)) {
-				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
-			}
-			else {
-				bindUuid = true;
-
-				query.append(_FINDER_COLUMN_UUID_C_UUID_2);
-			}
-
-			query.append(_FINDER_COLUMN_UUID_C_COMPANYID_2);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
-					orderByComparator);
-			}
-			else
-			 if (pagination) {
-				query.append(WikiPageModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = query.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query q = session.createQuery(sql);
-
-				QueryPos qPos = QueryPos.getInstance(q);
-
-				if (bindUuid) {
-					qPos.add(uuid);
-				}
-
-				qPos.add(companyId);
-
-				if (!pagination) {
-					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
-							start, end, false);
-
-					Collections.sort(list);
-
-					list = Collections.unmodifiableList(list);
-				}
-				else {
-					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
-							start, end);
-				}
-
-				cacheResult(list);
-
-				finderCache.putResult(finderPath, finderArgs, list);
-			}
-			catch (Exception e) {
-				finderCache.removeResult(finderPath, finderArgs);
-
-				throw processException(e);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Returns the first wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching wiki page
-	 * @throws NoSuchPageException if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage findByUuid_C_First(String uuid, long companyId,
-		OrderByComparator<WikiPage> orderByComparator)
-		throws NoSuchPageException {
-		WikiPage wikiPage = fetchByUuid_C_First(uuid, companyId,
-				orderByComparator);
-
-		if (wikiPage != null) {
-			return wikiPage;
-		}
-
-		StringBundler msg = new StringBundler(6);
-
-		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		msg.append("uuid=");
-		msg.append(uuid);
-
-		msg.append(", companyId=");
-		msg.append(companyId);
-
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
-
-		throw new NoSuchPageException(msg.toString());
-	}
-
-	/**
-	 * Returns the first wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching wiki page, or <code>null</code> if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage fetchByUuid_C_First(String uuid, long companyId,
-		OrderByComparator<WikiPage> orderByComparator) {
-		List<WikiPage> list = findByUuid_C(uuid, companyId, 0, 1,
-				orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Returns the last wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching wiki page
-	 * @throws NoSuchPageException if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage findByUuid_C_Last(String uuid, long companyId,
-		OrderByComparator<WikiPage> orderByComparator)
-		throws NoSuchPageException {
-		WikiPage wikiPage = fetchByUuid_C_Last(uuid, companyId,
-				orderByComparator);
-
-		if (wikiPage != null) {
-			return wikiPage;
-		}
-
-		StringBundler msg = new StringBundler(6);
-
-		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		msg.append("uuid=");
-		msg.append(uuid);
-
-		msg.append(", companyId=");
-		msg.append(companyId);
-
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
-
-		throw new NoSuchPageException(msg.toString());
-	}
-
-	/**
-	 * Returns the last wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching wiki page, or <code>null</code> if a matching wiki page could not be found
-	 */
-	@Override
-	public WikiPage fetchByUuid_C_Last(String uuid, long companyId,
-		OrderByComparator<WikiPage> orderByComparator) {
-		int count = countByUuid_C(uuid, companyId);
-
-		if (count == 0) {
-			return null;
-		}
-
-		List<WikiPage> list = findByUuid_C(uuid, companyId, count - 1, count,
-				orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Returns the wiki pages before and after the current wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param pageId the primary key of the current wiki page
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next wiki page
-	 * @throws NoSuchPageException if a wiki page with the primary key could not be found
-	 */
-	@Override
-	public WikiPage[] findByUuid_C_PrevAndNext(long pageId, String uuid,
-		long companyId, OrderByComparator<WikiPage> orderByComparator)
-		throws NoSuchPageException {
-		WikiPage wikiPage = findByPrimaryKey(pageId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			WikiPage[] array = new WikiPageImpl[3];
-
-			array[0] = getByUuid_C_PrevAndNext(session, wikiPage, uuid,
-					companyId, orderByComparator, true);
-
-			array[1] = wikiPage;
-
-			array[2] = getByUuid_C_PrevAndNext(session, wikiPage, uuid,
-					companyId, orderByComparator, false);
-
-			return array;
-		}
-		catch (Exception e) {
-			throw processException(e);
-		}
-		finally {
-			closeSession(session);
-		}
-	}
-
-	protected WikiPage getByUuid_C_PrevAndNext(Session session,
-		WikiPage wikiPage, String uuid, long companyId,
-		OrderByComparator<WikiPage> orderByComparator, boolean previous) {
-		StringBundler query = null;
-
-		if (orderByComparator != null) {
-			query = new StringBundler(5 +
-					(orderByComparator.getOrderByConditionFields().length * 3) +
-					(orderByComparator.getOrderByFields().length * 3));
-		}
-		else {
-			query = new StringBundler(4);
-		}
-
-		query.append(_SQL_SELECT_WIKIPAGE_WHERE);
-
-		boolean bindUuid = false;
-
-		if (uuid == null) {
-			query.append(_FINDER_COLUMN_UUID_C_UUID_1);
-		}
-		else if (uuid.equals(StringPool.BLANK)) {
-			query.append(_FINDER_COLUMN_UUID_C_UUID_3);
-		}
-		else {
-			bindUuid = true;
-
-			query.append(_FINDER_COLUMN_UUID_C_UUID_2);
-		}
-
-		query.append(_FINDER_COLUMN_UUID_C_COMPANYID_2);
-
-		if (orderByComparator != null) {
-			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
-
-			if (orderByConditionFields.length > 0) {
-				query.append(WHERE_AND);
-			}
-
-			for (int i = 0; i < orderByConditionFields.length; i++) {
-				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByConditionFields[i]);
-
-				if ((i + 1) < orderByConditionFields.length) {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(WHERE_GREATER_THAN_HAS_NEXT);
-					}
-					else {
-						query.append(WHERE_LESSER_THAN_HAS_NEXT);
-					}
-				}
-				else {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(WHERE_GREATER_THAN);
-					}
-					else {
-						query.append(WHERE_LESSER_THAN);
-					}
-				}
-			}
-
-			query.append(ORDER_BY_CLAUSE);
-
-			String[] orderByFields = orderByComparator.getOrderByFields();
-
-			for (int i = 0; i < orderByFields.length; i++) {
-				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
-
-				if ((i + 1) < orderByFields.length) {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(ORDER_BY_ASC_HAS_NEXT);
-					}
-					else {
-						query.append(ORDER_BY_DESC_HAS_NEXT);
-					}
-				}
-				else {
-					if (orderByComparator.isAscending() ^ previous) {
-						query.append(ORDER_BY_ASC);
-					}
-					else {
-						query.append(ORDER_BY_DESC);
-					}
-				}
-			}
-		}
-		else {
-			query.append(WikiPageModelImpl.ORDER_BY_JPQL);
-		}
-
-		String sql = query.toString();
-
-		Query q = session.createQuery(sql);
-
-		q.setFirstResult(0);
-		q.setMaxResults(2);
-
-		QueryPos qPos = QueryPos.getInstance(q);
-
-		if (bindUuid) {
-			qPos.add(uuid);
-		}
-
-		qPos.add(companyId);
-
-		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByConditionValues(wikiPage);
-
-			for (Object value : values) {
-				qPos.add(value);
-			}
-		}
-
-		List<WikiPage> list = q.list();
-
-		if (list.size() == 2) {
-			return list.get(1);
-		}
-		else {
-			return null;
-		}
-	}
-
-	/**
-	 * Removes all the wiki pages where uuid = &#63; and companyId = &#63; from the database.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 */
-	@Override
-	public void removeByUuid_C(String uuid, long companyId) {
-		for (WikiPage wikiPage : findByUuid_C(uuid, companyId,
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-			remove(wikiPage);
-		}
-	}
-
-	/**
-	 * Returns the number of wiki pages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @return the number of matching wiki pages
-	 */
-	@Override
-	public int countByUuid_C(String uuid, long companyId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID_C;
-
-		Object[] finderArgs = new Object[] { uuid, companyId };
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler query = new StringBundler(3);
-
-			query.append(_SQL_COUNT_WIKIPAGE_WHERE);
-
-			boolean bindUuid = false;
-
-			if (uuid == null) {
-				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
-			}
-			else if (uuid.equals(StringPool.BLANK)) {
-				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
-			}
-			else {
-				bindUuid = true;
-
-				query.append(_FINDER_COLUMN_UUID_C_UUID_2);
-			}
-
-			query.append(_FINDER_COLUMN_UUID_C_COMPANYID_2);
-
-			String sql = query.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query q = session.createQuery(sql);
-
-				QueryPos qPos = QueryPos.getInstance(q);
-
-				if (bindUuid) {
-					qPos.add(uuid);
-				}
-
-				qPos.add(companyId);
-
-				count = (Long)q.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception e) {
-				finderCache.removeResult(finderPath, finderArgs);
-
-				throw processException(e);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
-	private static final String _FINDER_COLUMN_UUID_C_UUID_1 = "wikiPage.uuid IS NULL AND ";
-	private static final String _FINDER_COLUMN_UUID_C_UUID_2 = "wikiPage.uuid = ? AND ";
-	private static final String _FINDER_COLUMN_UUID_C_UUID_3 = "(wikiPage.uuid IS NULL OR wikiPage.uuid = '') AND ";
-	private static final String _FINDER_COLUMN_UUID_C_COMPANYID_2 = "wikiPage.companyId = ?";
 	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_RESOURCEPRIMKEY =
 		new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
 			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
@@ -1711,7 +322,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append("resourcePrimKey=");
 		msg.append(resourcePrimKey);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -1762,7 +373,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append("resourcePrimKey=");
 		msg.append(resourcePrimKey);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -2005,6 +616,1393 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 
 	private static final String _FINDER_COLUMN_RESOURCEPRIMKEY_RESOURCEPRIMKEY_2 =
 		"wikiPage.resourcePrimKey = ?";
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
+			new String[] {
+				String.class.getName(),
+				
+			Integer.class.getName(), Integer.class.getName(),
+				OrderByComparator.class.getName()
+			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
+			new String[] { String.class.getName() },
+			WikiPageModelImpl.UUID_COLUMN_BITMASK |
+			WikiPageModelImpl.NODEID_COLUMN_BITMASK |
+			WikiPageModelImpl.TITLE_COLUMN_BITMASK |
+			WikiPageModelImpl.VERSION_COLUMN_BITMASK);
+	public static final FinderPath FINDER_PATH_COUNT_BY_UUID = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
+			new String[] { String.class.getName() });
+
+	/**
+	 * Returns all the wiki pages where uuid = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @return the matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid(String uuid) {
+		return findByUuid(uuid, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	}
+
+	/**
+	 * Returns a range of all the wiki pages where uuid = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param start the lower bound of the range of wiki pages
+	 * @param end the upper bound of the range of wiki pages (not inclusive)
+	 * @return the range of matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid(String uuid, int start, int end) {
+		return findByUuid(uuid, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the wiki pages where uuid = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param start the lower bound of the range of wiki pages
+	 * @param end the upper bound of the range of wiki pages (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid(String uuid, int start, int end,
+		OrderByComparator<WikiPage> orderByComparator) {
+		return findByUuid(uuid, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the wiki pages where uuid = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param start the lower bound of the range of wiki pages
+	 * @param end the upper bound of the range of wiki pages (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid(String uuid, int start, int end,
+		OrderByComparator<WikiPage> orderByComparator, boolean retrieveFromCache) {
+		boolean pagination = true;
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
+
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			pagination = false;
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID;
+			finderArgs = new Object[] { uuid };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID;
+			finderArgs = new Object[] { uuid, start, end, orderByComparator };
+		}
+
+		List<WikiPage> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<WikiPage>)finderCache.getResult(finderPath,
+					finderArgs, this);
+
+			if ((list != null) && !list.isEmpty()) {
+				for (WikiPage wikiPage : list) {
+					if (!Objects.equals(uuid, wikiPage.getUuid())) {
+						list = null;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (list == null) {
+			StringBundler query = null;
+
+			if (orderByComparator != null) {
+				query = new StringBundler(3 +
+						(orderByComparator.getOrderByFields().length * 2));
+			}
+			else {
+				query = new StringBundler(3);
+			}
+
+			query.append(_SQL_SELECT_WIKIPAGE_WHERE);
+
+			boolean bindUuid = false;
+
+			if (uuid == null) {
+				query.append(_FINDER_COLUMN_UUID_UUID_1);
+			}
+			else if (uuid.equals("")) {
+				query.append(_FINDER_COLUMN_UUID_UUID_3);
+			}
+			else {
+				bindUuid = true;
+
+				query.append(_FINDER_COLUMN_UUID_UUID_2);
+			}
+
+			if (orderByComparator != null) {
+				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
+					orderByComparator);
+			}
+			else
+			 if (pagination) {
+				query.append(WikiPageModelImpl.ORDER_BY_JPQL);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				if (bindUuid) {
+					qPos.add(uuid);
+				}
+
+				if (!pagination) {
+					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
+							start, end, false);
+
+					Collections.sort(list);
+
+					list = Collections.unmodifiableList(list);
+				}
+				else {
+					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
+							start, end);
+				}
+
+				cacheResult(list);
+
+				finderCache.putResult(finderPath, finderArgs, list);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * Returns the first wiki page in the ordered set where uuid = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching wiki page
+	 * @throws NoSuchPageException if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage findByUuid_First(String uuid,
+		OrderByComparator<WikiPage> orderByComparator)
+		throws NoSuchPageException {
+		WikiPage wikiPage = fetchByUuid_First(uuid, orderByComparator);
+
+		if (wikiPage != null) {
+			return wikiPage;
+		}
+
+		StringBundler msg = new StringBundler(4);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("uuid=");
+		msg.append(uuid);
+
+		msg.append("}");
+
+		throw new NoSuchPageException(msg.toString());
+	}
+
+	/**
+	 * Returns the first wiki page in the ordered set where uuid = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching wiki page, or <code>null</code> if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage fetchByUuid_First(String uuid,
+		OrderByComparator<WikiPage> orderByComparator) {
+		List<WikiPage> list = findByUuid(uuid, 0, 1, orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the last wiki page in the ordered set where uuid = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching wiki page
+	 * @throws NoSuchPageException if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage findByUuid_Last(String uuid,
+		OrderByComparator<WikiPage> orderByComparator)
+		throws NoSuchPageException {
+		WikiPage wikiPage = fetchByUuid_Last(uuid, orderByComparator);
+
+		if (wikiPage != null) {
+			return wikiPage;
+		}
+
+		StringBundler msg = new StringBundler(4);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("uuid=");
+		msg.append(uuid);
+
+		msg.append("}");
+
+		throw new NoSuchPageException(msg.toString());
+	}
+
+	/**
+	 * Returns the last wiki page in the ordered set where uuid = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching wiki page, or <code>null</code> if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage fetchByUuid_Last(String uuid,
+		OrderByComparator<WikiPage> orderByComparator) {
+		int count = countByUuid(uuid);
+
+		if (count == 0) {
+			return null;
+		}
+
+		List<WikiPage> list = findByUuid(uuid, count - 1, count,
+				orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the wiki pages before and after the current wiki page in the ordered set where uuid = &#63;.
+	 *
+	 * @param pageId the primary key of the current wiki page
+	 * @param uuid the uuid
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next wiki page
+	 * @throws NoSuchPageException if a wiki page with the primary key could not be found
+	 */
+	@Override
+	public WikiPage[] findByUuid_PrevAndNext(long pageId, String uuid,
+		OrderByComparator<WikiPage> orderByComparator)
+		throws NoSuchPageException {
+		WikiPage wikiPage = findByPrimaryKey(pageId);
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			WikiPage[] array = new WikiPageImpl[3];
+
+			array[0] = getByUuid_PrevAndNext(session, wikiPage, uuid,
+					orderByComparator, true);
+
+			array[1] = wikiPage;
+
+			array[2] = getByUuid_PrevAndNext(session, wikiPage, uuid,
+					orderByComparator, false);
+
+			return array;
+		}
+		catch (Exception e) {
+			throw processException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
+	protected WikiPage getByUuid_PrevAndNext(Session session,
+		WikiPage wikiPage, String uuid,
+		OrderByComparator<WikiPage> orderByComparator, boolean previous) {
+		StringBundler query = null;
+
+		if (orderByComparator != null) {
+			query = new StringBundler(4 +
+					(orderByComparator.getOrderByConditionFields().length * 3) +
+					(orderByComparator.getOrderByFields().length * 3));
+		}
+		else {
+			query = new StringBundler(3);
+		}
+
+		query.append(_SQL_SELECT_WIKIPAGE_WHERE);
+
+		boolean bindUuid = false;
+
+		if (uuid == null) {
+			query.append(_FINDER_COLUMN_UUID_UUID_1);
+		}
+		else if (uuid.equals("")) {
+			query.append(_FINDER_COLUMN_UUID_UUID_3);
+		}
+		else {
+			bindUuid = true;
+
+			query.append(_FINDER_COLUMN_UUID_UUID_2);
+		}
+
+		if (orderByComparator != null) {
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
+
+			if (orderByConditionFields.length > 0) {
+				query.append(WHERE_AND);
+			}
+
+			for (int i = 0; i < orderByConditionFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByConditionFields[i]);
+
+				if ((i + 1) < orderByConditionFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN_HAS_NEXT);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN);
+					}
+				}
+			}
+
+			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
+
+			for (int i = 0; i < orderByFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByFields[i]);
+
+				if ((i + 1) < orderByFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC_HAS_NEXT);
+					}
+					else {
+						query.append(ORDER_BY_DESC_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC);
+					}
+					else {
+						query.append(ORDER_BY_DESC);
+					}
+				}
+			}
+		}
+		else {
+			query.append(WikiPageModelImpl.ORDER_BY_JPQL);
+		}
+
+		String sql = query.toString();
+
+		Query q = session.createQuery(sql);
+
+		q.setFirstResult(0);
+		q.setMaxResults(2);
+
+		QueryPos qPos = QueryPos.getInstance(q);
+
+		if (bindUuid) {
+			qPos.add(uuid);
+		}
+
+		if (orderByComparator != null) {
+			Object[] values = orderByComparator.getOrderByConditionValues(wikiPage);
+
+			for (Object value : values) {
+				qPos.add(value);
+			}
+		}
+
+		List<WikiPage> list = q.list();
+
+		if (list.size() == 2) {
+			return list.get(1);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Removes all the wiki pages where uuid = &#63; from the database.
+	 *
+	 * @param uuid the uuid
+	 */
+	@Override
+	public void removeByUuid(String uuid) {
+		for (WikiPage wikiPage : findByUuid(uuid, QueryUtil.ALL_POS,
+				QueryUtil.ALL_POS, null)) {
+			remove(wikiPage);
+		}
+	}
+
+	/**
+	 * Returns the number of wiki pages where uuid = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @return the number of matching wiki pages
+	 */
+	@Override
+	public int countByUuid(String uuid) {
+		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID;
+
+		Object[] finderArgs = new Object[] { uuid };
+
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+
+		if (count == null) {
+			StringBundler query = new StringBundler(2);
+
+			query.append(_SQL_COUNT_WIKIPAGE_WHERE);
+
+			boolean bindUuid = false;
+
+			if (uuid == null) {
+				query.append(_FINDER_COLUMN_UUID_UUID_1);
+			}
+			else if (uuid.equals("")) {
+				query.append(_FINDER_COLUMN_UUID_UUID_3);
+			}
+			else {
+				bindUuid = true;
+
+				query.append(_FINDER_COLUMN_UUID_UUID_2);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				if (bindUuid) {
+					qPos.add(uuid);
+				}
+
+				count = (Long)q.uniqueResult();
+
+				finderCache.putResult(finderPath, finderArgs, count);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_UUID_UUID_1 = "wikiPage.uuid IS NULL";
+	private static final String _FINDER_COLUMN_UUID_UUID_2 = "wikiPage.uuid = ?";
+	private static final String _FINDER_COLUMN_UUID_UUID_3 = "(wikiPage.uuid IS NULL OR wikiPage.uuid = '')";
+	public static final FinderPath FINDER_PATH_FETCH_BY_UUID_G = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
+			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
+			new String[] { String.class.getName(), Long.class.getName() },
+			WikiPageModelImpl.UUID_COLUMN_BITMASK |
+			WikiPageModelImpl.GROUPID_COLUMN_BITMASK);
+	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_G = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
+			new String[] { String.class.getName(), Long.class.getName() });
+
+	/**
+	 * Returns the wiki page where uuid = &#63; and groupId = &#63; or throws a {@link NoSuchPageException} if it could not be found.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @return the matching wiki page
+	 * @throws NoSuchPageException if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage findByUUID_G(String uuid, long groupId)
+		throws NoSuchPageException {
+		WikiPage wikiPage = fetchByUUID_G(uuid, groupId);
+
+		if (wikiPage == null) {
+			StringBundler msg = new StringBundler(6);
+
+			msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+			msg.append("uuid=");
+			msg.append(uuid);
+
+			msg.append(", groupId=");
+			msg.append(groupId);
+
+			msg.append("}");
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(msg.toString());
+			}
+
+			throw new NoSuchPageException(msg.toString());
+		}
+
+		return wikiPage;
+	}
+
+	/**
+	 * Returns the wiki page where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @return the matching wiki page, or <code>null</code> if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage fetchByUUID_G(String uuid, long groupId) {
+		return fetchByUUID_G(uuid, groupId, true);
+	}
+
+	/**
+	 * Returns the wiki page where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the matching wiki page, or <code>null</code> if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage fetchByUUID_G(String uuid, long groupId,
+		boolean retrieveFromCache) {
+		Object[] finderArgs = new Object[] { uuid, groupId };
+
+		Object result = null;
+
+		if (retrieveFromCache) {
+			result = finderCache.getResult(FINDER_PATH_FETCH_BY_UUID_G,
+					finderArgs, this);
+		}
+
+		if (result instanceof WikiPage) {
+			WikiPage wikiPage = (WikiPage)result;
+
+			if (!Objects.equals(uuid, wikiPage.getUuid()) ||
+					(groupId != wikiPage.getGroupId())) {
+				result = null;
+			}
+		}
+
+		if (result == null) {
+			StringBundler query = new StringBundler(4);
+
+			query.append(_SQL_SELECT_WIKIPAGE_WHERE);
+
+			boolean bindUuid = false;
+
+			if (uuid == null) {
+				query.append(_FINDER_COLUMN_UUID_G_UUID_1);
+			}
+			else if (uuid.equals("")) {
+				query.append(_FINDER_COLUMN_UUID_G_UUID_3);
+			}
+			else {
+				bindUuid = true;
+
+				query.append(_FINDER_COLUMN_UUID_G_UUID_2);
+			}
+
+			query.append(_FINDER_COLUMN_UUID_G_GROUPID_2);
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				if (bindUuid) {
+					qPos.add(uuid);
+				}
+
+				qPos.add(groupId);
+
+				List<WikiPage> list = q.list();
+
+				if (list.isEmpty()) {
+					finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G,
+						finderArgs, list);
+				}
+				else {
+					WikiPage wikiPage = list.get(0);
+
+					result = wikiPage;
+
+					cacheResult(wikiPage);
+
+					if ((wikiPage.getUuid() == null) ||
+							!wikiPage.getUuid().equals(uuid) ||
+							(wikiPage.getGroupId() != groupId)) {
+						finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G,
+							finderArgs, wikiPage);
+					}
+				}
+			}
+			catch (Exception e) {
+				finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		if (result instanceof List<?>) {
+			return null;
+		}
+		else {
+			return (WikiPage)result;
+		}
+	}
+
+	/**
+	 * Removes the wiki page where uuid = &#63; and groupId = &#63; from the database.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @return the wiki page that was removed
+	 */
+	@Override
+	public WikiPage removeByUUID_G(String uuid, long groupId)
+		throws NoSuchPageException {
+		WikiPage wikiPage = findByUUID_G(uuid, groupId);
+
+		return remove(wikiPage);
+	}
+
+	/**
+	 * Returns the number of wiki pages where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @return the number of matching wiki pages
+	 */
+	@Override
+	public int countByUUID_G(String uuid, long groupId) {
+		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID_G;
+
+		Object[] finderArgs = new Object[] { uuid, groupId };
+
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+
+		if (count == null) {
+			StringBundler query = new StringBundler(3);
+
+			query.append(_SQL_COUNT_WIKIPAGE_WHERE);
+
+			boolean bindUuid = false;
+
+			if (uuid == null) {
+				query.append(_FINDER_COLUMN_UUID_G_UUID_1);
+			}
+			else if (uuid.equals("")) {
+				query.append(_FINDER_COLUMN_UUID_G_UUID_3);
+			}
+			else {
+				bindUuid = true;
+
+				query.append(_FINDER_COLUMN_UUID_G_UUID_2);
+			}
+
+			query.append(_FINDER_COLUMN_UUID_G_GROUPID_2);
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				if (bindUuid) {
+					qPos.add(uuid);
+				}
+
+				qPos.add(groupId);
+
+				count = (Long)q.uniqueResult();
+
+				finderCache.putResult(finderPath, finderArgs, count);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_UUID_G_UUID_1 = "wikiPage.uuid IS NULL AND ";
+	private static final String _FINDER_COLUMN_UUID_G_UUID_2 = "wikiPage.uuid = ? AND ";
+	private static final String _FINDER_COLUMN_UUID_G_UUID_3 = "(wikiPage.uuid IS NULL OR wikiPage.uuid = '') AND ";
+	private static final String _FINDER_COLUMN_UUID_G_GROUPID_2 = "wikiPage.groupId = ?";
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID_C = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid_C",
+			new String[] {
+				String.class.getName(), Long.class.getName(),
+				
+			Integer.class.getName(), Integer.class.getName(),
+				OrderByComparator.class.getName()
+			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C =
+		new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
+			new String[] { String.class.getName(), Long.class.getName() },
+			WikiPageModelImpl.UUID_COLUMN_BITMASK |
+			WikiPageModelImpl.COMPANYID_COLUMN_BITMASK |
+			WikiPageModelImpl.NODEID_COLUMN_BITMASK |
+			WikiPageModelImpl.TITLE_COLUMN_BITMASK |
+			WikiPageModelImpl.VERSION_COLUMN_BITMASK);
+	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_C = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
+			WikiPageModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
+			new String[] { String.class.getName(), Long.class.getName() });
+
+	/**
+	 * Returns all the wiki pages where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @return the matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid_C(String uuid, long companyId) {
+		return findByUuid_C(uuid, companyId, QueryUtil.ALL_POS,
+			QueryUtil.ALL_POS, null);
+	}
+
+	/**
+	 * Returns a range of all the wiki pages where uuid = &#63; and companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of wiki pages
+	 * @param end the upper bound of the range of wiki pages (not inclusive)
+	 * @return the range of matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid_C(String uuid, long companyId, int start,
+		int end) {
+		return findByUuid_C(uuid, companyId, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the wiki pages where uuid = &#63; and companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of wiki pages
+	 * @param end the upper bound of the range of wiki pages (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid_C(String uuid, long companyId, int start,
+		int end, OrderByComparator<WikiPage> orderByComparator) {
+		return findByUuid_C(uuid, companyId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the wiki pages where uuid = &#63; and companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WikiPageModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of wiki pages
+	 * @param end the upper bound of the range of wiki pages (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching wiki pages
+	 */
+	@Override
+	public List<WikiPage> findByUuid_C(String uuid, long companyId, int start,
+		int end, OrderByComparator<WikiPage> orderByComparator,
+		boolean retrieveFromCache) {
+		boolean pagination = true;
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
+
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			pagination = false;
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C;
+			finderArgs = new Object[] { uuid, companyId };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID_C;
+			finderArgs = new Object[] {
+					uuid, companyId,
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<WikiPage> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<WikiPage>)finderCache.getResult(finderPath,
+					finderArgs, this);
+
+			if ((list != null) && !list.isEmpty()) {
+				for (WikiPage wikiPage : list) {
+					if (!Objects.equals(uuid, wikiPage.getUuid()) ||
+							(companyId != wikiPage.getCompanyId())) {
+						list = null;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (list == null) {
+			StringBundler query = null;
+
+			if (orderByComparator != null) {
+				query = new StringBundler(4 +
+						(orderByComparator.getOrderByFields().length * 2));
+			}
+			else {
+				query = new StringBundler(4);
+			}
+
+			query.append(_SQL_SELECT_WIKIPAGE_WHERE);
+
+			boolean bindUuid = false;
+
+			if (uuid == null) {
+				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
+			}
+			else if (uuid.equals("")) {
+				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
+			}
+			else {
+				bindUuid = true;
+
+				query.append(_FINDER_COLUMN_UUID_C_UUID_2);
+			}
+
+			query.append(_FINDER_COLUMN_UUID_C_COMPANYID_2);
+
+			if (orderByComparator != null) {
+				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
+					orderByComparator);
+			}
+			else
+			 if (pagination) {
+				query.append(WikiPageModelImpl.ORDER_BY_JPQL);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				if (bindUuid) {
+					qPos.add(uuid);
+				}
+
+				qPos.add(companyId);
+
+				if (!pagination) {
+					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
+							start, end, false);
+
+					Collections.sort(list);
+
+					list = Collections.unmodifiableList(list);
+				}
+				else {
+					list = (List<WikiPage>)QueryUtil.list(q, getDialect(),
+							start, end);
+				}
+
+				cacheResult(list);
+
+				finderCache.putResult(finderPath, finderArgs, list);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * Returns the first wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching wiki page
+	 * @throws NoSuchPageException if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage findByUuid_C_First(String uuid, long companyId,
+		OrderByComparator<WikiPage> orderByComparator)
+		throws NoSuchPageException {
+		WikiPage wikiPage = fetchByUuid_C_First(uuid, companyId,
+				orderByComparator);
+
+		if (wikiPage != null) {
+			return wikiPage;
+		}
+
+		StringBundler msg = new StringBundler(6);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("uuid=");
+		msg.append(uuid);
+
+		msg.append(", companyId=");
+		msg.append(companyId);
+
+		msg.append("}");
+
+		throw new NoSuchPageException(msg.toString());
+	}
+
+	/**
+	 * Returns the first wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching wiki page, or <code>null</code> if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage fetchByUuid_C_First(String uuid, long companyId,
+		OrderByComparator<WikiPage> orderByComparator) {
+		List<WikiPage> list = findByUuid_C(uuid, companyId, 0, 1,
+				orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the last wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching wiki page
+	 * @throws NoSuchPageException if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage findByUuid_C_Last(String uuid, long companyId,
+		OrderByComparator<WikiPage> orderByComparator)
+		throws NoSuchPageException {
+		WikiPage wikiPage = fetchByUuid_C_Last(uuid, companyId,
+				orderByComparator);
+
+		if (wikiPage != null) {
+			return wikiPage;
+		}
+
+		StringBundler msg = new StringBundler(6);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("uuid=");
+		msg.append(uuid);
+
+		msg.append(", companyId=");
+		msg.append(companyId);
+
+		msg.append("}");
+
+		throw new NoSuchPageException(msg.toString());
+	}
+
+	/**
+	 * Returns the last wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching wiki page, or <code>null</code> if a matching wiki page could not be found
+	 */
+	@Override
+	public WikiPage fetchByUuid_C_Last(String uuid, long companyId,
+		OrderByComparator<WikiPage> orderByComparator) {
+		int count = countByUuid_C(uuid, companyId);
+
+		if (count == 0) {
+			return null;
+		}
+
+		List<WikiPage> list = findByUuid_C(uuid, companyId, count - 1, count,
+				orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the wiki pages before and after the current wiki page in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param pageId the primary key of the current wiki page
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next wiki page
+	 * @throws NoSuchPageException if a wiki page with the primary key could not be found
+	 */
+	@Override
+	public WikiPage[] findByUuid_C_PrevAndNext(long pageId, String uuid,
+		long companyId, OrderByComparator<WikiPage> orderByComparator)
+		throws NoSuchPageException {
+		WikiPage wikiPage = findByPrimaryKey(pageId);
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			WikiPage[] array = new WikiPageImpl[3];
+
+			array[0] = getByUuid_C_PrevAndNext(session, wikiPage, uuid,
+					companyId, orderByComparator, true);
+
+			array[1] = wikiPage;
+
+			array[2] = getByUuid_C_PrevAndNext(session, wikiPage, uuid,
+					companyId, orderByComparator, false);
+
+			return array;
+		}
+		catch (Exception e) {
+			throw processException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
+	protected WikiPage getByUuid_C_PrevAndNext(Session session,
+		WikiPage wikiPage, String uuid, long companyId,
+		OrderByComparator<WikiPage> orderByComparator, boolean previous) {
+		StringBundler query = null;
+
+		if (orderByComparator != null) {
+			query = new StringBundler(5 +
+					(orderByComparator.getOrderByConditionFields().length * 3) +
+					(orderByComparator.getOrderByFields().length * 3));
+		}
+		else {
+			query = new StringBundler(4);
+		}
+
+		query.append(_SQL_SELECT_WIKIPAGE_WHERE);
+
+		boolean bindUuid = false;
+
+		if (uuid == null) {
+			query.append(_FINDER_COLUMN_UUID_C_UUID_1);
+		}
+		else if (uuid.equals("")) {
+			query.append(_FINDER_COLUMN_UUID_C_UUID_3);
+		}
+		else {
+			bindUuid = true;
+
+			query.append(_FINDER_COLUMN_UUID_C_UUID_2);
+		}
+
+		query.append(_FINDER_COLUMN_UUID_C_COMPANYID_2);
+
+		if (orderByComparator != null) {
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
+
+			if (orderByConditionFields.length > 0) {
+				query.append(WHERE_AND);
+			}
+
+			for (int i = 0; i < orderByConditionFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByConditionFields[i]);
+
+				if ((i + 1) < orderByConditionFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN_HAS_NEXT);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN);
+					}
+				}
+			}
+
+			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
+
+			for (int i = 0; i < orderByFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByFields[i]);
+
+				if ((i + 1) < orderByFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC_HAS_NEXT);
+					}
+					else {
+						query.append(ORDER_BY_DESC_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC);
+					}
+					else {
+						query.append(ORDER_BY_DESC);
+					}
+				}
+			}
+		}
+		else {
+			query.append(WikiPageModelImpl.ORDER_BY_JPQL);
+		}
+
+		String sql = query.toString();
+
+		Query q = session.createQuery(sql);
+
+		q.setFirstResult(0);
+		q.setMaxResults(2);
+
+		QueryPos qPos = QueryPos.getInstance(q);
+
+		if (bindUuid) {
+			qPos.add(uuid);
+		}
+
+		qPos.add(companyId);
+
+		if (orderByComparator != null) {
+			Object[] values = orderByComparator.getOrderByConditionValues(wikiPage);
+
+			for (Object value : values) {
+				qPos.add(value);
+			}
+		}
+
+		List<WikiPage> list = q.list();
+
+		if (list.size() == 2) {
+			return list.get(1);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Removes all the wiki pages where uuid = &#63; and companyId = &#63; from the database.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 */
+	@Override
+	public void removeByUuid_C(String uuid, long companyId) {
+		for (WikiPage wikiPage : findByUuid_C(uuid, companyId,
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
+			remove(wikiPage);
+		}
+	}
+
+	/**
+	 * Returns the number of wiki pages where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @return the number of matching wiki pages
+	 */
+	@Override
+	public int countByUuid_C(String uuid, long companyId) {
+		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID_C;
+
+		Object[] finderArgs = new Object[] { uuid, companyId };
+
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+
+		if (count == null) {
+			StringBundler query = new StringBundler(3);
+
+			query.append(_SQL_COUNT_WIKIPAGE_WHERE);
+
+			boolean bindUuid = false;
+
+			if (uuid == null) {
+				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
+			}
+			else if (uuid.equals("")) {
+				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
+			}
+			else {
+				bindUuid = true;
+
+				query.append(_FINDER_COLUMN_UUID_C_UUID_2);
+			}
+
+			query.append(_FINDER_COLUMN_UUID_C_COMPANYID_2);
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				if (bindUuid) {
+					qPos.add(uuid);
+				}
+
+				qPos.add(companyId);
+
+				count = (Long)q.uniqueResult();
+
+				finderCache.putResult(finderPath, finderArgs, count);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_UUID_C_UUID_1 = "wikiPage.uuid IS NULL AND ";
+	private static final String _FINDER_COLUMN_UUID_C_UUID_2 = "wikiPage.uuid = ? AND ";
+	private static final String _FINDER_COLUMN_UUID_C_UUID_3 = "(wikiPage.uuid IS NULL OR wikiPage.uuid = '') AND ";
+	private static final String _FINDER_COLUMN_UUID_C_COMPANYID_2 = "wikiPage.companyId = ?";
 	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_NODEID = new FinderPath(WikiPageModelImpl.ENTITY_CACHE_ENABLED,
 			WikiPageModelImpl.FINDER_CACHE_ENABLED, WikiPageImpl.class,
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByNodeId",
@@ -2215,7 +2213,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append("nodeId=");
 		msg.append(nodeId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -2264,7 +2262,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append("nodeId=");
 		msg.append(nodeId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -2643,7 +2641,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (format == null) {
 				query.append(_FINDER_COLUMN_FORMAT_FORMAT_1);
 			}
-			else if (format.equals(StringPool.BLANK)) {
+			else if (format.equals("")) {
 				query.append(_FINDER_COLUMN_FORMAT_FORMAT_3);
 			}
 			else {
@@ -2731,7 +2729,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append("format=");
 		msg.append(format);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -2780,7 +2778,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append("format=");
 		msg.append(format);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -2872,7 +2870,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (format == null) {
 			query.append(_FINDER_COLUMN_FORMAT_FORMAT_1);
 		}
-		else if (format.equals(StringPool.BLANK)) {
+		else if (format.equals("")) {
 			query.append(_FINDER_COLUMN_FORMAT_FORMAT_3);
 		}
 		else {
@@ -3008,7 +3006,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (format == null) {
 				query.append(_FINDER_COLUMN_FORMAT_FORMAT_1);
 			}
-			else if (format.equals(StringPool.BLANK)) {
+			else if (format.equals("")) {
 				query.append(_FINDER_COLUMN_FORMAT_FORMAT_3);
 			}
 			else {
@@ -3284,7 +3282,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", nodeId=");
 		msg.append(nodeId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -3340,7 +3338,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", nodeId=");
 		msg.append(nodeId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -3828,7 +3826,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -3884,7 +3882,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -4288,7 +4286,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_TITLE_3);
 			}
 			else {
@@ -4382,7 +4380,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", title=");
 		msg.append(title);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -4436,7 +4434,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", title=");
 		msg.append(title);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -4532,7 +4530,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (title == null) {
 			query.append(_FINDER_COLUMN_N_T_TITLE_1);
 		}
-		else if (title.equals(StringPool.BLANK)) {
+		else if (title.equals("")) {
 			query.append(_FINDER_COLUMN_N_T_TITLE_3);
 		}
 		else {
@@ -4674,7 +4672,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_TITLE_3);
 			}
 			else {
@@ -4951,7 +4949,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -5005,7 +5003,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -5412,7 +5410,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_P_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_P_PARENTTITLE_3);
 			}
 			else {
@@ -5507,7 +5505,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", parentTitle=");
 		msg.append(parentTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -5563,7 +5561,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", parentTitle=");
 		msg.append(parentTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -5659,7 +5657,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_N_P_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_P_PARENTTITLE_3);
 		}
 		else {
@@ -5801,7 +5799,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_P_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_P_PARENTTITLE_3);
 			}
 			else {
@@ -6000,7 +5998,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_R_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_R_REDIRECTTITLE_3);
 			}
 			else {
@@ -6095,7 +6093,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", redirectTitle=");
 		msg.append(redirectTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -6151,7 +6149,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", redirectTitle=");
 		msg.append(redirectTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -6247,7 +6245,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (redirectTitle == null) {
 			query.append(_FINDER_COLUMN_N_R_REDIRECTTITLE_1);
 		}
-		else if (redirectTitle.equals(StringPool.BLANK)) {
+		else if (redirectTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_R_REDIRECTTITLE_3);
 		}
 		else {
@@ -6389,7 +6387,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_R_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_R_REDIRECTTITLE_3);
 			}
 			else {
@@ -6665,7 +6663,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -6719,7 +6717,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -7020,7 +7018,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			msg.append(", version=");
 			msg.append(version);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -7479,7 +7477,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -7540,7 +7538,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -8064,7 +8062,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -8125,7 +8123,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -8647,7 +8645,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -8708,7 +8706,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -9624,7 +9622,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -9685,7 +9683,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -10601,7 +10599,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -10662,7 +10660,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -10976,7 +10974,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			msg.append(", version=");
 			msg.append(version);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -11044,7 +11042,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_V_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_V_TITLE_3);
 			}
 			else {
@@ -11158,7 +11156,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_V_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_V_TITLE_3);
 			}
 			else {
@@ -11373,7 +11371,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_H_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_H_TITLE_3);
 			}
 			else {
@@ -11476,7 +11474,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -11537,7 +11535,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -11636,7 +11634,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (title == null) {
 			query.append(_FINDER_COLUMN_N_T_H_TITLE_1);
 		}
-		else if (title.equals(StringPool.BLANK)) {
+		else if (title.equals("")) {
 			query.append(_FINDER_COLUMN_N_T_H_TITLE_3);
 		}
 		else {
@@ -11784,7 +11782,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_H_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_H_TITLE_3);
 			}
 			else {
@@ -11999,7 +11997,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_S_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_S_TITLE_3);
 			}
 			else {
@@ -12102,7 +12100,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -12163,7 +12161,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -12261,7 +12259,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (title == null) {
 			query.append(_FINDER_COLUMN_N_T_S_TITLE_1);
 		}
-		else if (title.equals(StringPool.BLANK)) {
+		else if (title.equals("")) {
 			query.append(_FINDER_COLUMN_N_T_S_TITLE_3);
 		}
 		else {
@@ -12409,7 +12407,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_N_T_S_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_N_T_S_TITLE_3);
 			}
 			else {
@@ -12630,7 +12628,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_P_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_P_PARENTTITLE_3);
 			}
 			else {
@@ -12731,7 +12729,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", parentTitle=");
 		msg.append(parentTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -12792,7 +12790,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", parentTitle=");
 		msg.append(parentTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -12893,7 +12891,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_N_H_P_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_H_P_PARENTTITLE_3);
 		}
 		else {
@@ -13041,7 +13039,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_P_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_P_PARENTTITLE_3);
 			}
 			else {
@@ -13260,7 +13258,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_R_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_R_REDIRECTTITLE_3);
 			}
 			else {
@@ -13361,7 +13359,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", redirectTitle=");
 		msg.append(redirectTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -13422,7 +13420,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", redirectTitle=");
 		msg.append(redirectTitle);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -13523,7 +13521,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (redirectTitle == null) {
 			query.append(_FINDER_COLUMN_N_H_R_REDIRECTTITLE_1);
 		}
-		else if (redirectTitle.equals(StringPool.BLANK)) {
+		else if (redirectTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_H_R_REDIRECTTITLE_3);
 		}
 		else {
@@ -13671,7 +13669,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_R_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_R_REDIRECTTITLE_3);
 			}
 			else {
@@ -13974,7 +13972,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -14035,7 +14033,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -14537,7 +14535,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -14598,7 +14596,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -15136,7 +15134,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -15202,7 +15200,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -16074,7 +16072,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_G_N_T_H_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_G_N_T_H_TITLE_3);
 			}
 			else {
@@ -16184,7 +16182,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -16251,7 +16249,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", head=");
 		msg.append(head);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -16356,7 +16354,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (title == null) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_1);
 		}
-		else if (title.equals(StringPool.BLANK)) {
+		else if (title.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_3);
 		}
 		else {
@@ -16552,7 +16550,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (title == null) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_1);
 		}
-		else if (title.equals(StringPool.BLANK)) {
+		else if (title.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_3);
 		}
 		else {
@@ -16706,7 +16704,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (title == null) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_1);
 		}
-		else if (title.equals(StringPool.BLANK)) {
+		else if (title.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_3);
 		}
 		else {
@@ -16892,7 +16890,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (title == null) {
 				query.append(_FINDER_COLUMN_G_N_T_H_TITLE_1);
 			}
-			else if (title.equals(StringPool.BLANK)) {
+			else if (title.equals("")) {
 				query.append(_FINDER_COLUMN_G_N_T_H_TITLE_3);
 			}
 			else {
@@ -16970,7 +16968,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (title == null) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_1);
 		}
-		else if (title.equals(StringPool.BLANK)) {
+		else if (title.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_T_H_TITLE_3);
 		}
 		else {
@@ -17295,7 +17293,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -17361,7 +17359,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -18236,7 +18234,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_P_S_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_P_S_PARENTTITLE_3);
 			}
 			else {
@@ -18346,7 +18344,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -18414,7 +18412,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -18519,7 +18517,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_N_H_P_S_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_H_P_S_PARENTTITLE_3);
 		}
 		else {
@@ -18675,7 +18673,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_P_S_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_P_S_PARENTTITLE_3);
 			}
 			else {
@@ -18887,7 +18885,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_P_NOTS_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_P_NOTS_PARENTTITLE_3);
 			}
 			else {
@@ -18997,7 +18995,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -19065,7 +19063,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -19170,7 +19168,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_N_H_P_NOTS_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_H_P_NOTS_PARENTTITLE_3);
 		}
 		else {
@@ -19326,7 +19324,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_P_NOTS_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_P_NOTS_PARENTTITLE_3);
 			}
 			else {
@@ -19558,7 +19556,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_R_S_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_R_S_REDIRECTTITLE_3);
 			}
 			else {
@@ -19668,7 +19666,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -19736,7 +19734,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -19841,7 +19839,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (redirectTitle == null) {
 			query.append(_FINDER_COLUMN_N_H_R_S_REDIRECTTITLE_1);
 		}
-		else if (redirectTitle.equals(StringPool.BLANK)) {
+		else if (redirectTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_H_R_S_REDIRECTTITLE_3);
 		}
 		else {
@@ -19997,7 +19995,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_R_S_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_R_S_REDIRECTTITLE_3);
 			}
 			else {
@@ -20209,7 +20207,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_R_NOTS_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_R_NOTS_REDIRECTTITLE_3);
 			}
 			else {
@@ -20319,7 +20317,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -20387,7 +20385,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -20492,7 +20490,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (redirectTitle == null) {
 			query.append(_FINDER_COLUMN_N_H_R_NOTS_REDIRECTTITLE_1);
 		}
-		else if (redirectTitle.equals(StringPool.BLANK)) {
+		else if (redirectTitle.equals("")) {
 			query.append(_FINDER_COLUMN_N_H_R_NOTS_REDIRECTTITLE_3);
 		}
 		else {
@@ -20648,7 +20646,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (redirectTitle == null) {
 				query.append(_FINDER_COLUMN_N_H_R_NOTS_REDIRECTTITLE_1);
 			}
-			else if (redirectTitle.equals(StringPool.BLANK)) {
+			else if (redirectTitle.equals("")) {
 				query.append(_FINDER_COLUMN_N_H_R_NOTS_REDIRECTTITLE_3);
 			}
 			else {
@@ -20892,7 +20890,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_3);
 			}
 			else {
@@ -21008,7 +21006,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -21081,7 +21079,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		msg.append(", status=");
 		msg.append(status);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchPageException(msg.toString());
 	}
@@ -21190,7 +21188,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_3);
 		}
 		else {
@@ -21393,7 +21391,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_3);
 		}
 		else {
@@ -21554,7 +21552,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_3);
 		}
 		else {
@@ -21748,7 +21746,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 			if (parentTitle == null) {
 				query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_1);
 			}
-			else if (parentTitle.equals(StringPool.BLANK)) {
+			else if (parentTitle.equals("")) {
 				query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_3);
 			}
 			else {
@@ -21831,7 +21829,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		if (parentTitle == null) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_1);
 		}
-		else if (parentTitle.equals(StringPool.BLANK)) {
+		else if (parentTitle.equals("")) {
 			query.append(_FINDER_COLUMN_G_N_H_P_S_PARENTTITLE_3);
 		}
 		else {
@@ -21894,8 +21892,10 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		setModelClass(WikiPage.class);
 
 		try {
-			Field field = ReflectionUtil.getDeclaredField(BasePersistenceImpl.class,
+			Field field = BasePersistenceImpl.class.getDeclaredField(
 					"_dbColumnNames");
+
+			field.setAccessible(true);
 
 			Map<String, String> dbColumnNames = new HashMap<String, String>();
 
@@ -22294,7 +22294,13 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		}
 		else
 		 if (isNew) {
-			Object[] args = new Object[] { wikiPageModelImpl.getUuid() };
+			Object[] args = new Object[] { wikiPageModelImpl.getResourcePrimKey() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_RESOURCEPRIMKEY, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY,
+				args);
+
+			args = new Object[] { wikiPageModelImpl.getUuid() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
 			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
@@ -22307,12 +22313,6 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
 			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
-				args);
-
-			args = new Object[] { wikiPageModelImpl.getResourcePrimKey() };
-
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_RESOURCEPRIMKEY, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY,
 				args);
 
 			args = new Object[] { wikiPageModelImpl.getNodeId() };
@@ -22545,6 +22545,25 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 
 		else {
 			if ((wikiPageModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						wikiPageModelImpl.getOriginalResourcePrimKey()
+					};
+
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_RESOURCEPRIMKEY,
+					args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY,
+					args);
+
+				args = new Object[] { wikiPageModelImpl.getResourcePrimKey() };
+
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_RESOURCEPRIMKEY,
+					args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY,
+					args);
+			}
+
+			if ((wikiPageModelImpl.getColumnBitmask() &
 					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] { wikiPageModelImpl.getOriginalUuid() };
 
@@ -22577,25 +22596,6 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 
 				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
 				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
-					args);
-			}
-
-			if ((wikiPageModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						wikiPageModelImpl.getOriginalResourcePrimKey()
-					};
-
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_RESOURCEPRIMKEY,
-					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY,
-					args);
-
-				args = new Object[] { wikiPageModelImpl.getResourcePrimKey() };
-
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_RESOURCEPRIMKEY,
-					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RESOURCEPRIMKEY,
 					args);
 			}
 
@@ -23361,12 +23361,12 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
 			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

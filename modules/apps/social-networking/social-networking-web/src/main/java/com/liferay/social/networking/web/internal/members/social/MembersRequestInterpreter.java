@@ -31,8 +31,6 @@ import com.liferay.social.kernel.model.SocialRequestFeedEntry;
 import com.liferay.social.kernel.model.SocialRequestInterpreter;
 import com.liferay.social.kernel.service.SocialActivityLocalService;
 import com.liferay.social.networking.constants.SocialNetworkingPortletKeys;
-import com.liferay.social.networking.members.social.MembersActivityKeys;
-import com.liferay.social.networking.members.social.MembersRequestKeys;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -174,7 +172,7 @@ public class MembersRequestInterpreter extends BaseSocialRequestInterpreter {
 	}
 
 	private static final String[] _CLASS_NAMES =
-		new String[] {Group.class.getName(), Organization.class.getName()};
+		{Group.class.getName(), Organization.class.getName()};
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		MembersRequestInterpreter.class);

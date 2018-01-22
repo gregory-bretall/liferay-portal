@@ -120,14 +120,14 @@ renderResponse.setTitle((exportImportConfiguration == null) ? LanguageUtil.get(r
 		</div>
 
 		<aui:button-row>
-			<aui:button cssClass="btn-lg" type="submit" value="save" />
+			<aui:button type="submit" value="save" />
 
-			<aui:button cssClass="btn-lg" href="<%= portletURL.toString() %>" type="cancel" />
+			<aui:button href="<%= portletURL.toString() %>" type="cancel" />
 		</aui:button-row>
 	</aui:form>
 </div>
 
-<aui:script use="liferay-export-import">
+<aui:script use="liferay-export-import-export-import">
 	var exportImport = new Liferay.ExportImport(
 		{
 			archivedSetupsNode: '#<%= PortletDataHandlerKeys.PORTLET_ARCHIVED_SETUPS_ALL %>',

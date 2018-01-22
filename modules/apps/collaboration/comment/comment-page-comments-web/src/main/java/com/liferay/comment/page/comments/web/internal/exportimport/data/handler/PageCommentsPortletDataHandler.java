@@ -16,19 +16,19 @@ package com.liferay.comment.page.comments.web.internal.exportimport.data.handler
 
 import com.liferay.comment.page.comments.web.internal.constants.PageCommentsPortletKeys;
 import com.liferay.exportimport.kernel.lar.BasePortletDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportProcessCallbackRegistryUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportProcessCallbackRegistry;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataHandler;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.comment.DiscussionStagingHandler;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.StagedModel;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.xml.Element;
 
 import java.util.List;
@@ -161,7 +161,7 @@ public class PageCommentsPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences, String data)
 		throws Exception {
 
-		ExportImportProcessCallbackRegistryUtil.registerCallback(
+		_exportImportProcessCallbackRegistry.registerCallback(
 			new ImportCommentsCallable(_commentManager, portletDataContext));
 
 		return null;
@@ -189,6 +189,10 @@ public class PageCommentsPortletDataHandler extends BasePortletDataHandler {
 
 	@Reference
 	private CommentManager _commentManager;
+
+	@Reference
+	private ExportImportProcessCallbackRegistry
+		_exportImportProcessCallbackRegistry;
 
 	private static class ImportCommentsCallable implements Callable<Void> {
 

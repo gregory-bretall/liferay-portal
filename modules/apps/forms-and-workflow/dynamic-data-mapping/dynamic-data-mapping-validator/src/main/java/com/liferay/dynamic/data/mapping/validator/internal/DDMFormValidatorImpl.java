@@ -40,11 +40,11 @@ import com.liferay.dynamic.data.mapping.validator.DDMFormValidationException.Mus
 import com.liferay.dynamic.data.mapping.validator.DDMFormValidationException.MustSetValidValidationExpression;
 import com.liferay.dynamic.data.mapping.validator.DDMFormValidationException.MustSetValidVisibilityExpression;
 import com.liferay.dynamic.data.mapping.validator.DDMFormValidator;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -364,7 +364,7 @@ public class DDMFormValidatorImpl implements DDMFormValidator {
 
 	private DDMExpressionFactory _ddmExpressionFactory;
 	private final String[] _ddmFormFieldIndexTypes =
-		new String[] {StringPool.BLANK, "keyword", "text"};
+		{StringPool.BLANK, "keyword", "text"};
 	private final Pattern _ddmFormFieldNamePattern = Pattern.compile(
 		"([^\\p{Punct}|\\p{Space}$]|_)+");
 	private final Pattern _ddmFormFieldTypePattern = Pattern.compile(

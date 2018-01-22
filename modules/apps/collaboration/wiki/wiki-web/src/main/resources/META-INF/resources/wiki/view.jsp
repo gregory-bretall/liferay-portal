@@ -100,7 +100,7 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(WikiPage.class
 AssetEntryServiceUtil.incrementViewCounter(layoutAssetEntry);
 
 if (Validator.isNotNull(ParamUtil.getString(request, "title"))) {
-	AssetUtil.addLayoutTags(request, AssetTagLocalServiceUtil.getTags(WikiPage.class.getName(), wikiPage.getResourcePrimKey()));
+	assetHelper.addLayoutTags(request, AssetTagLocalServiceUtil.getTags(WikiPage.class.getName(), wikiPage.getResourcePrimKey()));
 }
 
 request.setAttribute(WebKeys.LAYOUT_ASSET_ENTRY, layoutAssetEntry);
@@ -195,6 +195,10 @@ if (portletTitleBasedNavigation) {
 				contextObjects.put("assetEntry", layoutAssetEntry);
 				contextObjects.put("formattedContent", formattedContent);
 				contextObjects.put("wikiPortletInstanceConfiguration", wikiPortletInstanceConfiguration);
+
+				// Deprecated
+
+				contextObjects.put("wikiPortletInstanceOverriddenConfiguration", wikiPortletInstanceConfiguration);
 				%>
 
 				<c:if test="<%= !portletTitleBasedNavigation %>">
@@ -220,7 +224,7 @@ if (portletTitleBasedNavigation) {
 						<c:if test="<%= !print && !portletTitleBasedNavigation %>">
 							<div class="page-actions top-actions">
 								<c:if test="<%= followRedirect || (redirectPage == null) %>">
-									<c:if test="<%= Validator.isNotNull(formattedContent) && WikiNodePermissionChecker.contains(permissionChecker, node, ActionKeys.ADD_PAGE) %>">
+									<c:if test="<%= Validator.isNotNull(formattedContent) && WikiNodePermission.contains(permissionChecker, node, ActionKeys.ADD_PAGE) %>">
 										<liferay-ui:icon
 											iconCssClass="icon-plus"
 											label="<%= true %>"
@@ -230,7 +234,7 @@ if (portletTitleBasedNavigation) {
 										/>
 									</c:if>
 
-									<c:if test="<%= WikiPagePermissionChecker.contains(permissionChecker, wikiPage, ActionKeys.UPDATE) %>">
+									<c:if test="<%= WikiPagePermission.contains(permissionChecker, wikiPage, ActionKeys.UPDATE) %>">
 										<liferay-ui:icon
 											iconCssClass="icon-edit"
 											label="<%= true %>"
@@ -317,7 +321,7 @@ if (portletTitleBasedNavigation) {
 
 								<div class="page-categorization">
 									<div class="page-categories">
-										<liferay-ui:asset-categories-summary
+										<liferay-asset:asset-categories-summary
 											className="<%= WikiPage.class.getName() %>"
 											classPK="<%= wikiPage.getResourcePrimKey() %>"
 											portletURL="<%= PortletURLUtil.clone(categorizedPagesURL, renderResponse) %>"
@@ -325,18 +329,18 @@ if (portletTitleBasedNavigation) {
 									</div>
 
 									<div class="page-tags">
-										<liferay-ui:asset-tags-available
+										<liferay-asset:asset-tags-available
 											className="<%= WikiPage.class.getName() %>"
 											classPK="<%= wikiPage.getResourcePrimKey() %>"
 										>
 											<h5><liferay-ui:message key="tags" /></h5>
 
-											<liferay-ui:asset-tags-summary
+											<liferay-asset:asset-tags-summary
 												className="<%= WikiPage.class.getName() %>"
 												classPK="<%= wikiPage.getResourcePrimKey() %>"
 												portletURL="<%= PortletURLUtil.clone(taggedPagesURL, renderResponse) %>"
 											/>
-										</liferay-ui:asset-tags-available>
+										</liferay-asset:asset-tags-available>
 									</div>
 								</div>
 
@@ -386,7 +390,7 @@ if (portletTitleBasedNavigation) {
 
 								<c:if test="<%= wikiPortletInstanceSettingsHelper.isEnableRelatedAssets() %>">
 									<div class="entry-links">
-										<liferay-ui:asset-links
+										<liferay-asset:asset-links
 											assetEntryId="<%= assetEntry.getEntryId() %>"
 										/>
 									</div>
@@ -438,7 +442,7 @@ if (portletTitleBasedNavigation) {
 						description = StringUtil.shorten(description, 200);
 
 						PortalUtil.setPageDescription(description, request);
-						PortalUtil.setPageKeywords(AssetUtil.getAssetKeywords(WikiPage.class.getName(), wikiPage.getResourcePrimKey()), request);
+						PortalUtil.setPageKeywords(assetHelper.getAssetKeywords(WikiPage.class.getName(), wikiPage.getResourcePrimKey()), request);
 					}
 
 					List<WikiPage> parentPages = wikiPage.getViewableParentPages();

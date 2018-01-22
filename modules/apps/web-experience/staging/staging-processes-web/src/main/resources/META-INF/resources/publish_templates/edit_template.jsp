@@ -156,9 +156,9 @@ renderResponse.setTitle((exportImportConfiguration == null) ? LanguageUtil.get(r
 				</div>
 
 				<aui:button-row>
-					<aui:button cssClass="btn-lg" type="submit" value="save" />
+					<aui:button type="submit" value="save" />
 
-					<aui:button cssClass="btn-lg" href="<%= renderURL.toString() %>" type="cancel" />
+					<aui:button href="<%= renderURL.toString() %>" type="cancel" />
 				</aui:button-row>
 			</div>
 		</aui:form>
@@ -197,7 +197,7 @@ renderResponse.setTitle((exportImportConfiguration == null) ? LanguageUtil.get(r
 	Liferay.Util.toggleRadio('<portlet:namespace />rangeLast', '<portlet:namespace />rangeLastInputs', ['<portlet:namespace />startEndDate']);
 </aui:script>
 
-<aui:script use="liferay-export-import">
+<aui:script use="liferay-staging-processes-export-import">
 	<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="publishLayouts" var="publishProcessesURL">
 		<portlet:param name="<%= Constants.CMD %>" value="<%= cmd %>" />
 		<portlet:param name="<%= SearchContainer.DEFAULT_CUR_PARAM %>" value="<%= ParamUtil.getString(request, SearchContainer.DEFAULT_CUR_PARAM) %>" />

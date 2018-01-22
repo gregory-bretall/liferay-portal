@@ -16,9 +16,12 @@ package com.liferay.portal.search.elasticsearch.internal;
 
 import com.liferay.portal.kernel.search.IndexSearcher;
 import com.liferay.portal.kernel.search.IndexWriter;
+import com.liferay.portal.kernel.util.Props;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.search.elasticsearch.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch.connection.TestElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch.document.ElasticsearchUpdateDocumentCommand;
+import com.liferay.portal.search.elasticsearch.facet.FacetProcessor;
 import com.liferay.portal.search.elasticsearch.index.IndexNameBuilder;
 import com.liferay.portal.search.elasticsearch.internal.connection.ElasticsearchFixture;
 import com.liferay.portal.search.elasticsearch.internal.connection.IndexCreator;
@@ -55,6 +58,10 @@ import com.liferay.portal.search.elasticsearch.internal.query.TermRangeQueryTran
 import com.liferay.portal.search.elasticsearch.internal.query.WildcardQueryTranslatorImpl;
 import com.liferay.portal.search.elasticsearch.internal.stats.DefaultStatsTranslator;
 import com.liferay.portal.search.test.util.indexing.IndexingFixture;
+
+import org.elasticsearch.action.search.SearchRequestBuilder;
+
+import org.mockito.Mockito;
 
 /**
  * @author André de Oliveira
@@ -95,6 +102,12 @@ public class ElasticsearchIndexingFixture implements IndexingFixture {
 	@Override
 	public boolean isSearchEngineAvailable() {
 		return true;
+	}
+
+	public void setFacetProcessor(
+		FacetProcessor<SearchRequestBuilder> facetProcessor) {
+
+		_facetProcessor = facetProcessor;
 	}
 
 	@Override
@@ -179,10 +192,11 @@ public class ElasticsearchIndexingFixture implements IndexingFixture {
 			{
 				elasticsearchConnectionManager =
 					elasticsearchConnectionManager1;
-				facetProcessor = new DefaultFacetProcessor();
+				facetProcessor = _facetProcessor;
 				filterTranslator = createElasticsearchFilterTranslator();
 				groupByTranslator = new DefaultGroupByTranslator();
 				indexNameBuilder = indexNameBuilder1;
+				props = createProps();
 				queryTranslator = createElasticsearchQueryTranslator();
 				statsTranslator = new DefaultStatsTranslator();
 				searchHitDocumentTranslator =
@@ -224,6 +238,20 @@ public class ElasticsearchIndexingFixture implements IndexingFixture {
 		};
 	}
 
+	protected Props createProps() {
+		Props props = Mockito.mock(Props.class);
+
+		Mockito.doReturn(
+			"20"
+		).when(
+			props
+		).get(
+			PropsKeys.INDEX_SEARCH_LIMIT
+		);
+
+		return props;
+	}
+
 	protected static class TestIndexNameBuilder implements IndexNameBuilder {
 
 		@Override
@@ -235,6 +263,8 @@ public class ElasticsearchIndexingFixture implements IndexingFixture {
 
 	private final long _companyId;
 	private final ElasticsearchFixture _elasticsearchFixture;
+	private FacetProcessor<SearchRequestBuilder> _facetProcessor =
+		new DefaultFacetProcessor();
 	private final IndexCreator _indexCreator;
 	private final IndexNameBuilder _indexNameBuilder =
 		new TestIndexNameBuilder();

@@ -37,12 +37,15 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.Props;
 import com.liferay.portal.kernel.util.PropsUtil;
+import com.liferay.portal.search.internal.summary.SummaryBuilderFactoryImpl;
 import com.liferay.portal.search.test.SearchTestUtil;
 import com.liferay.portal.search.web.internal.display.context.PortletURLFactory;
 import com.liferay.portal.search.web.internal.display.context.SearchResultPreferences;
 import com.liferay.portal.search.web.internal.result.display.context.SearchResultSummaryDisplayContext;
 
 import java.util.Locale;
+
+import javax.portlet.PortletURL;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -69,6 +72,42 @@ public class SearchResultSummaryDisplayBuilderTest {
 		setUpProps();
 
 		themeDisplay = createThemeDisplay();
+	}
+
+	@Test
+	public void testClassFieldsWithoutAssetTagsOrCategories() throws Exception {
+		PortletURL portletURL = Mockito.mock(PortletURL.class);
+
+		Mockito.doReturn(
+			portletURL
+		).when(
+			portletURLFactory
+		).getPortletURL();
+
+		String entryClassName = RandomTestUtil.randomString();
+
+		long entryClassPK = RandomTestUtil.randomLong();
+
+		whenAssetRendererFactoryGetAssetRenderer(entryClassPK, assetRenderer);
+
+		whenAssetRendererFactoryLookupGetAssetRendererFactoryByClassName(
+			entryClassName);
+
+		SearchResultSummaryDisplayBuilder searchResultSummaryDisplayBuilder =
+			createSearchResultSummaryDisplayBuilder();
+
+		searchResultSummaryDisplayBuilder.setDocument(
+			createDocument(entryClassName, entryClassPK));
+
+		SearchResultSummaryDisplayContext searchResultSummaryDisplayContext =
+			searchResultSummaryDisplayBuilder.build();
+
+		Assert.assertEquals(
+			entryClassName, searchResultSummaryDisplayContext.getClassName());
+		Assert.assertEquals(
+			entryClassPK, searchResultSummaryDisplayContext.getClassPK());
+		Assert.assertEquals(
+			portletURL, searchResultSummaryDisplayContext.getPortletURL());
 	}
 
 	@Test
@@ -274,8 +313,8 @@ public class SearchResultSummaryDisplayBuilderTest {
 		return document;
 	}
 
-	protected Indexer createIndexer() throws Exception {
-		Indexer indexer = Mockito.mock(Indexer.class);
+	protected Indexer<?> createIndexer() throws Exception {
+		Indexer<?> indexer = Mockito.mock(Indexer.class);
 
 		Mockito.doReturn(
 			new Summary(Locale.US, null, null)
@@ -303,13 +342,15 @@ public class SearchResultSummaryDisplayBuilderTest {
 			Mockito.mock(Language.class));
 		searchResultSummaryDisplayBuilder.setLocale(Locale.US);
 		searchResultSummaryDisplayBuilder.setPortletURLFactory(
-			Mockito.mock(PortletURLFactory.class));
+			portletURLFactory);
 		searchResultSummaryDisplayBuilder.setResourceActions(
 			Mockito.mock(ResourceActions.class));
 		searchResultSummaryDisplayBuilder.setSearchResultPreferences(
 			Mockito.mock(SearchResultPreferences.class));
 		searchResultSummaryDisplayBuilder.setSearchResultViewURLSupplier(
 			Mockito.mock(SearchResultViewURLSupplier.class));
+		searchResultSummaryDisplayBuilder.setSummaryBuilderFactory(
+			new SummaryBuilderFactoryImpl());
 		searchResultSummaryDisplayBuilder.setThemeDisplay(themeDisplay);
 
 		return searchResultSummaryDisplayBuilder;
@@ -446,6 +487,9 @@ public class SearchResultSummaryDisplayBuilderTest {
 
 	@Mock
 	protected PermissionChecker permissionChecker;
+
+	@Mock
+	protected PortletURLFactory portletURLFactory;
 
 	protected ThemeDisplay themeDisplay;
 

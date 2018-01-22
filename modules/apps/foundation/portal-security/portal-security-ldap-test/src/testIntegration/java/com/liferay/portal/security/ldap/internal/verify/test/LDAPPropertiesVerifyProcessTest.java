@@ -15,6 +15,7 @@
 package com.liferay.portal.security.ldap.internal.verify.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.security.ldap.LDAPSettingsUtil;
@@ -22,7 +23,6 @@ import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.ldap.authenticator.configuration.LDAPAuthConfiguration;
@@ -406,7 +406,7 @@ public class LDAPPropertiesVerifyProcessTest extends BaseVerifyProcessTestCase {
 					portletPreferences.getValue(
 						"ldap.server.ids", StringPool.BLANK)));
 
-			for (String key : LegacyLDAPPropsKeys.NONPOSTFIXED_LDAP_KEYS) {
+			for (String key : LegacyLDAPPropsKeys.LDAP_KEYS_NONPOSTFIXED) {
 				Assert.assertTrue(
 					Validator.isNull(
 						portletPreferences.getValue(key, StringPool.BLANK)));

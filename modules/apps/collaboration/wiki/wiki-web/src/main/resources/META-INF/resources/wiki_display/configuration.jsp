@@ -91,7 +91,7 @@ boolean nodeInGroup = false;
 							</div>
 
 							<aui:script sandbox="<%= true %>">
-								var nodeIdSelect = $('#<portlet:namespace/>nodeId');
+								var nodeIdSelect = $('#<portlet:namespace />nodeId');
 								var pageSelectorContainer = $('#<portlet:namespace />pageSelectorContainer');
 
 								var nodeIdValue = nodeIdSelect.val();
@@ -114,6 +114,6 @@ boolean nodeInGroup = false;
 	</div>
 
 	<aui:button-row>
-		<aui:button cssClass="btn-lg" disabled="<%= nodes.isEmpty() %>" type="submit" />
+		<aui:button disabled="<%= nodes.isEmpty() %>" type="submit" />
 	</aui:button-row>
 </aui:form>

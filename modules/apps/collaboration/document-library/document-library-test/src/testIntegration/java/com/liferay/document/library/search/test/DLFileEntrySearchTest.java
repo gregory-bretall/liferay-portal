@@ -38,6 +38,7 @@ import com.liferay.dynamic.data.mapping.test.util.search.TestOrderHelper;
 import com.liferay.dynamic.data.mapping.util.DDMBeanTranslatorUtil;
 import com.liferay.dynamic.data.mapping.util.DDMIndexer;
 import com.liferay.dynamic.data.mapping.util.DDMUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.Group;
@@ -47,8 +48,6 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.SearchContextTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -58,20 +57,17 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.search.test.BaseSearchTestCase;
+import com.liferay.portal.search.test.util.BaseSearchTestCase;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerTestRule;
 import com.liferay.portlet.documentlibrary.util.test.DLAppTestUtil;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
 
 import java.io.File;
 import java.io.InputStream;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -82,7 +78,6 @@ import org.junit.runner.RunWith;
  * @author Eudaldo Alonso
  */
 @RunWith(Arquillian.class)
-@Sync
 public class DLFileEntrySearchTest extends BaseSearchTestCase {
 
 	@ClassRule
@@ -90,16 +85,7 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE,
-			SynchronousDestinationTestRule.INSTANCE);
-
-	@Before
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-
-		setUpDDMIndexer();
-	}
+			PermissionCheckerTestRule.INSTANCE);
 
 	@Ignore
 	@Override
@@ -453,12 +439,6 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 			QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 	}
 
-	protected void setUpDDMIndexer() {
-		Registry registry = RegistryUtil.getRegistry();
-
-		_ddmIndexer = registry.getService(DDMIndexer.class);
-	}
-
 	@Override
 	protected BaseModel<?> updateBaseModel(
 			BaseModel<?> baseModel, String keywords,
@@ -553,7 +533,9 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 
 	private static final int _FOLDER_NAME_MAX_LENGTH = 100;
 
-	private DDMIndexer _ddmIndexer;
+	@Inject
+	private static DDMIndexer _ddmIndexer;
+
 	private DDMStructure _ddmStructure;
 
 }

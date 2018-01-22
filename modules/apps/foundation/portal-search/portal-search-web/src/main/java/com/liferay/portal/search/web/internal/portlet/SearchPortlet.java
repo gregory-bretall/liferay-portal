@@ -14,6 +14,7 @@
 
 package com.liferay.portal.search.web.internal.portlet;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.search.OpenSearch;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
@@ -21,7 +22,7 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.search.PortalOpenSearchImpl;
 import com.liferay.portal.search.web.constants.SearchPortletKeys;
 import com.liferay.portal.search.web.internal.display.context.SearchDisplayContext;
@@ -82,7 +83,7 @@ public class SearchPortlet extends MVCPortlet {
 				renderRequest, renderResponse, renderRequest.getPreferences());
 
 		renderRequest.setAttribute(
-			SearchDisplayContext.class.getName(), searchDisplayContext);
+			WebKeys.PORTLET_DISPLAY_CONTEXT, searchDisplayContext);
 
 		super.render(renderRequest, renderResponse);
 	}

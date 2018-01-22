@@ -396,6 +396,30 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 								</liferay-ui:search-container-column-text>
 							</c:if>
 
+							<c:if test='<%= ArrayUtil.contains(entryColumns, "document-type") %>'>
+								<c:choose>
+									<c:when test="<%= latestFileVersion.getModel() instanceof DLFileVersion %>">
+
+										<%
+										DLFileVersion latestDLFileVersion = (DLFileVersion)latestFileVersion.getModel();
+
+										DLFileEntryType dlFileEntryType = latestDLFileVersion.getDLFileEntryType();
+										%>
+
+										<liferay-ui:search-container-column-text
+											name="document-type"
+											value="<%= HtmlUtil.escape(dlFileEntryType.getName(locale)) %>"
+										/>
+									</c:when>
+									<c:otherwise>
+										<liferay-ui:search-container-column-text
+											name="document-type"
+											value="--"
+										/>
+									</c:otherwise>
+								</c:choose>
+							</c:if>
+
 							<c:if test='<%= ArrayUtil.contains(entryColumns, "size") %>'>
 								<liferay-ui:search-container-column-text
 									name="size"
@@ -442,16 +466,16 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 				<c:otherwise>
 
 					<%
+					if (dlSearchContainer.getRowChecker() == null) {
+						dlSearchContainer.setRowChecker(entriesChecker);
+					}
+
 					Map<String, Object> rowData = new HashMap<String, Object>();
 
 					boolean draggable = false;
 
 					if (DLFolderPermission.contains(permissionChecker, curFolder, ActionKeys.DELETE) || DLFolderPermission.contains(permissionChecker, curFolder, ActionKeys.UPDATE)) {
 						draggable = true;
-
-						if (dlSearchContainer.getRowChecker() == null) {
-							dlSearchContainer.setRowChecker(entriesChecker);
-						}
 
 						if (dlSearchContainer.getRowMover() == null) {
 							dlSearchContainer.setRowMover(entriesMover);
@@ -530,6 +554,13 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 									href="<%= rowURL %>"
 									name="title"
 									value="<%= curFolder.getName() %>"
+								/>
+							</c:if>
+
+							<c:if test='<%= ArrayUtil.contains(entryColumns, "document-type") %>'>
+								<liferay-ui:search-container-column-text
+									name="document-type"
+									value="--"
 								/>
 							</c:if>
 

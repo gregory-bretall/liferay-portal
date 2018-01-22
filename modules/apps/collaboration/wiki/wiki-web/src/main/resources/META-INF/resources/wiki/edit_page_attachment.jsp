@@ -19,6 +19,8 @@
 <%
 WikiNode node = (WikiNode)request.getAttribute(WikiWebKeys.WIKI_NODE);
 WikiPage wikiPage = (WikiPage)request.getAttribute(WikiWebKeys.WIKI_PAGE);
+
+DLConfiguration dlConfiguration = ConfigurationProviderUtil.getSystemConfiguration(DLConfiguration.class);
 %>
 
 <div class="lfr-dynamic-uploader" id="<portlet:namespace />uploaderContainer">
@@ -28,35 +30,28 @@ WikiPage wikiPage = (WikiPage)request.getAttribute(WikiWebKeys.WIKI_PAGE);
 <div class="hide lfr-fallback" id="<portlet:namespace />fallback">
 	<aui:input name="numOfFiles" type="hidden" value="3" />
 
-	<aui:input label='<%= LanguageUtil.get(request, "file") + " 1" %>' name="file1" type="file" />
+	<%
+	String acceptedExtensions = StringUtil.merge(dlConfiguration.fileExtensions(), StringPool.COMMA_AND_SPACE);
+	%>
 
-	<aui:input label='<%= LanguageUtil.get(request, "file") + " 2" %>' name="file2" type="file" />
+	<aui:input label='<%= LanguageUtil.get(request, "file") + " 1" %>' name="file1" type="file">
+		<aui:validator name="acceptFiles">
+			'<%= acceptedExtensions %>'
+		</aui:validator>
+	</aui:input>
 
-	<aui:input label='<%= LanguageUtil.get(request, "file") + " 3" %>' name="file3" type="file" />
+	<aui:input label='<%= LanguageUtil.get(request, "file") + " 2" %>' name="file2" type="file">
+		<aui:validator name="acceptFiles">
+			'<%= acceptedExtensions %>'
+		</aui:validator>
+	</aui:input>
+
+	<aui:input label='<%= LanguageUtil.get(request, "file") + " 3" %>' name="file3" type="file">
+		<aui:validator name="acceptFiles">
+			'<%= acceptedExtensions %>'
+		</aui:validator>
+	</aui:input>
 </div>
-
-<aui:script sandbox="<%= true %>">
-	$('#<portlet:namespace />fallback').on(
-		'change',
-		'input',
-		function(event) {
-			var currentTarget = $(event.currentTarget);
-
-			var value = currentTarget.val();
-
-			if (value) {
-				var extension = value.substring(value.lastIndexOf('.')).toLowerCase();
-				var validExtensions = ['<%= StringUtil.merge(PrefsPropsUtil.getStringArray(PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA), "', '") %>'];
-
-				if ((validExtensions.indexOf('*') == -1) && (validExtensions.indexOf(extension) == -1)) {
-					alert('<%= UnicodeLanguageUtil.get(request, "document-names-must-end-with-one-of-the-following-extensions") %> <%= StringUtil.merge(PrefsPropsUtil.getStringArray(PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA), StringPool.COMMA_AND_SPACE) %>');
-
-					currentTarget.val('');
-				}
-			}
-		}
-	);
-</aui:script>
 
 <%
 Date expirationDate = new Date(System.currentTimeMillis() + GetterUtil.getInteger(PropsUtil.get(PropsKeys.SESSION_TIMEOUT)) * Time.MINUTE);
@@ -88,8 +83,8 @@ Ticket ticket = TicketLocalServiceUtil.addTicket(user.getCompanyId(), User.class
 
 			decimalSeparator: '<%= decimalFormatSymbols.getDecimalSeparator() %>',
 			fallback: '#<portlet:namespace />fallback',
-			fileDescription: '<%= StringUtil.merge(PrefsPropsUtil.getStringArray(PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA)) %>',
-			maxFileSize: '<%= PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE) %> ',
+			fileDescription: '<%= StringUtil.merge(dlConfiguration.fileExtensions()) %>',
+			maxFileSize: '<%= dlConfiguration.fileMaxSize() %> ',
 			namespace: '<portlet:namespace />',
 			removeOnComplete: true,
 			rootElement: '#<portlet:namespace />uploaderContainer',

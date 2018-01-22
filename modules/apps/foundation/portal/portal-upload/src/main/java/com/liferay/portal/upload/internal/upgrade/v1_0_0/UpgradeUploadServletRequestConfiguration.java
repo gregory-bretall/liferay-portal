@@ -14,13 +14,13 @@
 
 package com.liferay.portal.upload.internal.upgrade.v1_0_0;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.PrefsProps;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.upload.configuration.UploadServletRequestConfiguration;
 import com.liferay.portal.upload.constants.LegacyUploadServletRequestPropsKeys;
+import com.liferay.portal.upload.internal.configuration.UploadServletRequestConfiguration;
 
 import java.util.Dictionary;
 
@@ -41,6 +41,7 @@ public class UpgradeUploadServletRequestConfiguration extends UpgradeProcess {
 		_prefsProps = prefsProps;
 	}
 
+	@Override
 	protected void doUpgrade() throws Exception {
 		Configuration configuration = _configurationAdmin.getConfiguration(
 			UploadServletRequestConfiguration.class.getName(),
@@ -80,7 +81,10 @@ public class UpgradeUploadServletRequestConfiguration extends UpgradeProcess {
 
 		PortletPreferences portletPreferences = _prefsProps.getPreferences();
 
-		for (String key : LegacyUploadServletRequestPropsKeys.KEYS) {
+		for (String key :
+				LegacyUploadServletRequestPropsKeys.
+					UPLOAD_SERVLET_REQUEST_IMPL_KEYS) {
+
 			portletPreferences.reset(key);
 		}
 	}
