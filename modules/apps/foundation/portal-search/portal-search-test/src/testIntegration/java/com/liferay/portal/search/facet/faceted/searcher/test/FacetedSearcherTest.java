@@ -21,8 +21,6 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.test.util.SearchMapUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -39,15 +37,12 @@ import org.junit.runner.RunWith;
  * @author Andrew Betts
  */
 @RunWith(Arquillian.class)
-@Sync
 public class FacetedSearcherTest extends BaseFacetedSearcherTestCase {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Test
 	public void testSearchByKeywords() throws Exception {
@@ -55,7 +50,7 @@ public class FacetedSearcherTest extends BaseFacetedSearcherTestCase {
 
 		String tag = RandomTestUtil.randomString();
 
-		User user = userSearchFixture.addUser(group, tag);
+		User user = addUser(group, tag);
 
 		assertSearch(tag, toMap(user, tag));
 	}
@@ -68,13 +63,13 @@ public class FacetedSearcherTest extends BaseFacetedSearcherTestCase {
 
 		String tag1 = prefix + " " + RandomTestUtil.randomString();
 
-		User user1 = userSearchFixture.addUser(group1, tag1);
+		User user1 = addUser(group1, tag1);
 
 		Group group2 = userSearchFixture.addGroup();
 
 		String tag2 = prefix + " " + RandomTestUtil.randomString();
 
-		User user2 = userSearchFixture.addUser(group2, tag2);
+		User user2 = addUser(group2, tag2);
 
 		assertSearch(
 			prefix, SearchMapUtil.join(toMap(user1, tag1), toMap(user2, tag2)));

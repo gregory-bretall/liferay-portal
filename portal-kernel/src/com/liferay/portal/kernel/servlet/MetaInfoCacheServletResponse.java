@@ -14,7 +14,7 @@
 
 package com.liferay.portal.kernel.servlet;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -213,7 +214,6 @@ public class MetaInfoCacheServletResponse extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public void flushBuffer() throws IOException {
 		_committed = true;
 	}
@@ -264,7 +264,9 @@ public class MetaInfoCacheServletResponse extends HttpServletResponseWrapper {
 			return null;
 		}
 
-		Header header = values.iterator().next();
+		Iterator<Header> iterator = values.iterator();
+
+		Header header = iterator.next();
 
 		return header.toString();
 	}

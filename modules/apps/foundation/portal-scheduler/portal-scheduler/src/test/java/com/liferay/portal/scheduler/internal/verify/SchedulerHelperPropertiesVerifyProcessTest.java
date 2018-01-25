@@ -14,9 +14,9 @@
 
 package com.liferay.portal.scheduler.internal.verify;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.Props;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.scheduler.configuration.SchedulerEngineHelperConfiguration;
+import com.liferay.portal.scheduler.internal.configuration.SchedulerEngineHelperConfiguration;
 
 import java.util.Dictionary;
 
@@ -128,7 +128,11 @@ public class SchedulerHelperPropertiesVerifyProcessTest {
 
 		schedulerHelperPropertiesVerifyProcess.doVerify();
 
-		Mockito.verify(configuration).update(_argumentCaptor.capture());
+		Mockito.verify(
+			configuration
+		).update(
+			_argumentCaptor.capture()
+		);
 
 		Dictionary<String, Object> dictionary = _argumentCaptor.getValue();
 

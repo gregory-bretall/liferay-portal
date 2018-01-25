@@ -19,12 +19,13 @@ import com.google.template.soy.SoyFileSet;
 import com.google.template.soy.SoyFileSet.Builder;
 import com.google.template.soy.data.SanitizedContent;
 import com.google.template.soy.data.SoyMapData;
-import com.google.template.soy.data.UnsafeSanitizedContentOrdainer;
 import com.google.template.soy.msgs.SoyMsgBundle;
 import com.google.template.soy.tofu.SoyTofu;
 import com.google.template.soy.tofu.SoyTofu.Renderer;
 import com.google.template.soy.tofu.SoyTofuOptions;
 
+import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -35,17 +36,21 @@ import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.ClassResourceBundleLoader;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.template.AbstractMultiResourceTemplate;
+import com.liferay.portal.template.TemplateContextHelper;
+import com.liferay.portal.template.soy.constants.SoyTemplateConstants;
 import com.liferay.portal.template.soy.utils.SoyHTMLContextValue;
+import com.liferay.portal.template.soy.utils.SoyRawData;
 import com.liferay.portal.template.soy.utils.SoyTemplateResourcesProvider;
 
 import java.io.Reader;
 import java.io.Writer;
+
+import java.lang.reflect.Array;
 
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -53,6 +58,8 @@ import java.security.PrivilegedExceptionAction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -60,6 +67,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.ClassUtils;
+
+import org.json.JSONArray;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
@@ -83,42 +97,43 @@ public class SoyTemplate extends AbstractMultiResourceTemplate {
 		_privileged = privileged;
 
 		_soyMapData = new SoyMapData();
+		_injectedSoyMapData = new SoyMapData();
 		_soyTofuCacheHandler = soyTofuCacheHandler;
 	}
 
 	@Override
 	public void clear() {
-		for (String key : _soyMapData.getKeys()) {
-			_soyMapData.remove(key);
-		}
+		_soyMapData = new SoyMapData();
+		_injectedSoyMapData = new SoyMapData();
 
 		super.clear();
 	}
 
 	@Override
+	public void prepare(HttpServletRequest request) {
+		Map<String, Object> injectedDataObjects = new HashMap<>();
+
+		_templateContextHelper.prepare(injectedDataObjects, request);
+
+		for (Map.Entry<String, Object> entry : injectedDataObjects.entrySet()) {
+			putInjectedData(entry.getKey(), entry.getValue());
+		}
+	}
+
+	@Override
 	public Object put(String key, Object value) {
+		TemplateContextHelper templateContextHelper =
+			getTemplateContextHelper();
+
 		Set<String> restrictedVariables =
-			_templateContextHelper.getRestrictedVariables();
+			templateContextHelper.getRestrictedVariables();
 
 		Object currentValue = get(key);
 
 		if (!restrictedVariables.contains(key) &&
 			!Objects.equals(value, currentValue)) {
 
-			Object soyMapValue = null;
-
-			if (value == null) {
-				soyMapValue = null;
-			}
-			else if (value instanceof SoyHTMLContextValue) {
-				SoyHTMLContextValue htmlValue = (SoyHTMLContextValue)value;
-
-				soyMapValue = UnsafeSanitizedContentOrdainer.ordainAsSafe(
-					htmlValue.toString(), SanitizedContent.ContentKind.HTML);
-			}
-			else {
-				soyMapValue = _templateContextHelper.deserializeValue(value);
-			}
+			Object soyMapValue = getSoyMapValue(value);
 
 			_soyMapData.put(key, soyMapValue);
 		}
@@ -133,8 +148,16 @@ public class SoyTemplate extends AbstractMultiResourceTemplate {
 		}
 	}
 
+	public void putInjectedData(String key, Object value) {
+		_injectedSoyMapData.put(key, getSoyMapValue(value));
+	}
+
 	@Override
 	public Object remove(Object key) {
+		if (SoyTemplateConstants.INJECTED_DATA.equals(key)) {
+			_injectedSoyMapData = new SoyMapData();
+		}
+
 		_soyMapData.remove((String)key);
 
 		return super.remove(key);
@@ -180,6 +203,152 @@ public class SoyTemplate extends AbstractMultiResourceTemplate {
 
 	protected SoyMapData getSoyMapData() {
 		return _soyMapData;
+	}
+
+	protected SoyMapData getSoyMapInjectedData() {
+		if (containsKey(SoyTemplateConstants.INJECTED_DATA)) {
+			Map<String, Object> injectedData = (Map<String, Object>)get(
+				SoyTemplateConstants.INJECTED_DATA);
+
+			for (Map.Entry<String, Object> entry : injectedData.entrySet()) {
+				putInjectedData(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return _injectedSoyMapData;
+	}
+
+	protected Object getSoyMapValue(Object value) {
+		if (value == null) {
+			return null;
+		}
+
+		Class<?> clazz = value.getClass();
+
+		if (ClassUtils.isPrimitiveOrWrapper(clazz) || value instanceof String) {
+			return value;
+		}
+
+		if (clazz.isArray()) {
+			List<Object> newList = new ArrayList<>();
+
+			for (int i = 0; i < Array.getLength(value); i++) {
+				Object object = Array.get(value, i);
+
+				newList.add(getSoyMapValue(object));
+			}
+
+			return newList;
+		}
+
+		if (value instanceof Iterable) {
+			@SuppressWarnings("unchecked")
+			Iterable<Object> iterable = (Iterable<Object>)value;
+
+			List<Object> newList = new ArrayList<>();
+
+			for (Object object : iterable) {
+				newList.add(getSoyMapValue(object));
+			}
+
+			return newList;
+		}
+
+		if (value instanceof JSONArray) {
+			JSONArray jsonArray = (JSONArray)value;
+
+			List<Object> newList = new ArrayList<>();
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				Object object = jsonArray.opt(i);
+
+				newList.add(getSoyMapValue(object));
+			}
+
+			return newList;
+		}
+
+		if (value instanceof Map) {
+			Map<Object, Object> map = (Map<Object, Object>)value;
+
+			Map<Object, Object> newMap = new TreeMap<>();
+
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Object newKey = getSoyMapValue(entry.getKey());
+
+				if (newKey == null) {
+					continue;
+				}
+
+				Object newValue = getSoyMapValue(entry.getValue());
+
+				newMap.put(newKey, newValue);
+			}
+
+			return newMap;
+		}
+
+		if (value instanceof JSONObject) {
+			JSONObject jsonObject = (JSONObject)value;
+
+			Map<String, Object> newMap = new TreeMap<>();
+
+			Iterator<String> iterator = jsonObject.keys();
+
+			while (iterator.hasNext()) {
+				String key = iterator.next();
+
+				Object object = jsonObject.get(key);
+
+				Object newValue = getSoyMapValue(object);
+
+				newMap.put(key, newValue);
+			}
+
+			return newMap;
+		}
+
+		if (value instanceof org.json.JSONObject) {
+			org.json.JSONObject jsonObject = (org.json.JSONObject)value;
+
+			Map<Object, Object> newMap = new TreeMap<>();
+
+			Iterator<String> iterator = jsonObject.keys();
+
+			while (iterator.hasNext()) {
+				String key = iterator.next();
+
+				Object object = jsonObject.opt(key);
+
+				Object newValue = getSoyMapValue(object);
+
+				newMap.put(key, newValue);
+			}
+
+			return newMap;
+		}
+
+		if (value instanceof SoyHTMLContextValue) {
+			SoyHTMLContextValue htmlValue = (SoyHTMLContextValue)value;
+
+			return htmlValue.getValue();
+		}
+
+		if (value instanceof SoyRawData) {
+			SoyRawData soyRawData = (SoyRawData)value;
+
+			return soyRawData.getValue();
+		}
+
+		Map<String, Object> newMap = new TreeMap<>();
+
+		BeanPropertiesUtil.copyProperties(value, newMap);
+
+		if (newMap.isEmpty()) {
+			return null;
+		}
+
+		return getSoyMapValue(newMap);
 	}
 
 	protected Optional<SoyMsgBundle> getSoyMsgBundle(
@@ -234,6 +403,10 @@ public class SoyTemplate extends AbstractMultiResourceTemplate {
 		return CharStreams.toString(reader);
 	}
 
+	protected TemplateContextHelper getTemplateContextHelper() {
+		return _templateContextHelper;
+	}
+
 	@Override
 	protected void handleException(Exception exception, Writer writer)
 		throws TemplateException {
@@ -285,6 +458,7 @@ public class SoyTemplate extends AbstractMultiResourceTemplate {
 			Renderer renderer = soyTofu.newRenderer(namespace);
 
 			renderer.setData(getSoyMapData());
+			renderer.setIjData(getSoyMapInjectedData());
 
 			SoyFileSet soyFileSet = soyTofuCacheBag.getSoyFileSet();
 
@@ -347,15 +521,14 @@ public class SoyTemplate extends AbstractMultiResourceTemplate {
 				resourceBundleLoaders.toArray(
 					new ResourceBundleLoader[resourceBundleLoaders.size()]));
 
-		String languageId = LocaleUtil.toLanguageId(locale);
-
-		return aggregateResourceBundleLoader.loadResourceBundle(languageId);
+		return aggregateResourceBundleLoader.loadResourceBundle(locale);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(SoyTemplate.class);
 
+	private SoyMapData _injectedSoyMapData;
 	private final boolean _privileged;
-	private final SoyMapData _soyMapData;
+	private SoyMapData _soyMapData;
 	private final SoyTofuCacheHandler _soyTofuCacheHandler;
 	private final SoyTemplateContextHelper _templateContextHelper;
 

@@ -31,6 +31,8 @@
 			</div>
 
 			<aui:fieldset>
+				<aui:input name="preferences--enableHighlighting--" type="checkbox" value="<%= journalContentSearchPortletInstanceConfiguration.enableHighlighting() %>" />
+
 				<aui:input label="only-show-results-for-web-content-listed-in-a-web-content-display-portlet" name="preferences--showListed--" type="checkbox" value="<%= journalContentSearchPortletInstanceConfiguration.showListed() %>" />
 
 				<div class="<%= !journalContentSearchPortletInstanceConfiguration.showListed() ? StringPool.BLANK : " hide" %>" id="<portlet:namespace />webContentDisplay">
@@ -41,7 +43,7 @@
 	</div>
 
 	<aui:button-row>
-		<aui:button cssClass="btn-lg" type="submit" />
+		<aui:button type="submit" />
 	</aui:button-row>
 </aui:form>
 

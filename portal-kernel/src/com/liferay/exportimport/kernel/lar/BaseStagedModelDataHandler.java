@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.LocalizedModel;
+import com.liferay.portal.kernel.model.ResourcedModel;
 import com.liferay.portal.kernel.model.StagedGroupedModel;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.model.TrashedModel;
@@ -530,7 +531,7 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 
 		List<AssetCategory> assetCategories =
 			AssetCategoryLocalServiceUtil.getCategories(
-				ExportImportClassedModelUtil.getClassName(stagedModel),
+				ExportImportClassedModelUtil.getClassNameId(stagedModel),
 				ExportImportClassedModelUtil.getClassPK(stagedModel));
 
 		for (AssetCategory assetCategory : assetCategories) {
@@ -545,7 +546,7 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 		throws PortletDataException {
 
 		List<AssetTag> assetTags = AssetTagLocalServiceUtil.getTags(
-			ExportImportClassedModelUtil.getClassName(stagedModel),
+			ExportImportClassedModelUtil.getClassNameId(stagedModel),
 			ExportImportClassedModelUtil.getClassPK(stagedModel));
 
 		for (AssetTag assetTag : assetTags) {
@@ -735,6 +736,14 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			PortletDataContext portletDataContext, T stagedModel)
 		throws PortalException {
 
+		if (stagedModel instanceof ResourcedModel) {
+			ResourcedModel resourcedModel = (ResourcedModel)stagedModel;
+
+			if (!resourcedModel.isResourceMain()) {
+				return;
+			}
+		}
+
 		if (!MapUtil.getBoolean(
 				portletDataContext.getParameterMap(),
 				PortletDataHandlerKeys.PORTLET_DATA_ALL) &&
@@ -769,6 +778,14 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 	protected void importRatings(
 			PortletDataContext portletDataContext, T stagedModel)
 		throws PortalException {
+
+		if (stagedModel instanceof ResourcedModel) {
+			ResourcedModel resourcedModel = (ResourcedModel)stagedModel;
+
+			if (!resourcedModel.isResourceMain()) {
+				return;
+			}
+		}
 
 		if (!MapUtil.getBoolean(
 				portletDataContext.getParameterMap(),
@@ -840,16 +857,12 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			PortletDataContext portletDataContext, T stagedModel)
 		throws PortletDataException {
 
-		if (!portletDataContext.isInitialPublication() &&
-			(stagedModel instanceof WorkflowedModel)) {
+		if (stagedModel instanceof TrashedModel) {
+			TrashedModel trashedModel = (TrashedModel)stagedModel;
 
-			WorkflowedModel workflowedModel = (WorkflowedModel)stagedModel;
-
-			if (!ArrayUtil.contains(
-					getExportableStatuses(), workflowedModel.getStatus())) {
-
+			if (trashedModel.isInTrash()) {
 				PortletDataException pde = new PortletDataException(
-					PortletDataException.STATUS_UNAVAILABLE);
+					PortletDataException.STATUS_IN_TRASH);
 
 				pde.setStagedModelDisplayName(getDisplayName(stagedModel));
 				pde.setStagedModelClassName(stagedModel.getModelClassName());
@@ -860,12 +873,16 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			}
 		}
 
-		if (stagedModel instanceof TrashedModel) {
-			TrashedModel trashedModel = (TrashedModel)stagedModel;
+		if (!portletDataContext.isInitialPublication() &&
+			(stagedModel instanceof WorkflowedModel)) {
 
-			if (trashedModel.isInTrash()) {
+			WorkflowedModel workflowedModel = (WorkflowedModel)stagedModel;
+
+			if (!ArrayUtil.contains(
+					getExportableStatuses(), workflowedModel.getStatus())) {
+
 				PortletDataException pde = new PortletDataException(
-					PortletDataException.STATUS_IN_TRASH);
+					PortletDataException.STATUS_UNAVAILABLE);
 
 				pde.setStagedModelDisplayName(getDisplayName(stagedModel));
 				pde.setStagedModelClassName(stagedModel.getModelClassName());

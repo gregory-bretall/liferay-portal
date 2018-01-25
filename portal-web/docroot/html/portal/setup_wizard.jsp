@@ -175,21 +175,21 @@
 									<aui:select cssClass="database-type" name="databaseType">
 
 										<%
-										for (int i = 0; i < PropsValues.SETUP_DATABASE_TYPES.length; i++) {
-											String databaseType = PropsValues.SETUP_DATABASE_TYPES[i];
+										for (DBType dbType : DBManagerUtil.getDBTypes()) {
+											String dbTypeString = dbType.toString();
 
 											Map<String, Object> data = new HashMap<String, Object>();
 
-											String driverClassName = PropsUtil.get(PropsKeys.SETUP_DATABASE_DRIVER_CLASS_NAME, new Filter(databaseType));
+											String driverClassName = PropsUtil.get(PropsKeys.SETUP_DATABASE_DRIVER_CLASS_NAME, new Filter(dbTypeString));
 
 											data.put("driverClassName", driverClassName);
 
-											String url = PropsUtil.get(PropsKeys.SETUP_DATABASE_URL, new Filter(databaseType));
+											String url = PropsUtil.get(PropsKeys.SETUP_DATABASE_URL, new Filter(dbTypeString));
 
 											data.put("url", url);
 										%>
 
-											<aui:option data="<%= data %>" label='<%= "database." + databaseType %>' selected="<%= PropsValues.JDBC_DEFAULT_URL.contains(databaseType) %>" value="<%= databaseType %>" />
+											<aui:option data="<%= data %>" label='<%= "database." + dbTypeString %>' selected="<%= PropsValues.JDBC_DEFAULT_URL.contains(dbTypeString) %>" value="<%= dbTypeString %>" />
 
 										<%
 										}
@@ -213,7 +213,7 @@
 						</div>
 
 						<aui:button-row>
-							<aui:button cssClass="btn-lg" name="finishButton" type="submit" value="finish-configuration" />
+							<aui:button name="finishButton" type="submit" value="finish-configuration" />
 						</aui:button-row>
 					</aui:form>
 

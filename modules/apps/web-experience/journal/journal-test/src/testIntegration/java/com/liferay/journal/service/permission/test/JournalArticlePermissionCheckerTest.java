@@ -16,19 +16,22 @@ package com.liferay.journal.service.permission.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.journal.configuration.JournalServiceConfiguration;
+import com.liferay.journal.constants.JournalConstants;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalFolder;
-import com.liferay.journal.service.permission.JournalArticlePermission;
-import com.liferay.journal.service.permission.JournalPermission;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.service.permission.test.BasePermissionTestCase;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,28 +69,33 @@ public class JournalArticlePermissionCheckerTest
 	@Test
 	public void testContains() throws Exception {
 		Assert.assertTrue(
-			JournalArticlePermission.contains(
+			_journalArticleModelResourcePermission.contains(
 				permissionChecker, _article, ActionKeys.VIEW));
 		Assert.assertTrue(
-			JournalArticlePermission.contains(
+			_journalArticleModelResourcePermission.contains(
 				permissionChecker, _subarticle, ActionKeys.VIEW));
 
 		removePortletModelViewPermission();
 
+		Map<Object, Object> permissionChecksMap =
+			permissionChecker.getPermissionChecksMap();
+
+		permissionChecksMap.clear();
+
 		if (_journalServiceConfiguration.articleViewPermissionsCheckEnabled()) {
 			Assert.assertFalse(
-				JournalArticlePermission.contains(
+				_journalArticleModelResourcePermission.contains(
 					permissionChecker, _article, ActionKeys.VIEW));
 			Assert.assertFalse(
-				JournalArticlePermission.contains(
+				_journalArticleModelResourcePermission.contains(
 					permissionChecker, _subarticle, ActionKeys.VIEW));
 		}
 		else {
 			Assert.assertTrue(
-				JournalArticlePermission.contains(
+				_journalArticleModelResourcePermission.contains(
 					permissionChecker, _article, ActionKeys.VIEW));
 			Assert.assertTrue(
-				JournalArticlePermission.contains(
+				_journalArticleModelResourcePermission.contains(
 					permissionChecker, _subarticle, ActionKeys.VIEW));
 		}
 	}
@@ -108,8 +116,14 @@ public class JournalArticlePermissionCheckerTest
 
 	@Override
 	protected String getResourceName() {
-		return JournalPermission.RESOURCE_NAME;
+		return JournalConstants.RESOURCE_NAME;
 	}
+
+	@Inject(
+		filter = "model.class.name=com.liferay.journal.model.JournalArticle"
+	)
+	private static ModelResourcePermission<JournalArticle>
+		_journalArticleModelResourcePermission;
 
 	private JournalArticle _article;
 	private JournalServiceConfiguration _journalServiceConfiguration;

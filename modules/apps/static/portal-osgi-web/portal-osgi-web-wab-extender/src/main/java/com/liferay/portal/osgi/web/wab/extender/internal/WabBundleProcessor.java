@@ -14,8 +14,8 @@
 
 package com.liferay.portal.osgi.web.wab.extender.internal;
 
+import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -213,7 +213,9 @@ public class WabBundleProcessor {
 
 			modifiableServletContext.registerServlets();
 
-			initServlets(webXMLDefinition.getServletDefinitions());
+			initServlets(
+				webXMLDefinition.getServletDefinitions(),
+				modifiableServletContext);
 		}
 		catch (Exception e) {
 			_logger.log(
@@ -632,7 +634,8 @@ public class WabBundleProcessor {
 	}
 
 	protected void initServlets(
-			Map<String, ServletDefinition> servletDefinitions)
+			Map<String, ServletDefinition> servletDefinitions,
+			ModifiableServletContext modifiableServletContext)
 		throws Exception {
 
 		for (Entry<String, ServletDefinition> entry :
@@ -682,7 +685,8 @@ public class WabBundleProcessor {
 			}
 
 			ServletExceptionAdapter servletExceptionAdaptor =
-				new ServletExceptionAdapter(servletDefinition.getServlet());
+				new ServletExceptionAdapter(
+					servletDefinition.getServlet(), modifiableServletContext);
 
 			ServiceRegistration<Servlet> serviceRegistration =
 				_bundleContext.registerService(

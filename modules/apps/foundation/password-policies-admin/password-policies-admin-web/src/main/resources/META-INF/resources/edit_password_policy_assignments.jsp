@@ -52,7 +52,7 @@ portletDisplay.setURLBack(redirect);
 
 renderResponse.setTitle(passwordPolicy.getName());
 
-String[] orderColumns = new String[] {"first-name", "last-name", "screen-name"};
+String[] orderColumns = {"first-name", "last-name", "screen-name"};
 RowChecker rowChecker = new DeleteUserPasswordPolicyChecker(renderResponse, passwordPolicy);
 PortletURL searchURL = PortletURLUtil.clone(portletURL, renderResponse);
 SearchContainer searchContainer = new UserSearch(renderRequest, searchURL);
@@ -96,6 +96,14 @@ PortalUtil.addPortletBreadcrumbEntry(request, passwordPolicy.getName(), null);
 			orderColumns="<%= orderColumns %>"
 			portletURL="<%= PortletURLUtil.clone(portletURL, renderResponse) %>"
 		/>
+
+		<c:if test='<%= passwordPolicyDisplayContext.hasAssignMembersPermission() && tabs1.equals("assignees") %>'>
+			<li>
+				<aui:form action="<%= portletURL.toString() %>" name="searchFm">
+					<liferay-ui:input-search markupView="lexicon" />
+				</aui:form>
+			</li>
+		</c:if>
 	</liferay-frontend:management-bar-filters>
 
 	<liferay-frontend:management-bar-buttons>

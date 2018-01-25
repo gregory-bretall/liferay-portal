@@ -71,11 +71,13 @@ String fullName = namespace + HtmlUtil.escapeJS(name);
 					<%= onSubmit %>
 				}
 			</c:if>
+
+			, validateOnBlur: <%= validateOnBlur %>
 		}
 	);
 
 	var onDestroyPortlet = function(event) {
-		if (event.portletId === '<%= portletDisplay.getRootPortletId() %>') {
+		if (event.portletId === '<%= portletDisplay.getId() %>') {
 			delete Liferay.Form._INSTANCES['<%= fullName %>'];
 		}
 	};

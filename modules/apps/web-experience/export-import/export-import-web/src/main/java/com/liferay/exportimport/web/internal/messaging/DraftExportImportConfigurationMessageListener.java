@@ -18,6 +18,7 @@ import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationCo
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.web.internal.configuration.ExportImportWebConfigurationValues;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.background.task.model.BackgroundTask;
 import com.liferay.portal.background.task.service.BackgroundTaskLocalService;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
@@ -43,7 +44,6 @@ import com.liferay.portal.kernel.scheduler.TriggerFactory;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.Date;
@@ -278,10 +278,6 @@ public class DraftExportImportConfigurationMessageListener
 		SchedulerEngineHelper schedulerEngineHelper) {
 
 		_schedulerEngineHelper = schedulerEngineHelper;
-	}
-
-	@Reference(unbind = "-")
-	protected void setTriggerFactory(TriggerFactory triggerFactory) {
 	}
 
 	private BackgroundTaskLocalService _backgroundTaskLocalService;

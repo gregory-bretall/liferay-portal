@@ -26,7 +26,7 @@ if (Validator.isNotNull(saveCallback)) {
 String className = ParamUtil.getString(request, "className");
 long classPK = ParamUtil.getLong(request, "classPK");
 
-List<MDRRuleGroupInstance> ruleGroupInstances = MDRRuleGroupInstanceServiceUtil.getRuleGroupInstances(className, classPK, QueryUtil.ALL_POS, QueryUtil.ALL_POS, new RuleGroupInstancePriorityComparator());
+List<MDRRuleGroupInstance> ruleGroupInstances = MDRRuleGroupInstanceServiceUtil.getRuleGroupInstances(className, classPK, QueryUtil.ALL_POS, QueryUtil.ALL_POS, RuleGroupInstancePriorityComparator.INSTANCE_ASCENDING);
 %>
 
 <portlet:actionURL name="/mobile_device_rules/edit_rule_group_instance" var="editRuleGroupInstancesURL">
@@ -68,9 +68,9 @@ List<MDRRuleGroupInstance> ruleGroupInstances = MDRRuleGroupInstanceServiceUtil.
 	</div>
 
 	<aui:button-row>
-		<aui:button cssClass="btn-lg" type="submit" />
+		<aui:button type="submit" />
 
-		<aui:button cssClass="btn-lg" onClick="<%= saveCallback %>" value="close" />
+		<aui:button onClick="<%= saveCallback %>" value="close" />
 	</aui:button-row>
 </aui:form>
 

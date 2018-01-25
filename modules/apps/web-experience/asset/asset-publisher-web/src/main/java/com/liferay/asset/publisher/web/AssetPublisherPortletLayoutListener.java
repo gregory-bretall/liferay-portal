@@ -14,8 +14,9 @@
 
 package com.liferay.asset.publisher.web;
 
-import com.liferay.asset.publisher.web.util.AssetPublisherUtil;
+import com.liferay.asset.publisher.web.internal.util.AssetPublisherWebUtil;
 import com.liferay.journal.service.JournalArticleLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutTypePortletConstants;
 import com.liferay.portal.kernel.model.PortletPreferences;
@@ -25,9 +26,7 @@ import com.liferay.portal.kernel.portlet.PortletLayoutListenerException;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.SubscriptionLocalService;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portlet.asset.util.AssetUtil;
 
 /**
  * Provides the implementation of <code>PortletLayoutListener</code> (in
@@ -35,7 +34,7 @@ import com.liferay.portlet.asset.util.AssetUtil;
  * email subscriptions can be removed when the Asset Publisher is removed from
  * the page.
  *
- * @author Zsolt Berentey
+ * @author     Zsolt Berentey
  * @deprecated As of 2.0.0, with not direct replacement
  */
 @Deprecated
@@ -57,7 +56,7 @@ public class AssetPublisherPortletLayoutListener
 		try {
 			Layout layout = _layoutLocalService.getLayout(plid);
 
-			if (AssetUtil.isDefaultAssetPublisher(
+			if (_assetPublisherWebUtil.isDefaultAssetPublisher(
 					layout, portletId, StringPool.BLANK)) {
 
 				_journalArticleLocalService.deleteLayoutArticleReferences(
@@ -74,7 +73,7 @@ public class AssetPublisherPortletLayoutListener
 
 			_subscriptionLocalService.deleteSubscriptions(
 				layout.getCompanyId(), PortletPreferences.class.getName(),
-				AssetPublisherUtil.getSubscriptionClassPK(
+				_assetPublisherWebUtil.getSubscriptionClassPK(
 					ownerId, ownerType, plid, portletId));
 		}
 		catch (Exception e) {
@@ -102,6 +101,12 @@ public class AssetPublisherPortletLayoutListener
 		}
 	}
 
+	protected void setAssetPublisherWebUtil(
+		AssetPublisherWebUtil assetPublisherWebUtil) {
+
+		_assetPublisherWebUtil = assetPublisherWebUtil;
+	}
+
 	protected void setJournalArticleLocalService(
 		JournalArticleLocalService journalArticleLocalService) {
 
@@ -120,6 +125,7 @@ public class AssetPublisherPortletLayoutListener
 		_subscriptionLocalService = subscriptionLocalService;
 	}
 
+	private AssetPublisherWebUtil _assetPublisherWebUtil;
 	private JournalArticleLocalService _journalArticleLocalService;
 	private LayoutLocalService _layoutLocalService;
 	private SubscriptionLocalService _subscriptionLocalService;

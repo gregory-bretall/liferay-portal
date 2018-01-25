@@ -246,9 +246,7 @@
 					<var name="name" value="${calendarNameEdit}" />
 				</execute>
 
-				<execute macro="Button#clickSave" />
-
-				<execute macro="Alert#viewSuccessMessage" />
+				<execute macro="PortletEntry#save" />
 
 				<execute function="SelectFrame" value1="relative=top" />
 			</then>
@@ -270,9 +268,7 @@
 						<var name="name" value="${calendarNameEdit}" />
 					</execute>
 
-					<execute macro="Button#clickSave" />
-
-					<execute macro="Alert#viewSuccessMessage" />
+					<execute macro="PortletEntry#save" />
 
 					<execute function="SelectFrame" value1="relative=top" />
 				</then>
@@ -291,9 +287,7 @@
 						<var name="name" value="${calendarNameEdit}" />
 					</execute>
 
-					<execute macro="Button#clickSave" />
-
-					<execute macro="Alert#viewSuccessMessage" />
+					<execute macro="PortletEntry#save" />
 
 					<execute function="SelectFrame" value1="relative=top" />
 				</then>
@@ -426,18 +420,7 @@
 
 		<execute macro="Button#clickSave" />
 
-		<if>
-			<condition function="IsElementPresent" locator1="Message#SUCCESS" />
-			<then>
-				<execute macro="Alert#viewSuccessMessage" />
-				<execute function="SelectFrame" value1="relative=top" />
-			</then>
-			<else>
-				<execute function="SelectFrame" value1="relative=top" />
-
-				<execute macro="Alert#viewSuccessMessage" />
-			</else>
-		</if>
+		<execute macro="Alert#waitForSuccessMessageHide" />
 
 		<execute function="SelectFrame" value1="relative=top" />
 	</command>
@@ -624,7 +607,9 @@
 
 		<execute function="Click" locator1="CalendarManageCalendars#CALENDAR_TABLE_ACTIONS" />
 
-		<execute function="AssertClick" locator1="MenuItem#EXPORT" value1="Export" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Export">
+			<var name="key_menuItem" value="Export" />
+		</execute>
 
 		<execute function="Pause" locator1="5000" />
 
@@ -651,7 +636,9 @@
 		<execute function="AssertTextEquals" locator1="CalendarManageCalendars#CALENDAR_TABLE_NAME" value1="${calendarName}" />
 		<execute function="Click" locator1="CalendarManageCalendars#CALENDAR_TABLE_ACTIONS" />
 
-		<execute function="AssertClick" locator1="MenuItem#IMPORT" value1="Import" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Import">
+			<var name="key_menuItem" value="Import" />
+		</execute>
 
 		<execute function="UploadCommonFile" locator1="CalendarImport#FILE_FIELD" value1="${calendarFile}" />
 

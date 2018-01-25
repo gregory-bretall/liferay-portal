@@ -3,6 +3,8 @@ AUI.add(
 	function(A) {
 		var AArray = A.Array;
 
+		var AObject = A.Object;
+
 		var DateMath = A.DataType.DateMath;
 
 		var Lang = A.Lang;
@@ -35,15 +37,13 @@ AUI.add(
 				'<a title="{label}">{label}</a>' +
 			'</li>';
 
-		var TPL_PAGES_CONTAINER = '<ul class="lfr-ddm-pages-container nav"></ul>';
+		var TPL_PAGES_CONTAINER = '<ul class="lfr-ddm-pages-container nav vertical-scrolling"></ul>';
 
 		var TPL_REPEATABLE_ADD = '<a class="icon-plus-sign lfr-ddm-repeatable-add-button" href="javascript:;"></a>';
 
 		var TPL_REPEATABLE_DELETE = '<a class="hide icon-minus-sign lfr-ddm-repeatable-delete-button" href="javascript:;"></a>';
 
 		var TPL_REPEATABLE_HELPER = '<div class="lfr-ddm-repeatable-helper"></div>';
-
-		var TPL_REPEATABLE_PLACEHOLDER = '<div class="lfr-ddm-repeatable-placeholder"></div>';
 
 		var TPL_REQUIRED_MARK = '<span class="icon-asterisk text-warning"><span class="hide-accessible">' + Liferay.Language.get('required') + '</span></span>';
 
@@ -191,7 +191,7 @@ AUI.add(
 
 				var field = new FieldClass(
 					A.merge(
-						instance.getAttrs(A.Object.keys(DDMPortletSupport.ATTRS)),
+						instance.getAttrs(AObject.keys(DDMPortletSupport.ATTRS)),
 						{
 							container: fieldNode,
 							dataType: fieldDefinition.dataType,
@@ -380,6 +380,36 @@ AUI.add(
 						instance.get('container').remove();
 					},
 
+					addLocaleToLocalizationMap: function(locale) {
+						var instance = this;
+
+						var localizationMap = instance.get('localizationMap');
+
+						if (!localizationMap[locale]) {
+							var predefinedValue = instance.getPredefinedValueByLocale(locale);
+
+							if (predefinedValue) {
+								localizationMap[locale] = predefinedValue;
+							}
+							else {
+								var name = instance.get('name');
+
+								var field = instance.getFieldByNameInFieldDefinition(name);
+
+								if (field && field.type) {
+									var type = field.type;
+
+									if (type === 'radio' || type === 'select') {
+										localizationMap[locale] = instance.getValue();
+									}
+									else {
+										localizationMap[locale] = '';
+									}
+								}
+							}
+						}
+					},
+
 					createField: function(fieldTemplate) {
 						var instance = this;
 
@@ -404,7 +434,7 @@ AUI.add(
 						return field;
 					},
 
-					getDefaulLocale: function() {
+					getDefaultLocale: function() {
 						var instance = this;
 
 						var defaultLocale = themeDisplay.getDefaultLanguageId();
@@ -416,6 +446,25 @@ AUI.add(
 						}
 
 						return defaultLocale;
+					},
+
+					getFieldByNameInFieldDefinition: function(name) {
+						var instance = this;
+
+						var definition = instance.get('definition');
+
+						var fields = [];
+
+						if (definition && definition.fields) {
+							fields = definition.fields;
+						}
+
+						return AArray.find(
+							fields,
+							function(item) {
+								return item.name === name;
+							}
+						);
 					},
 
 					getFieldDefinition: function() {
@@ -472,6 +521,22 @@ AUI.add(
 						return instance.get('container').one('.control-label');
 					},
 
+					getPredefinedValueByLocale: function(locale) {
+						var instance = this;
+
+						var name = instance.get('name');
+
+						var field = instance.getFieldByNameInFieldDefinition(name);
+
+						var predefinedValue;
+
+						if (field && field.predefinedValue && field.predefinedValue[locale]) {
+							predefinedValue = field.predefinedValue[locale];
+						}
+
+						return predefinedValue;
+					},
+
 					getRepeatedSiblings: function() {
 						var instance = this;
 
@@ -524,6 +589,26 @@ AUI.add(
 						instance.get('container').remove(true);
 					},
 
+					removeNotAvailableLocales: function(localizationMap) {
+						var instance = this;
+
+						var parent = instance.get('parent');
+
+						var translationManager = parent.get('translationManager');
+
+						var availableLocales = translationManager.get('availableLocales');
+
+						if (availableLocales.length == 0) {
+							return;
+						}
+
+						for (var localization in localizationMap) {
+							if (availableLocales.indexOf(localization) == -1) {
+								delete localizationMap[localization];
+							}
+						}
+					},
+
 					renderRepeatableUI: function() {
 						var instance = this;
 
@@ -557,13 +642,13 @@ AUI.add(
 						if (labelNode) {
 							var tipNode = labelNode.one('.taglib-icon-help');
 
-							if (Lang.isValue(label) && Lang.isNode(labelNode)) {
+							if (!A.UA.ie && Lang.isValue(label) && Lang.isNode(labelNode)) {
 								labelNode.html(A.Escape.html(label));
 							}
 
 							var fieldDefinition = instance.getFieldDefinition();
 
-							if (fieldDefinition.required) {
+							if (!A.UA.ie && fieldDefinition.required) {
 								labelNode.append(TPL_REQUIRED_MARK);
 							}
 
@@ -586,7 +671,7 @@ AUI.add(
 					syncLabelUI: function() {
 						var instance = this;
 
-						var defaultLocale = instance.getDefaulLocale();
+						var defaultLocale = instance.getDefaultLocale();
 
 						var fieldDefinition = instance.getFieldDefinition();
 
@@ -676,6 +761,10 @@ AUI.add(
 
 						var value = instance.getValue();
 
+						if (AObject.keys(localizationMap).length != 0) {
+							this.removeNotAvailableLocales(localizationMap);
+						}
+
 						if (instance.get('localizable')) {
 							localizationMap[locale] = value;
 						}
@@ -735,7 +824,7 @@ AUI.add(
 						if (tipNode) {
 							var instance = this;
 
-							var defaultLocale = instance.getDefaulLocale();
+							var defaultLocale = instance.getDefaultLocale();
 							var fieldDefinition = instance.getFieldDefinition();
 
 							var tipsMap = fieldDefinition.tip;
@@ -743,7 +832,7 @@ AUI.add(
 							if (Lang.isObject(tipsMap)) {
 								var tip = tipsMap[instance.get('displayLocale')] || tipsMap[defaultLocale];
 
-								tipNode.attr('title', A.Escape.html(tip));
+								tipNode.attr('title', tip);
 							}
 
 							labelNode.append(tipNode);
@@ -773,8 +862,14 @@ AUI.add(
 
 						var locales = [defaultLocale].concat(availableLocales);
 
-						if (localizable && locales.indexOf(event.prevVal) > -1) {
-							instance.updateLocalizationMap(event.prevVal);
+						if (localizable) {
+							if (locales.indexOf(event.prevVal) > -1) {
+								instance.updateLocalizationMap(event.prevVal);
+							}
+
+							if (locales.indexOf(event.newVal) > -1) {
+								instance.addLocaleToLocalizationMap(event.newVal);
+							}
 						}
 
 						instance.set('displayLocale', event.newVal);
@@ -960,9 +1055,9 @@ AUI.add(
 
 						var container = instance.get('container');
 
+						var colorPicker = instance.get('colorPicker');
 						var selectorInput = container.one('.selector-input');
 						var valueField = container.one('.color-value');
-						var colorPicker = instance.get('colorPicker');
 
 						if (!colorPicker) {
 							return;
@@ -1096,7 +1191,7 @@ AUI.add(
 
 						var portletNamespace = instance.get('portletNamespace');
 
-						var portletURL = Liferay.PortletURL.createURL(themeDisplay.getURLControlPanel());
+						var portletURL = Liferay.PortletURL.createURL(themeDisplay.getLayoutRelativeControlPanelURL());
 
 						portletURL.setParameter('criteria', criteria);
 						portletURL.setParameter('itemSelectedEventName', portletNamespace + 'selectDocumentLibrary');
@@ -1141,7 +1236,7 @@ AUI.add(
 					getUploadURL: function() {
 						var instance = this;
 
-						var portletURL = Liferay.PortletURL.createURL(themeDisplay.getURLControlPanel());
+						var portletURL = Liferay.PortletURL.createURL(themeDisplay.getLayoutRelativeControlPanelURL());
 
 						portletURL.setLifecycle(Liferay.PortletURL.ACTION_PHASE);
 						portletURL.setParameter('cmd', 'add_temp');
@@ -1198,7 +1293,6 @@ AUI.add(
 						var instance = this;
 
 						instance.setValue('');
-
 					},
 
 					_handleSelectButtonClick: function(event) {
@@ -1464,7 +1558,7 @@ AUI.add(
 						instance.after('selectedLayoutChange', instance._afterSelectedLayoutChange);
 						instance.after('selectedLayoutPathChange', instance._afterSelectedLayoutPathChange);
 
-						container.delegate('click', instance._handleControlButtonsClick, '.btn', instance);
+						container.delegate('click', instance._handleControlButtonsClick, '> .form-group .btn', instance);
 					},
 
 					getParsedValue: function(value) {
@@ -1645,7 +1739,7 @@ AUI.add(
 								toolbars: {
 									footer: [
 										{
-											cssClass: 'btn-lg btn-primary',
+											cssClass: 'btn-primary',
 											disabled: !instance.get('selectedLayout'),
 											label: Liferay.Language.get('select'),
 											on: {
@@ -1653,7 +1747,7 @@ AUI.add(
 											}
 										},
 										{
-											cssClass: 'btn-lg btn-link',
+											cssClass: 'btn-link',
 											label: Liferay.Language.get('cancel'),
 											on: {
 												click: A.bind(instance._handleCancelButtonClick, instance)
@@ -1864,7 +1958,7 @@ AUI.add(
 									instance._requestLayouts(parentLayoutId, groupId, privateLayout, start, end, A.rbind('_renderLayoutsFragment', instance, key, 'up'));
 								}
 							}
-							else if (scrollTop + innerHeight === scrollHeight) {
+							else if (scrollHeight - (scrollTop + innerHeight) <= 1) {
 								start = end;
 								end = start + delta;
 
@@ -2418,7 +2512,7 @@ AUI.add(
 
 						var portletNamespace = instance.get('portletNamespace');
 
-						var portletURL = Liferay.PortletURL.createURL(themeDisplay.getURLControlPanel());
+						var portletURL = Liferay.PortletURL.createURL(themeDisplay.getLayoutRelativeControlPanelURL());
 
 						portletURL.setParameter('criteria', criteria);
 						portletURL.setParameter('itemSelectedEventName', portletNamespace + 'selectDocumentLibrary');
@@ -2710,7 +2804,7 @@ AUI.add(
 							value = RadioField.superclass.getValue.apply(instance, arguments);
 						}
 
-						return JSON.stringify([value]);
+						return value;
 					},
 
 					setLabel: function() {
@@ -2746,14 +2840,6 @@ AUI.add(
 
 						radioNodes.set('checked', false);
 
-						if (Lang.isString(value)) {
-							value = JSON.parse(value);
-						}
-
-						if (value.length) {
-							value = value[0];
-						}
-
 						radioNodes.filter('[value=' + value + ']').set('checked', true);
 					},
 
@@ -2784,7 +2870,18 @@ AUI.add(
 					getValue: function() {
 						var instance = this;
 
-						return instance.getInputNode().all('option:selected').val();
+						var selectedItems = instance.getInputNode().all('option:selected');
+
+						var value;
+
+						if (selectedItems._nodes && selectedItems._nodes.length > 0) {
+							value = selectedItems.val();
+						}
+						else {
+							value = [];
+						}
+
+						return value;
 					},
 
 					setLabel: function() {
@@ -2864,6 +2961,10 @@ AUI.add(
 						value: false
 					},
 
+					requestedLocale: {
+						validator: Lang.isString
+					},
+
 					translationManager: {
 						valueFn: '_valueTranslationManager'
 					}
@@ -2918,6 +3019,10 @@ AUI.add(
 						AArray.invoke(instance.eventHandlers, 'detach');
 						AArray.invoke(instance.get('fields'), 'destroy');
 
+						if (instance._translationManagerHandle) {
+							instance._translationManagerHandle.detach();
+						}
+
 						instance.get('container').remove();
 
 						instance.eventHandlers = null;
@@ -2928,6 +3033,12 @@ AUI.add(
 								item.destroy();
 							}
 						);
+
+						var translationManager = instance.get('translationManager');
+
+						if (translationManager) {
+							translationManager.destroy();
+						}
 
 						instance.repeatableInstances = null;
 					},
@@ -2945,15 +3056,53 @@ AUI.add(
 
 						var fieldName = field.get('name');
 
-						var repeatableInstance = instance.repeatableInstances[fieldName];
+						var fieldContainer = field.get('container');
+
+						var parentField = field.get('parent');
+
+						var parentNode = fieldContainer.get('parentNode');
+
+						var treeName = fieldName + '_' + parentField.get('instanceId');
+
+						var repeatableInstance = instance.repeatableInstances[treeName];
 
 						if (!repeatableInstance) {
-							repeatableInstance = new A.SortableList(
+							var ddPlugins = [];
+
+							if (Liferay.Util.getTop() === A.config.win) {
+								ddPlugins.push(
+									{
+										fn: A.Plugin.DDWinScroll
+									}
+								);
+							}
+							else {
+								ddPlugins.push(
+									{
+										cfg: {
+											constrain: '.lfr-form-content'
+										},
+										fn: A.Plugin.DDConstrained
+									},
+									{
+										cfg: {
+											horizontal: false,
+											node: '.lfr-form-content'
+										},
+										fn: A.Plugin.DDNodeScroll
+									}
+								);
+							}
+
+							repeatableInstance = new Liferay.DDM.RepeatableSortableList(
 								{
-									dropOn: field.get('container').get('parentNode'),
+									dd: {
+										plugins: ddPlugins
+									},
+									dropOn: '#' + parentNode.attr('id'),
 									helper: A.Node.create(TPL_REPEATABLE_HELPER),
-									nodes: '[data-fieldName=' + fieldName + ']',
-									placeholder: A.Node.create(TPL_REPEATABLE_PLACEHOLDER),
+									nodes: '#' + parentNode.attr('id') + ' [data-fieldName=' + fieldName + ']',
+									placeholder: A.Node.create('<div class="form-builder-placeholder"></div>'),
 									sortCondition: function(event) {
 										var dropNode = event.drop.get('node');
 
@@ -2962,17 +3111,20 @@ AUI.add(
 								}
 							);
 
-							repeatableInstance.after('drag:end', A.rbind(instance._afterRepeatableDragEnd, instance, field.get('parent')));
+							repeatableInstance.after('drag:align', A.bind(instance._afterRepeatableDragAlign, instance));
 
-							instance.repeatableInstances[fieldName] = repeatableInstance;
+							repeatableInstance.after('drag:end', A.rbind(instance._afterRepeatableDragEnd, instance, parentField));
+
+							instance.repeatableInstances[treeName] = repeatableInstance;
 						}
 						else {
-							repeatableInstance.add(field.get('container'));
+							repeatableInstance.add(fieldContainer);
 						}
 
-						var drag = A.DD.DDM.getDrag(field.get('container'));
+						var drag = A.DD.DDM.getDrag(fieldContainer);
 
 						drag.addInvalid('.alloy-editor');
+						drag.addInvalid('.cke');
 						drag.addInvalid('.lfr-source-editor');
 					},
 
@@ -3020,6 +3172,13 @@ AUI.add(
 						if (field.get('repeatable')) {
 							instance.registerRepeatable(field);
 						}
+					},
+
+					_afterRepeatableDragAlign: function() {
+						var DDM = A.DD.DDM;
+
+						DDM.syncActiveShims();
+						DDM._dropMove();
 					},
 
 					_afterRepeatableDragEnd: function(event, parentField) {
@@ -3097,6 +3256,29 @@ AUI.add(
 						instance.updateDDMFormInputValue();
 					},
 
+					_onTranslationManagerRegistered: function(event) {
+						var instance = this;
+
+						var translationManagerId = instance.get('portletNamespace') + 'translationManager';
+
+						var translationManager = instance.get('translationManager');
+
+						translationManager.destroy();
+
+						translationManager = Liferay.component(translationManagerId);
+
+						translationManager.addTarget(instance);
+
+						AArray.each(
+							instance.get('fields'),
+							function(field) {
+								translationManager.addTarget(field);
+							}
+						);
+
+						instance.set('translationManager', translationManager);
+					},
+
 					_valueDisplayLocale: function() {
 						var instance = this;
 
@@ -3130,19 +3312,59 @@ AUI.add(
 					_valueTranslationManager: function() {
 						var instance = this;
 
-						var translationManager = Liferay.component(instance.get('portletNamespace') + 'translationManager');
+						var translationManagerId = instance.get('portletNamespace') + 'translationManager';
+
+						var translationManager = Liferay.component(translationManagerId);
 
 						if (!translationManager) {
 							translationManager = new Liferay.TranslationManager(
 								{
-									defaultLocale: themeDisplay.getLanguageId()
+									defaultLocale: instance.get('requestedLocale') || themeDisplay.getLanguageId()
 								}
+							);
+
+							instance._translationManagerHandle = Liferay.once(
+								translationManagerId + ':registered',
+								instance._onTranslationManagerRegistered.bind(instance)
 							);
 						}
 
 						translationManager.addTarget(instance);
 
 						return translationManager;
+					}
+				}
+			}
+		);
+
+		Liferay.DDM.RepeatableSortableList = A.Component.create(
+			{
+				EXTENDS: A.SortableList,
+
+				prototype: {
+					_createDrag: function(node) {
+						var instance = this;
+
+						var helper = instance.get('helper');
+
+						if (!A.DD.DDM.getDrag(node)) {
+							var dragOptions = {
+								bubbleTargets: instance,
+								node: node,
+								target: true
+							};
+
+							var proxyOptions = instance.get('proxy');
+
+							if (helper) {
+								proxyOptions.borderStyle = null;
+							}
+
+							new A.DD.Drag(
+								A.mix(dragOptions, instance.get('dd'))
+							)
+							.plug(A.Plugin.DDProxy, proxyOptions);
+						}
 					}
 				}
 			}

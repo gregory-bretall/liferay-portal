@@ -19,6 +19,7 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.model.DDMTemplateConstants;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateServiceUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -34,7 +35,6 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -225,7 +225,8 @@ public class DDMTemplateServiceTest extends BaseDDMServiceTestCase {
 		Assert.assertEquals(templates.toString(), 3, templates.size());
 
 		for (DDMTemplate newTemplate : newTemplates) {
-			Assert.assertTrue(templates.contains(newTemplate));
+			Assert.assertTrue(
+				templates.toString(), templates.contains(newTemplate));
 		}
 	}
 
@@ -357,7 +358,7 @@ public class DDMTemplateServiceTest extends BaseDDMServiceTestCase {
 			structure.getStructureId(), StringUtil.randomString(),
 			WorkflowConstants.STATUS_ANY);
 
-		long[] groupIds = new long[] {group.getGroupId(), _group.getGroupId()};
+		long[] groupIds = {group.getGroupId(), _group.getGroupId()};
 
 		List<DDMTemplate> ddmTemplates = DDMTemplateServiceUtil.search(
 			TestPropsValues.getCompanyId(), groupIds,
@@ -440,7 +441,7 @@ public class DDMTemplateServiceTest extends BaseDDMServiceTestCase {
 			_recordSetClassNameId, null, StringUtil.randomString(), description,
 			type, mode, language, script, WorkflowConstants.STATUS_ANY);
 
-		long[] groupIds = new long[] {group.getGroupId(), _group.getGroupId()};
+		long[] groupIds = {group.getGroupId(), _group.getGroupId()};
 
 		List<DDMTemplate> templates = DDMTemplateServiceUtil.search(
 			TestPropsValues.getCompanyId(), groupIds,
@@ -520,7 +521,7 @@ public class DDMTemplateServiceTest extends BaseDDMServiceTestCase {
 			_recordSetClassNameId, null, StringUtil.randomString(), description,
 			type, mode, language, script, WorkflowConstants.STATUS_ANY);
 
-		long[] groupIds = new long[] {group.getGroupId(), _group.getGroupId()};
+		long[] groupIds = {group.getGroupId(), _group.getGroupId()};
 
 		List<DDMTemplate> templates = DDMTemplateServiceUtil.search(
 			TestPropsValues.getCompanyId(), groupIds,
@@ -598,7 +599,7 @@ public class DDMTemplateServiceTest extends BaseDDMServiceTestCase {
 			_recordSetClassNameId, null, StringUtil.randomString(), description,
 			type, mode, language, script, WorkflowConstants.STATUS_ANY);
 
-		long[] groupIds = new long[] {group.getGroupId(), _group.getGroupId()};
+		long[] groupIds = {group.getGroupId(), _group.getGroupId()};
 
 		int count = DDMTemplateServiceUtil.searchCount(
 			TestPropsValues.getCompanyId(), groupIds,
@@ -675,7 +676,7 @@ public class DDMTemplateServiceTest extends BaseDDMServiceTestCase {
 			_recordSetClassNameId, null, StringUtil.randomString(), description,
 			type, mode, language, script, WorkflowConstants.STATUS_ANY);
 
-		long[] groupIds = new long[] {group.getGroupId(), _group.getGroupId()};
+		long[] groupIds = {group.getGroupId(), _group.getGroupId()};
 
 		int count = DDMTemplateServiceUtil.searchCount(
 			TestPropsValues.getCompanyId(), groupIds,

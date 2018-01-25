@@ -40,7 +40,7 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.trash.kernel.service.TrashEntryService;
+import com.liferay.trash.service.TrashEntryService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,9 +102,7 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 		long[] deleteFolderIds = ParamUtil.getLongValues(
 			actionRequest, "rowIdsBookmarksFolder");
 
-		for (int i = 0; i < deleteFolderIds.length; i++) {
-			long deleteFolderId = deleteFolderIds[i];
-
+		for (long deleteFolderId : deleteFolderIds) {
 			if (moveToTrash) {
 				BookmarksFolder folder =
 					_bookmarksFolderService.moveFolderToTrash(deleteFolderId);

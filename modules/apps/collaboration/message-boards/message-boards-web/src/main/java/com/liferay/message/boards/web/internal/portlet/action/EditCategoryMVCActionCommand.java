@@ -15,18 +15,18 @@
 package com.liferay.message.boards.web.internal.portlet.action;
 
 import com.liferay.captcha.configuration.CaptchaConfiguration;
+import com.liferay.captcha.util.CaptchaUtil;
+import com.liferay.message.boards.constants.MBPortletKeys;
+import com.liferay.message.boards.exception.MailingListEmailAddressException;
+import com.liferay.message.boards.exception.MailingListInServerNameException;
+import com.liferay.message.boards.exception.MailingListInUserNameException;
+import com.liferay.message.boards.exception.MailingListOutEmailAddressException;
+import com.liferay.message.boards.exception.MailingListOutServerNameException;
+import com.liferay.message.boards.exception.MailingListOutUserNameException;
 import com.liferay.message.boards.kernel.exception.CategoryNameException;
-import com.liferay.message.boards.kernel.exception.MailingListEmailAddressException;
-import com.liferay.message.boards.kernel.exception.MailingListInServerNameException;
-import com.liferay.message.boards.kernel.exception.MailingListInUserNameException;
-import com.liferay.message.boards.kernel.exception.MailingListOutEmailAddressException;
-import com.liferay.message.boards.kernel.exception.MailingListOutServerNameException;
-import com.liferay.message.boards.kernel.exception.MailingListOutUserNameException;
 import com.liferay.message.boards.kernel.exception.NoSuchCategoryException;
 import com.liferay.message.boards.kernel.model.MBCategory;
 import com.liferay.message.boards.kernel.service.MBCategoryService;
-import com.liferay.message.boards.web.constants.MBPortletKeys;
-import com.liferay.portal.kernel.captcha.Captcha;
 import com.liferay.portal.kernel.captcha.CaptchaConfigurationException;
 import com.liferay.portal.kernel.captcha.CaptchaTextException;
 import com.liferay.portal.kernel.model.TrashedModel;
@@ -42,7 +42,7 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.trash.kernel.service.TrashEntryService;
+import com.liferay.trash.service.TrashEntryService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -262,7 +262,7 @@ public class EditCategoryMVCActionCommand extends BaseMVCActionCommand {
 
 		if (categoryId <= 0) {
 			if (captchaConfiguration.messageBoardsEditMessageCaptchaEnabled()) {
-				_captcha.check(actionRequest);
+				CaptchaUtil.check(actionRequest);
 			}
 
 			// Add category
@@ -287,9 +287,6 @@ public class EditCategoryMVCActionCommand extends BaseMVCActionCommand {
 				mergeWithParentCategory, serviceContext);
 		}
 	}
-
-	@Reference
-	private Captcha _captcha;
 
 	@Reference
 	private ConfigurationProvider _configurationProvider;

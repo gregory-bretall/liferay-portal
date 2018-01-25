@@ -32,8 +32,8 @@ import com.liferay.social.kernel.model.SocialRequest;
 import com.liferay.social.kernel.model.SocialRequestFeedEntry;
 import com.liferay.social.kernel.service.SocialActivityLocalService;
 import com.liferay.social.kernel.service.SocialRelationLocalService;
-import com.liferay.social.networking.friends.social.FriendsActivityKeys;
-import com.liferay.social.networking.friends.social.FriendsRequestKeys;
+import com.liferay.social.networking.web.internal.friends.social.FriendsActivityKeys;
+import com.liferay.social.networking.web.internal.friends.social.FriendsRequestKeys;
 
 /**
  * @author Adolfo Pérez
@@ -141,8 +141,7 @@ public abstract class BaseSocialNetworkingRequestInterpreter
 
 	protected abstract UserLocalService getUserLocalService();
 
-	private static final String[] _CLASS_NAMES =
-		new String[] {User.class.getName()};
+	private static final String[] _CLASS_NAMES = {User.class.getName()};
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		BaseSocialNetworkingRequestInterpreter.class.getName());

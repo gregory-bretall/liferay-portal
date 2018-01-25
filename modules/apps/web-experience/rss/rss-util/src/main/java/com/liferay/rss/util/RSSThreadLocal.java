@@ -14,11 +14,11 @@
 
 package com.liferay.rss.util;
 
-import com.liferay.portal.kernel.util.AutoResetThreadLocal;
+import com.liferay.petra.lang.CentralizedThreadLocal;
 
 /**
- * @author Shuyang Zhou
- * @see    com.liferay.util.RSSThreadLocal
+ * @author     Shuyang Zhou
+ * @see        com.liferay.util.RSSThreadLocal
  * @deprecated As of 1.0.0, with no direct replacement
  */
 @Deprecated
@@ -33,7 +33,7 @@ public class RSSThreadLocal {
 	}
 
 	private static final ThreadLocal<Boolean> _exportRSS =
-		new AutoResetThreadLocal<>(
+		new CentralizedThreadLocal<>(
 			RSSThreadLocal.class + "._exportRSS", () -> Boolean.FALSE);
 
 }

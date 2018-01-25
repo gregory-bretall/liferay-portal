@@ -36,13 +36,34 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		super(cause);
 	}
 
+	public static class EmptyNotificationTemplate
+		extends KaleoDefinitionValidationException {
+
+		public EmptyNotificationTemplate(String node) {
+			super(
+				String.format(
+					"The %s node has a empty notification template", node));
+
+			_node = node;
+		}
+
+		public String getNode() {
+			return _node;
+		}
+
+		private final String _node;
+
+	}
+
 	public static class MultipleInitialStateNodes
 		extends KaleoDefinitionValidationException {
 
 		public MultipleInitialStateNodes(String state1, String state2) {
 			super(
 				String.format(
-					"Multiple initial state nodes %s and %s", state1, state2));
+					"The workflow has too many start nodes (state nodes %s " +
+						"and %s)",
+					state1, state2));
 
 			_state1 = state1;
 			_state2 = state2;
@@ -67,7 +88,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		public MustNotSetIncomingTransition(String node) {
 			super(
 				String.format(
-					"An incoming transition was found for the %s node", node));
+					"The %s node cannot have an incoming transition", node));
 
 			_node = node;
 		}
@@ -86,7 +107,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		public MustPairedForkAndJoinNodes(String fork, String node) {
 			super(
 				String.format(
-					"Fork %s and join %s nodes are not paired", fork, node));
+					"Fork %s and join %s nodes must be paired", fork, node));
 
 			_fork = fork;
 			_node = node;
@@ -109,7 +130,10 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		extends KaleoDefinitionValidationException {
 
 		public MustSetAssignments(String task) {
-			super(String.format("No assignments for the %s task node", task));
+			super(
+				String.format(
+					"Specify at least one assignment for the %s task node",
+					task));
 
 			_task = task;
 		}
@@ -128,7 +152,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		public MustSetIncomingTransition(String node) {
 			super(
 				String.format(
-					"No incoming transition found for the %s node", node));
+					"The %s node must have an incoming transition", node));
 
 			_node = node;
 		}
@@ -145,7 +169,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		extends KaleoDefinitionValidationException {
 
 		public MustSetInitialStateNode() {
-			super("No initial state node defined");
+			super("You must define a start node");
 		}
 
 	}
@@ -156,7 +180,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		public MustSetJoinNode(String fork) {
 			super(
 				String.format(
-					"No matching join node found for the %s fork node", fork));
+					"The %s fork node must have a matching join node", fork));
 
 			_fork = fork;
 		}
@@ -175,7 +199,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		public MustSetMultipleOutgoingTransition(String node) {
 			super(
 				String.format(
-					"Less than 2 outgoing transitions found for the %s node",
+					"The %s node must have at least 2 outgoing transitions",
 					node));
 
 			_node = node;
@@ -195,7 +219,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		public MustSetOutgoingTransition(String node) {
 			super(
 				String.format(
-					"No outgoing transition found for the %s node", node));
+					"The %s node must have an outgoing transition", node));
 
 			_node = node;
 		}
@@ -213,7 +237,8 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 
 		public MustSetSourceNode(String node) {
 			super(
-				String.format("Unable to find source node for %s node", node));
+				String.format(
+					"The %s transition must have a source node", node));
 
 			_node = node;
 		}
@@ -230,8 +255,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		extends KaleoDefinitionValidationException {
 
 		public MustSetTargetNode(String node) {
-			super(
-				String.format("Unable to find target node for %s node", node));
+			super(String.format("The %s transition must end at a node", node));
 
 			_node = node;
 		}
@@ -252,9 +276,9 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 
 			super(
 				String.format(
-					"Task form must specify the form reference or form " +
-						"definition for task %s and form %s",
-					task, taskForm));
+					"The task form %s for task %s must specify a form " +
+						"reference or form definition",
+					taskForm, task));
 
 			_task = task;
 			_taskForm = taskForm;
@@ -277,7 +301,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		extends KaleoDefinitionValidationException {
 
 		public MustSetTerminalStateNode() {
-			super("No terminal state node defined");
+			super("You must define an end node");
 		}
 
 	}
@@ -288,8 +312,7 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		public UnbalancedForkAndJoinNode(String fork, String join) {
 			super(
 				String.format(
-					"There are errors between the fork node %s and the join " +
-						"node %s",
+					"Fix the errors between the fork node %s and join node %s",
 					fork, join));
 
 			_fork = fork;
@@ -313,7 +336,9 @@ public class KaleoDefinitionValidationException extends WorkflowException {
 		extends KaleoDefinitionValidationException {
 
 		public UnbalancedForkAndJoinNodes() {
-			super("There are unbalanced fork and join nodes");
+			super(
+				"Each fork node requires a join node. Make sure all forks and" +
+					"joins are properly paired");
 		}
 
 	}

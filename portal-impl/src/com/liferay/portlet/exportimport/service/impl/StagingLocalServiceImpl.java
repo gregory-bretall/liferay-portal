@@ -285,10 +285,20 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			disableStaging(liveGroup, serviceContext);
 		}
 
+		UnicodeProperties typeSettingsProperties =
+			liveGroup.getTypeSettingsProperties();
+
 		boolean hasStagingGroup = liveGroup.hasStagingGroup();
 
 		if (!hasStagingGroup) {
 			serviceContext.setAttribute("staging", String.valueOf(true));
+
+			String languageId = typeSettingsProperties.getProperty(
+				"languageId");
+
+			if (Validator.isNotNull(languageId)) {
+				serviceContext.setLanguageId(languageId);
+			}
 
 			addStagingGroup(userId, liveGroup, serviceContext);
 		}
@@ -296,9 +306,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 		checkDefaultLayoutSetBranches(
 			userId, liveGroup, branchingPublic, branchingPrivate, false,
 			serviceContext);
-
-		UnicodeProperties typeSettingsProperties =
-			liveGroup.getTypeSettingsProperties();
 
 		typeSettingsProperties.setProperty(
 			"branchingPrivate", String.valueOf(branchingPrivate));
@@ -437,7 +444,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 	 */
 	@Deprecated
 	@Override
-	@SuppressWarnings("unused")
 	public MissingReferences publishStagingRequest(
 			long userId, long stagingRequestId, boolean privateLayout,
 			Map<String, String[]> parameterMap)
@@ -503,6 +509,8 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			ExportImportThreadLocal.setLayoutStagingInProcess(false);
 
 			LocaleThreadLocal.setSiteDefaultLocale(siteDefaultLocale);
+
+			FileUtil.delete(file);
 		}
 	}
 
@@ -594,19 +602,7 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			long userId, Group liveGroup, ServiceContext serviceContext)
 		throws PortalException {
 
-		long parentGroupId = GroupConstants.DEFAULT_PARENT_GROUP_ID;
-
-		if (liveGroup.getParentGroupId() !=
-				GroupConstants.DEFAULT_PARENT_GROUP_ID) {
-
-			Group parentGroup = liveGroup.getParentGroup();
-
-			if (parentGroup.hasStagingGroup()) {
-				parentGroup = parentGroup.getStagingGroup();
-			}
-
-			parentGroupId = parentGroup.getGroupId();
-		}
+		long parentGroupId = liveGroup.getParentGroupId();
 
 		Group stagingGroup = groupLocalService.addGroup(
 			userId, parentGroupId, liveGroup.getClassName(),
@@ -915,14 +911,10 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 
 		IndexStatusManagerThreadLocal.setIndexReadOnly(true);
 
-		FileOutputStream fileOutputStream = null;
+		File tempFile = FileUtil.createTempFile("lar");
 
-		File tempFile = null;
-
-		try {
-			tempFile = FileUtil.createTempFile("lar");
-
-			fileOutputStream = new FileOutputStream(tempFile);
+		try (FileOutputStream fileOutputStream =
+				new FileOutputStream(tempFile)) {
 
 			List<FileEntry> fileEntries =
 				PortletFileRepositoryUtil.getPortletFileEntries(
@@ -976,8 +968,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 		}
 		finally {
 			IndexStatusManagerThreadLocal.setIndexReadOnly(indexReadOnly);
-
-			StreamUtil.cleanUp(fileOutputStream);
 
 			FileUtil.delete(tempFile);
 		}

@@ -80,17 +80,24 @@
 
 		<execute function="AssertElementPresent" locator1="NavBar#ACTIVE_NAV_ITEM_LINK" />
 
-		<execute function="Click" locator1="Button#PLUS" />
+		<execute macro="LexiconEntry#gotoAdd" />
 
 		<if>
 			<equals arg1="${orgType}" arg2="Location" />
 			<then>
-				<execute function="AssertClick" locator1="MenuItem#LOCATION" value1="Location" />
+				<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Location">
+					<var name="key_menuItem" value="Location" />
+				</execute>
 			</then>
 			<elseif>
-				<condition function="IsElementPresent" locator1="MenuItem#ORGANIZATION" />
+				<condition function="IsElementPresent" locator1="MenuItem#ANY_MENU_ITEM">
+					<var name="key_menuItem" value="Organization" />
+				</condition>
+
 				<then>
-					<execute function="AssertClick" locator1="MenuItem#ORGANIZATION" value1="Organization" />
+					<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Organization">
+						<var name="key_menuItem" value="Organization" />
+					</execute>
 				</then>
 			</elseif>
 		</if>
@@ -119,12 +126,14 @@
 	<command name="addMemberCP">
 		<execute macro="Organization#gotoCP">
 			<var name="orgName" value="${orgName}" />
-			<var name="searchToken" value="Organization" />
+			<var name="searchToken" value="${orgName}" />
 		</execute>
 
-		<execute function="Click" locator1="Button#PLUS" />
+		<execute macro="LexiconEntry#gotoAdd" />
 
-		<execute function="AssertClick" locator1="MenuItem#ASSIGN_USERS" value1="Assign Users" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Assign Users">
+			<var name="key_menuItem" value="Assign Users" />
+		</execute>
 
 		<execute function="AssertElementPresent#assertVisible" locator1="Button#DONE" />
 
@@ -205,17 +214,8 @@
 	</command>
 
 	<command name="addSiteCP">
-		<execute macro="Organization#gotoActionsCmd">
+		<execute macro="Organization#editOrganizationInformationCP">
 			<var name="orgName" value="${orgName}" />
-		</execute>
-
-		<var name="key_orgName" value="${orgName}" />
-
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
-
-		<execute function="Pause" locator1="3000" />
-
-		<execute macro="Panel#expandPanel">
 			<var name="panelHeading" value="Organization Site" />
 		</execute>
 
@@ -280,9 +280,14 @@
 		<execute macro="LexiconEntry#gotoAdd" />
 
 		<if>
-			<condition function="IsElementPresent" locator1="MenuItem#ORGANIZATION" />
+			<condition function="IsElementPresent" locator1="MenuItem#ANY_MENU_ITEM">
+				<var name="key_menuItem" value="${localizedOption}" />
+			</condition>
+
 			<then>
-				<execute function="AssertClick" locator1="MenuItem#ORGANIZATION" value1="${localizedOption}" />
+				<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="${localizedOption}">
+					<var name="key_menuItem" value="${localizedOption}" />
+				</execute>
 			</then>
 		</if>
 
@@ -307,7 +312,9 @@
 		<if>
 			<equals arg1="${orgAdvancedSearch}" arg2="Name" />
 			<then>
-				<execute function="Type" locator1="AdvancedSearch#NAME_FIELD" value1="${orgName}" />
+				<execute macro="PortletEntry#inputName">
+					<var name="name" value="${orgName}" />
+				</execute>
 
 				<execute function="AssertClick" locator1="Button#SEARCH" value1="Search" />
 
@@ -370,7 +377,9 @@
 
 		<execute function="Pause" locator1="5000" />
 
-		<execute function="AssertClick" locator1="MenuItem#ASSIGN_ORGANIZATION_ROLES" value1="Assign Organization Roles" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Assign Organization Roles">
+			<var name="key_menuItem" value="Assign Organization Roles" />
+		</execute>
 
 		<execute function="SelectFrame" locator1="//iframe[contains(@class,'dialog-iframe-node')]" />
 
@@ -378,11 +387,13 @@
 
 		<execute function="Click" locator1="//tr[contains(.,'${roleTitle}')]/td[1]/span/a" value1="${roleTitle}" />
 
-		<execute function="AssertClick" locator1="MenuItem#AVAILABLE" value1="Available" />
+		<execute macro="Navigator#gotoNavItem">
+			<var name="navItem" value="Available" />
+		</execute>
 
-		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${userScreenName}" />
-
-		<execute function="Click" locator1="NavBar#SEARCH_BUTTON" />
+		<execute macro="Search#searchCP">
+			<var name="searchTerm" value="${userScreenName}" />
+		</execute>
 
 		<var name="key_userScreenName" value="${userScreenName}" />
 
@@ -394,7 +405,9 @@
 
 		<execute macro="Alert#viewSuccessMessage" />
 
-		<execute function="AssertClick" locator1="MenuItem#CURRENT" value1="Current" />
+		<execute macro="Navigator#gotoNavItem">
+			<var name="navItem" value="Current" />
+		</execute>
 
 		<execute function="AssertTextEquals" locator1="UsersAndOrganizationsAssignUsers#USER_TABLE_USER_NAME" value1="${userFirstName} ${userLastName}" />
 		<execute function="AssertTextEquals" locator1="UsersAndOrganizationsAssignUsers#USER_TABLE_SCREEN_NAME" value1="${userScreenName}" />
@@ -411,7 +424,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClickNoError" locator1="MenuItem#DELETE" value1="Delete" />
+		<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Delete">
+			<var name="key_menuItem" value="Delete" />
+		</execute>
 
 		<execute function="Confirm" value1="Are you sure you want to delete this? It will be deleted immediately." />
 
@@ -429,7 +444,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<execute macro="Organization#gotoIdentificationCP">
 			<var name="panelHeading" value="${panelHeading}" />
@@ -445,7 +462,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<execute macro="Organization#gotoMiscellaneousCP">
 			<var name="panelHeading" value="${panelHeading}" />
@@ -461,7 +480,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<execute macro="Organization#gotoOrganizationInformationCP">
 			<var name="panelHeading" value="${panelHeading}" />
@@ -475,7 +496,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<execute function="Type" locator1="UsersAndOrganizationsEditOrganization#DETAILS_NAME_FIELD" value1="${orgNameEdit}" />
 
@@ -487,9 +510,9 @@
 	<command name="gotoActionsCmd">
 		<execute function="Pause" locator1="1000" />
 
-		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${orgName}" />
-
-		<execute function="Click" locator1="Button#SUBMIT" />
+		<execute macro="Search#searchCP">
+			<var name="searchTerm" value="${orgName}" />
+		</execute>
 
 		<execute function="AssertVisible" locator1="UsersAndOrganizations#ORGANIZATION_TABLE_NAME_GENERIC" />
 
@@ -501,9 +524,9 @@
 	</command>
 
 	<command name="gotoCP">
-		<execute function="Type" locator1="TextInput#SEARCH" value1="${searchToken}" />
-
-		<execute function="Click" locator1="Button#SUBMIT" />
+		<execute macro="Search#searchCP">
+			<var name="searchTerm" value="${searchToken}" />
+		</execute>
 
 		<var name="key_orgName" value="${orgName}" />
 
@@ -562,7 +585,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClick" locator1="MenuItem#MANAGE_SITE" value1="Manage Site" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Manage Site">
+			<var name="key_menuItem" value="Manage Site" />
+		</execute>
 
 		<if>
 			<equals arg1="${selectMembershipType}" arg2="true" />
@@ -584,32 +609,36 @@
 	</command>
 
 	<command name="removeMemberCP">
-		<execute macro="Organization#gotoActionsCmd">
+		<execute macro="Organization#gotoCP">
 			<var name="orgName" value="${orgName}" />
+			<var name="searchToken" value="${orgName}" />
 		</execute>
 
-		<var name="key_orgName" value="${orgName}" />
+		<execute macro="Search#searchCP">
+			<var name="searchTerm" value="${userFullName}" />
+		</execute>
 
-		<execute function="AssertClick" locator1="MenuItem#ASSIGN_USERS" value1="Assign Users" />
+		<execute function="AssertVisible" locator1="UsersAndOrganizations#USERS_AND_SUBORGANIZATIONS_TABLE_NAME_GENERIC" />
 
-		<var name="key_userScreenName" value="${userScreenName}" />
+		<var name="key_userFullName" value="${userFullName}" />
 
-		<execute function="AssertClick" locator1="UsersAndOrganizationsAssignUsers#CURRENT_TAB" value1="Current" />
+		<execute function="AssertTextEquals" locator1="UsersAndOrganizations#USERS_AND_SUBORGANIZATIONS_TABLE_NAME" value1="${userFullName}" />
 
-		<execute function="AssertTextEquals" locator1="UsersAndOrganizationsAssignUsers#USER_TABLE_SCREEN_NAME" value1="${userScreenName}" />
-		<execute function="Uncheck" locator1="UsersAndOrganizationsAssignUsers#USER_TABLE_CHECKBOX" />
+		<execute function="Click" locator1="UsersAndOrganizations#USERS_AND_SUBORGANIZATIONS_TABLE_ACTIONS" />
 
-		<execute function="AssertClick" locator1="Button#UPDATE_ASSOCIATIONS" value1="Update Associations" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Remove">
+			<var name="key_menuItem" value="Remove" />
+		</execute>
 
 		<execute macro="Alert#viewSuccessMessage" />
 
-		<execute function="AssertTextEquals" locator1="Message#EMPTY_INFO" value1="No users were found." />
+		<execute function="AssertTextEquals" locator1="Message#EMPTY_INFO" value1="No results were found." />
 	</command>
 
 	<command name="searchCP">
-		<execute function="Type" locator1="TextInput#SEARCH" value1="${searchTerm}" />
-
-		<execute function="Click" locator1="Button#SUBMIT" />
+		<execute macro="Search#searchCP">
+			<var name="searchTerm" value="${searchTerm}" />
+		</execute>
 
 		<var name="key_orgName" value="${orgName}" />
 
@@ -621,7 +650,9 @@
 
 		<execute function="Click" locator1="UsersAndOrganizations#ORGANIZATION_TABLE_ACTIONS" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<execute function="AssertClick" locator1="UsersAndOrganizationsEditOrganization#PARENT_ORGANIZATION_SELECT_BUTTON" value1="Select" />
 
@@ -641,7 +672,9 @@
 	</command>
 
 	<command name="tearDownCP">
-		<execute macro="ProductMenu#gotoControlPanelUsers">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Users" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
@@ -684,7 +717,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<execute function="AssertClick" locator1="UsersAndOrganizationsEditOrganization#ADDRESSES_TAB" value1="Addresses" />
 
@@ -721,7 +756,9 @@
 
 		<execute function="Click" locator1="UsersAndOrganizations#ORGANIZATION_TABLE_ACTIONS" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<var name="key_orgType" value="${orgType}" />
 
@@ -739,8 +776,8 @@
 			<var name="key_orgName" value="${orgName}" />
 		</execute>
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT_LOCALIZED" value1="${editLocalized}">
-			<var name="key_editLocalized" value="${editLocalized}" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="${editLocalized}">
+			<var name="key_menuItem" value="${editLocalized}" />
 		</execute>
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="UsersAndOrganizations#ORGANIZATION_COUNTRY_NAME" value1="${countryName}">
@@ -763,7 +800,9 @@
 
 		<var name="key_orgName" value="${orgName}" />
 
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Edit">
+			<var name="key_menuItem" value="Edit" />
+		</execute>
 
 		<execute function="AssertClick" locator1="UsersAndOrganizationsEditOrganization#PARENT_ORGANIZATION_SELECT_BUTTON" value1="Select" />
 
@@ -790,9 +829,9 @@
 	</command>
 
 	<command name="viewRemoveMemberCP">
-		<execute function="Type" locator1="TextInput#SEARCH" value1="${orgName}" />
-
-		<execute function="Click" locator1="Icon#BASIC_SEARCH" />
+		<execute macro="Search#searchCP">
+			<var name="searchTerm" value="${orgName}" />
+		</execute>
 
 		<var name="key_orgName" value="${orgName}" />
 

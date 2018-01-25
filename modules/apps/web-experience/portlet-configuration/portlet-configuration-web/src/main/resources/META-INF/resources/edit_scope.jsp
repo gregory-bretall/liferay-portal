@@ -91,7 +91,7 @@ for (Layout scopeGroupLayout : LayoutLocalServiceUtil.getScopeGroupLayouts(layou
 								String value = availableGroupScopeType + "," + availableGroupScopeLayoutUuid;
 							%>
 
-								<aui:option label="<%= HtmlUtil.escape(availableGroup.getDescriptiveName(locale)) %>" value="<%= value %>" />
+								<aui:option label="<%= HtmlUtil.escape(availableGroup.getDescriptiveName(locale)) %>" selected="<%= (group != null) && (group.getGroupId() == availableGroup.getGroupId()) %>" value="<%= value %>" />
 
 							<%
 							}
@@ -107,7 +107,7 @@ for (Layout scopeGroupLayout : LayoutLocalServiceUtil.getScopeGroupLayouts(layou
 		</div>
 
 		<aui:button-row>
-			<aui:button cssClass="btn-lg" type="submit" />
+			<aui:button type="submit" />
 		</aui:button-row>
 	</aui:form>
 </div>

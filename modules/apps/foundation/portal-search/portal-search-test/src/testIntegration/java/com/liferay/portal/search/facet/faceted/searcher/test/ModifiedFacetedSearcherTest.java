@@ -24,18 +24,14 @@ import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.search.facet.ModifiedFacetFactory;
 import com.liferay.portal.kernel.search.facet.config.FacetConfiguration;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.test.util.SearchMapUtil;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
 
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,25 +41,12 @@ import org.junit.runner.RunWith;
  * @author André de Oliveira
  */
 @RunWith(Arquillian.class)
-@Sync
 public class ModifiedFacetedSearcherTest extends BaseFacetedSearcherTestCase {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
-
-	@Before
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-
-		Registry registry = RegistryUtil.getRegistry();
-
-		_modifiedFacetFactory = registry.getService(ModifiedFacetFactory.class);
-	}
+		new LiferayIntegrationTestRule();
 
 	@Test
 	public void testRanges() throws Exception {
@@ -71,7 +54,7 @@ public class ModifiedFacetedSearcherTest extends BaseFacetedSearcherTestCase {
 
 		String keyword = RandomTestUtil.randomString();
 
-		userSearchFixture.addUser(group, keyword);
+		addUser(group, keyword);
 
 		SearchContext searchContext = getSearchContext(keyword);
 
@@ -134,6 +117,7 @@ public class ModifiedFacetedSearcherTest extends BaseFacetedSearcherTestCase {
 		return Collections.singletonMap(key, value);
 	}
 
-	private ModifiedFacetFactory _modifiedFacetFactory;
+	@Inject
+	private static ModifiedFacetFactory _modifiedFacetFactory;
 
 }
