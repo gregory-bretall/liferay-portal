@@ -14,6 +14,8 @@
 
 package com.liferay.source.formatter.checks;
 
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.Serializable;
@@ -35,13 +37,19 @@ public class YMLDefintionOrderCheck extends BaseFileCheck {
 	protected String doProcess(
 		String fileName, String absolutePath, String content) {
 
-		return _sortDefinitions(content);
+		return _sortDefinitions(fileName, content, StringPool.BLANK);
 	}
 
-	private List<String> _getDefinitions(String content) {
+	private List<String> _getDefinitions(String content, String indent) {
 		List<String> definitions = new ArrayList<>();
 
-		Matcher matcher = _definitionPattern.matcher(content);
+		Pattern pattern = Pattern.compile(
+			StringBundler.concat(
+				"^", indent, "[a-z].*:.*(\n|\\Z)((", indent,
+				"[^a-z\n].*)?(\n|\\Z))*"),
+			Pattern.MULTILINE);
+
+		Matcher matcher = pattern.matcher(content);
 
 		while (matcher.find()) {
 			definitions.add(matcher.group());
@@ -50,10 +58,13 @@ public class YMLDefintionOrderCheck extends BaseFileCheck {
 		return definitions;
 	}
 
-	private String _sortDefinitions(String content) {
-		List<String> definitions = _getDefinitions(content);
+	private String _sortDefinitions(
+		String fileName, String content, String indent) {
 
-		DefinitionComparator definitionComparator = new DefinitionComparator();
+		List<String> definitions = _getDefinitions(content, indent);
+
+		DefinitionComparator definitionComparator = new DefinitionComparator(
+			fileName);
 
 		for (int i = 1; i < definitions.size(); i++) {
 			String definition = definitions.get(i);
@@ -72,27 +83,38 @@ public class YMLDefintionOrderCheck extends BaseFileCheck {
 				return StringUtil.replaceLast(
 					content, definition, previousDefinition);
 			}
+
+			String newDefinition = _sortDefinitions(
+				fileName, definition, indent + StringPool.FOUR_SPACES);
+
+			if (!newDefinition.equals(definition)) {
+				return StringUtil.replaceFirst(
+					content, definition, newDefinition);
+			}
 		}
 
 		return content;
 	}
 
-	private final Pattern _definitionPattern = Pattern.compile(
-		"^[a-z].*:.*(\n|\\Z)(([^a-z\n].*)?(\n|\\Z))*", Pattern.MULTILINE);
-
 	private static class DefinitionComparator
 		implements Comparator<String>, Serializable {
+
+		public DefinitionComparator(String fileName) {
+			_fileName = fileName;
+		}
 
 		@Override
 		public int compare(String definition1, String definition2) {
 			String definitionKey1 = _getDefinitionKey(definition1);
 			String definitionKey2 = _getDefinitionKey(definition2);
 
-			int definitionKeyWeight1 = _getDefinitionKeyWeight(definitionKey1);
-			int definitionKeyWeight2 = _getDefinitionKeyWeight(definitionKey2);
+			if (_fileName.endsWith("/.travis.yml")) {
+				int weight1 = _getTravisDefinitionKeyWeight(definitionKey1);
+				int weight2 = _getTravisDefinitionKeyWeight(definitionKey2);
 
-			if ((definitionKeyWeight1 != -1) || (definitionKeyWeight2 != -1)) {
-				return definitionKeyWeight1 - definitionKeyWeight2;
+				if ((weight1 != -1) || (weight2 != -1)) {
+					return weight1 - weight2;
+				}
 			}
 
 			return definitionKey1.compareTo(definitionKey2);
@@ -108,33 +130,34 @@ public class YMLDefintionOrderCheck extends BaseFileCheck {
 			return definition;
 		}
 
-		private int _getDefinitionKeyWeight(String definitionKey) {
-			if (_definitionKeyWeightMap.containsKey(definitionKey)) {
-				return _definitionKeyWeightMap.get(definitionKey);
+		private int _getTravisDefinitionKeyWeight(String definitionKey) {
+			if (_travisDefinitionKeyWeightMap.containsKey(definitionKey)) {
+				return _travisDefinitionKeyWeightMap.get(definitionKey);
 			}
 
 			return -1;
 		}
 
-		private static final Map<String, Integer> _definitionKeyWeightMap =
-			new HashMap<>();
+		private static final Map<String, Integer>
+			_travisDefinitionKeyWeightMap = new HashMap<>();
 
 		static {
-			_definitionKeyWeightMap.put("after_deploy", 11);
-			_definitionKeyWeightMap.put("after_failure", 8);
-			_definitionKeyWeightMap.put("after_script", 12);
-			_definitionKeyWeightMap.put("after_success", 7);
-			_definitionKeyWeightMap.put("before_cache", 5);
-			_definitionKeyWeightMap.put("before_deploy", 9);
-			_definitionKeyWeightMap.put("before_install", 1);
-			_definitionKeyWeightMap.put("before_script", 3);
-			_definitionKeyWeightMap.put("cache", 6);
-			_definitionKeyWeightMap.put("deploy", 10);
-			_definitionKeyWeightMap.put("install", 2);
-			_definitionKeyWeightMap.put("script", 4);
+			_travisDefinitionKeyWeightMap.put("after_deploy", 11);
+			_travisDefinitionKeyWeightMap.put("after_failure", 8);
+			_travisDefinitionKeyWeightMap.put("after_script", 12);
+			_travisDefinitionKeyWeightMap.put("after_success", 7);
+			_travisDefinitionKeyWeightMap.put("before_cache", 5);
+			_travisDefinitionKeyWeightMap.put("before_deploy", 9);
+			_travisDefinitionKeyWeightMap.put("before_install", 1);
+			_travisDefinitionKeyWeightMap.put("before_script", 3);
+			_travisDefinitionKeyWeightMap.put("cache", 6);
+			_travisDefinitionKeyWeightMap.put("deploy", 10);
+			_travisDefinitionKeyWeightMap.put("install", 2);
+			_travisDefinitionKeyWeightMap.put("script", 4);
 		}
 
 		private final Pattern _definitionKeyPattern = Pattern.compile("(.*?):");
+		private final String _fileName;
 
 	}
 

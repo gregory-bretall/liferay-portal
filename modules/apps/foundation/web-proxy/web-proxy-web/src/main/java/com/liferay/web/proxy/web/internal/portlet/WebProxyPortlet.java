@@ -14,13 +14,13 @@
 
 package com.liferay.web.proxy.web.internal.portlet;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapDictionary;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.RenderResponseImpl;
@@ -65,7 +65,7 @@ import org.portletbridge.portlet.PortletBridgeServlet;
 		"com.liferay.portlet.instanceable=true",
 		"com.liferay.portlet.preferences-owned-by-group=true",
 		"com.liferay.portlet.private-request-attributes=false",
-		"com.liferay.portlet.private-session-attributes=false",
+		"com.liferay.portlet.private-session-attributes=true",
 		"com.liferay.portlet.render-weight=50",
 		"javax.portlet.display-name=Web Proxy",
 		"javax.portlet.expiration-cache=0",

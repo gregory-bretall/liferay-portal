@@ -14,6 +14,7 @@
 
 package com.liferay.portal.events;
 
+import com.liferay.petra.executor.PortalExecutorManager;
 import com.liferay.portal.fabric.server.FabricServerUtil;
 import com.liferay.portal.jericho.CachedLoggerProvider;
 import com.liferay.portal.kernel.dao.db.DB;
@@ -21,7 +22,6 @@ import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.db.DBType;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.SimpleAction;
-import com.liferay.portal.kernel.executor.PortalExecutorManager;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.MessageBus;
@@ -53,7 +53,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.plugin.PluginPackageIndexer;
 import com.liferay.portal.tools.DBUpgrader;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.messageboards.util.MBMessageIndexer;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistration;
@@ -154,7 +153,6 @@ public class StartupAction extends SimpleAction {
 
 				@Override
 				public void dependenciesFulfilled() {
-					IndexerRegistryUtil.register(new MBMessageIndexer());
 					IndexerRegistryUtil.register(new PluginPackageIndexer());
 				}
 
@@ -258,10 +256,6 @@ public class StartupAction extends SimpleAction {
 
 		@Override
 		public void dependenciesFulfilled() {
-			Registry registry = RegistryUtil.getRegistry();
-
-			MessageBus messageBus = registry.getService(MessageBus.class);
-
 			try {
 				DistributedRegistry.registerDistributed(
 					ComponentConstants.COMPONENT_CONTEXT, Direction.DUPLEX,
@@ -282,7 +276,7 @@ public class StartupAction extends SimpleAction {
 
 				intraband.registerDatagramReceiveHandler(
 					SystemDataType.MESSAGE.getValue(),
-					new MessageDatagramReceiveHandler(messageBus));
+					new MessageDatagramReceiveHandler());
 
 				intraband.registerDatagramReceiveHandler(
 					SystemDataType.PROXY.getValue(),

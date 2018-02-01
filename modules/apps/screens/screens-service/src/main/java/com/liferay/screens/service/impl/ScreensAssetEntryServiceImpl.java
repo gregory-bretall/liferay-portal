@@ -16,7 +16,7 @@ package com.liferay.screens.service.impl;
 
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
-import com.liferay.asset.publisher.web.util.AssetPublisherUtil;
+import com.liferay.asset.publisher.util.AssetPublisherHelper;
 import com.liferay.blogs.model.BlogsEntry;
 import com.liferay.blogs.service.BlogsEntryService;
 import com.liferay.document.library.kernel.model.DLFileEntry;
@@ -24,6 +24,7 @@ import com.liferay.dynamic.data.lists.model.DDLRecord;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleResource;
 import com.liferay.journal.service.permission.JournalArticlePermission;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.Property;
@@ -45,7 +46,6 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.portlet.asset.service.permission.AssetEntryPermission;
@@ -121,9 +121,7 @@ public class ScreensAssetEntryServiceImpl
 			if (!layouts.isEmpty()) {
 				Layout layout = layouts.get(0);
 
-				List<AssetEntry> assetEntries =
-					_assetPublisherUtil.getAssetEntries(
-						portletPreferences, layout, groupId, max, false);
+				List<AssetEntry> assetEntries = new ArrayList<>();
 
 				assetEntries = filterAssetEntries(assetEntries);
 
@@ -139,7 +137,7 @@ public class ScreensAssetEntryServiceImpl
 					PermissionCheckerFactoryUtil.create(getUser());
 
 				List<AssetEntry> assetEntries =
-					_assetPublisherUtil.getAssetEntries(
+					_assetPublisherHelper.getAssetEntries(
 						null, portletPreferences, permissionChecker,
 						new long[] {groupId}, false, false, false);
 
@@ -361,8 +359,8 @@ public class ScreensAssetEntryServiceImpl
 		return jsonObject;
 	}
 
-	@ServiceReference(type = AssetPublisherUtil.class)
-	private AssetPublisherUtil _assetPublisherUtil;
+	@ServiceReference(type = AssetPublisherHelper.class)
+	private AssetPublisherHelper _assetPublisherHelper;
 
 	@ServiceReference(type = BlogsEntryService.class)
 	private BlogsEntryService _blogsEntryService;

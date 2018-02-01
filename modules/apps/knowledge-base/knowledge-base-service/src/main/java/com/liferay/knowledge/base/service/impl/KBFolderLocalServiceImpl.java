@@ -22,13 +22,13 @@ import com.liferay.knowledge.base.exception.NoSuchFolderException;
 import com.liferay.knowledge.base.model.KBFolder;
 import com.liferay.knowledge.base.service.base.KBFolderLocalServiceBaseImpl;
 import com.liferay.knowledge.base.util.KnowledgeBaseUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Date;
@@ -227,9 +227,8 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 	}
 
 	/**
-	 * @deprecated As of 1.1.0, replaced by {@link
-	 *             #updateKBFolder(long, long, long, String, String,
-	 *             ServiceContext)}
+	 * @deprecated As of 1.1.0, replaced by {@link #updateKBFolder(long, long,
+	 *             long, String, String, ServiceContext)}
 	 */
 	@Deprecated
 	@Override
@@ -293,7 +292,8 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 
 		String uniqueUrlTitle = urlTitle;
 
-		KBFolder kbFolder = null;
+		KBFolder kbFolder = kbFolderPersistence.fetchByG_P_UT(
+			groupId, parentKbFolderId, uniqueUrlTitle);
 
 		for (int i = 1; kbFolder != null; i++) {
 			uniqueUrlTitle = urlTitle + StringPool.DASH + i;

@@ -21,11 +21,11 @@ import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.service.JournalFolderLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.search.facet.AssetEntriesFacetFactory;
 import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
@@ -35,16 +35,13 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.search.facet.type.AssetEntriesFacetFactory;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,37 +63,18 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Bryan Engler
  */
 @RunWith(Arquillian.class)
-@Sync
 public class PermissionFilterFacetedSearcherTest
 	extends BaseFacetedSearcherTestCase {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Before
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-
-		Registry registry = RegistryUtil.getRegistry();
-
-		assetEntriesFacetFactory = registry.getService(
-			AssetEntriesFacetFactory.class);
-
-		configurationAdmin = registry.getService(ConfigurationAdmin.class);
-
-		journalFolderLocalService = registry.getService(
-			JournalFolderLocalService.class);
-
-		journalArticleLocalService = registry.getService(
-			JournalArticleLocalService.class);
-
-		permissionCheckerFactory = registry.getService(
-			PermissionCheckerFactory.class);
 
 		setUpJournalServiceConfiguration();
 
@@ -118,7 +96,7 @@ public class PermissionFilterFacetedSearcherTest
 	public void testDecrementFrequencyCount() throws Exception {
 		Group group = userSearchFixture.addGroup();
 
-		User user1 = userSearchFixture.addUser(group);
+		User user1 = addUser(group);
 
 		ServiceContext serviceContext = createServiceContext(group, user1);
 
@@ -130,7 +108,7 @@ public class PermissionFilterFacetedSearcherTest
 
 		addArticle(title, user1, group, folder.getFolderId(), serviceContext);
 
-		User user2 = userSearchFixture.addUser(group);
+		User user2 = addUser(group);
 
 		PermissionThreadLocal.setPermissionChecker(
 			permissionCheckerFactory.create(user2));
@@ -212,11 +190,20 @@ public class PermissionFilterFacetedSearcherTest
 		_configuration.delete();
 	}
 
-	protected AssetEntriesFacetFactory assetEntriesFacetFactory;
-	protected ConfigurationAdmin configurationAdmin;
-	protected JournalArticleLocalService journalArticleLocalService;
-	protected JournalFolderLocalService journalFolderLocalService;
-	protected PermissionCheckerFactory permissionCheckerFactory;
+	@Inject
+	protected static AssetEntriesFacetFactory assetEntriesFacetFactory;
+
+	@Inject
+	protected static ConfigurationAdmin configurationAdmin;
+
+	@Inject
+	protected static JournalArticleLocalService journalArticleLocalService;
+
+	@Inject
+	protected static JournalFolderLocalService journalFolderLocalService;
+
+	@Inject
+	protected static PermissionCheckerFactory permissionCheckerFactory;
 
 	@DeleteAfterTestRun
 	private final List<JournalArticle> _articles = new ArrayList<>();

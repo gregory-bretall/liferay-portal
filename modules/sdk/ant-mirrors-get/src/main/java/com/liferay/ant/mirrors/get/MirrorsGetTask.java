@@ -16,12 +16,12 @@ package com.liferay.ant.mirrors.get;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -299,9 +299,11 @@ public class MirrorsGetTask extends Task {
 		try {
 			remoteMD5 = toString(url);
 		}
-		catch (FileNotFoundException fnfe) {
+		catch (Exception e) {
 			if (_verbose) {
-				System.out.println("URL does not point to a valid MD5 file.");
+				System.out.println("Unable to access MD5 file");
+
+				e.printStackTrace();
 			}
 
 			return true;
@@ -376,6 +378,33 @@ public class MirrorsGetTask extends Task {
 		return false;
 	}
 
+	protected URLConnection openConnection(URL url) throws IOException {
+		URLConnection urlConnection = null;
+
+		while (true) {
+			urlConnection = url.openConnection();
+
+			if (!(urlConnection instanceof HttpURLConnection)) {
+				break;
+			}
+
+			HttpURLConnection httpURLConnection =
+				(HttpURLConnection)urlConnection;
+
+			int responseCode = httpURLConnection.getResponseCode();
+
+			if ((responseCode != HttpURLConnection.HTTP_MOVED_PERM) &&
+				(responseCode != HttpURLConnection.HTTP_MOVED_TEMP)) {
+
+				break;
+			}
+
+			url = new URL(httpURLConnection.getHeaderField("Location"));
+		}
+
+		return urlConnection;
+	}
+
 	protected int toFile(URL url, File file) throws IOException {
 		if (file.exists()) {
 			file.delete();
@@ -409,7 +438,7 @@ public class MirrorsGetTask extends Task {
 	protected int toOutputStream(URL url, OutputStream outputStream)
 		throws IOException {
 
-		URLConnection urlConnection = url.openConnection();
+		URLConnection urlConnection = openConnection(url);
 
 		InputStream inputStream = urlConnection.getInputStream();
 

@@ -61,7 +61,7 @@ boolean useAssetEntryQuery = (assetCategoryId > 0) || Validator.isNotNull(assetT
 
 String displayStyle = ParamUtil.getString(request, "displayStyle");
 
-String[] displayViews = new String[] {"descriptive", "list"};
+String[] displayViews = {"descriptive", "list"};
 
 if (Validator.isNull(displayStyle)) {
 	displayStyle = portalPreferences.getValue(BookmarksPortletKeys.BOOKMARKS, "display-style", "descriptive");
@@ -166,8 +166,6 @@ BookmarksUtil.addPortletBreadcrumbEntries(folder, request, renderResponse);
 <liferay-trash:undo
 	portletURL="<%= restoreTrashEntriesURL %>"
 />
-
-<liferay-util:include page="/bookmarks/navigation.jsp" servletContext="<%= application %>" />
 
 <liferay-util:include page="/bookmarks/toolbar.jsp" servletContext="<%= application %>">
 	<liferay-util:param name="searchContainerId" value="entries" />

@@ -16,7 +16,6 @@ package com.liferay.source.formatter.checks;
 
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -29,7 +28,6 @@ import com.liferay.source.formatter.parser.JavaVariable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,12 +40,16 @@ public class JavaVariableTypeCheck extends BaseJavaTermCheck {
 	public void init() {
 		_annotationsExclusions = _getAnnotationsExclusions();
 		_defaultPrimitiveValues = _getDefaultPrimitiveValues();
-		_immutableFieldTypes = _getImmutableFieldTypes();
 	}
 
 	@Override
 	public boolean isPortalCheck() {
 		return true;
+	}
+
+	public void setImmutableFieldTypes(String immutableFieldTypes) {
+		_immutableFieldTypes = ListUtil.fromString(
+			immutableFieldTypes, StringPool.COMMA);
 	}
 
 	@Override
@@ -98,13 +100,15 @@ public class JavaVariableTypeCheck extends BaseJavaTermCheck {
 		}
 
 		if (isFinal) {
-			if (!javaVariable.isStatic() &&
-				(_immutableFieldTypes.contains(fieldType) ||
+			JavaClass parentJavaClass = javaClass.getParentJavaClass();
+
+			if ((parentJavaClass == null) && !javaVariable.isStatic() &&
+				(_isImmutableField(fieldType) ||
 				 (fieldType.equals("Log") &&
 				  !isExcludedPath(_STATIC_LOG_EXCLUDES, absolutePath)))) {
 
 				classContent = _formatStaticableFieldType(
-					classContent, javaVariable.getContent());
+					classContent, javaVariable.getContent(), fieldType);
 			}
 		}
 		else if (!_containsNonAccessModifier(javaVariable, "volatile")) {
@@ -210,9 +214,13 @@ public class JavaVariableTypeCheck extends BaseJavaTermCheck {
 	}
 
 	private String _formatStaticableFieldType(
-		String classContent, String javaVariableContent) {
+		String classContent, String javaVariableContent, String fieldType) {
 
-		if (!javaVariableContent.contains(StringPool.EQUAL)) {
+		if (!javaVariableContent.contains(StringPool.EQUAL) ||
+			(fieldType.endsWith("[]") &&
+			 (javaVariableContent.contains(" new ") ||
+			  javaVariableContent.contains("\tnew ")))) {
+
 			return classContent;
 		}
 
@@ -275,27 +283,22 @@ public class JavaVariableTypeCheck extends BaseJavaTermCheck {
 		return null;
 	}
 
-	private Set<String> _getImmutableFieldTypes() {
-		Set<String> immutableFieldTypes = SetUtil.fromArray(
-			new String[] {
-				"boolean", "byte", "char", "double", "float", "int", "long",
-				"short", "Boolean", "Byte", "Character", "Class", "Double",
-				"Float", "Int", "Long", "Number", "Short", "String"
-			});
-
-		immutableFieldTypes.addAll(getPropertyList("immutable.field.types"));
-
-		return immutableFieldTypes;
-	}
-
 	private boolean _isFinalableField(
 		JavaClass javaClass, Pattern pattern,
 		List<JavaTerm> allChildJavaTerms) {
+
+		int assignmentCount = 0;
 
 		for (JavaTerm childJavaTerm : allChildJavaTerms) {
 			String content = childJavaTerm.getContent();
 
 			Matcher matcher = pattern.matcher(content);
+
+			boolean found = matcher.find();
+
+			if (found) {
+				assignmentCount++;
+			}
 
 			if (childJavaTerm instanceof JavaConstructor) {
 				JavaClass constructorClass = childJavaTerm.getParentJavaClass();
@@ -303,30 +306,49 @@ public class JavaVariableTypeCheck extends BaseJavaTermCheck {
 				String constructorClassName = constructorClass.getName();
 
 				if (constructorClassName.equals(javaClass.getName())) {
-					if (!matcher.find()) {
+					if (!found) {
 						return false;
 					}
 				}
-				else if (matcher.find()) {
+				else if (found) {
 					return false;
 				}
 			}
-			else if (matcher.find() &&
-					 ((childJavaTerm instanceof JavaMethod) ||
-					  ((childJavaTerm instanceof JavaVariable) &&
-					   content.contains("{\n\n")))) {
-
-				return false;
+			else if (childJavaTerm instanceof JavaMethod) {
+				if (found) {
+					return false;
+				}
+			}
+			else if (childJavaTerm instanceof JavaVariable) {
+				if (found && content.contains("{\n\n")) {
+					return false;
+				}
 			}
 		}
 
+		if (assignmentCount == 0) {
+			return false;
+		}
+
 		return true;
+	}
+
+	private boolean _isImmutableField(String fieldType) {
+		for (String immutableFieldType : _immutableFieldTypes) {
+			if (fieldType.equals(immutableFieldType) ||
+				fieldType.startsWith(immutableFieldType + "[]")) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private static final String _STATIC_LOG_EXCLUDES = "static.log.excludes";
 
 	private List<String> _annotationsExclusions;
 	private Map<String, String> _defaultPrimitiveValues;
-	private Set<String> _immutableFieldTypes;
+	private List<String> _immutableFieldTypes = new ArrayList<>();
 
 }

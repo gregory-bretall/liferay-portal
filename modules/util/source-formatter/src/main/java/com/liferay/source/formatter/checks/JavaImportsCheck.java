@@ -14,10 +14,14 @@
 
 package com.liferay.source.formatter.checks;
 
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.tools.ImportsFormatter;
 import com.liferay.portal.tools.JavaImportsFormatter;
 import com.liferay.source.formatter.checks.util.JavaSourceUtil;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Hugo Huijser
@@ -32,11 +36,32 @@ public class JavaImportsCheck extends BaseFileCheck {
 		ImportsFormatter importsFormatter = new JavaImportsFormatter();
 
 		String className = JavaSourceUtil.getClassName(fileName);
-		String packagePath = JavaSourceUtil.getPackagePath(content);
+		String packageName = JavaSourceUtil.getPackageName(content);
 
-		content = importsFormatter.format(content, packagePath, className);
+		content = importsFormatter.format(content, packageName, className);
 
-		return StringUtil.replace(content, ";\n/**", ";\n\n/**");
+		content = StringUtil.replace(content, ";\n/**", ";\n\n/**");
+
+		Matcher matcher = _importMethodPattern.matcher(content);
+
+		while (matcher.find()) {
+			StringBundler sb = new StringBundler(5);
+
+			sb.append("Do not import method '");
+			sb.append(matcher.group(1));
+			sb.append("', import class '");
+			sb.append(matcher.group(2));
+			sb.append("' instead");
+
+			addMessage(
+				fileName, sb.toString(), "imports.markdown",
+				getLineCount(content, matcher.end()));
+		}
+
+		return content;
 	}
+
+	private final Pattern _importMethodPattern = Pattern.compile(
+		"\nimport static ((.*\\.(Assert|(Power)?Mockito))\\.[a-z]\\w*);");
 
 }

@@ -17,7 +17,7 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String[] tab2Names = new String[] {"update-categories", "add-category"};
+String[] tab2Names = {"update-categories", "add-category"};
 
 if (!ArrayUtil.contains(tab2Names, tabs2)) {
 	tabs2 = tab2Names[0];
@@ -79,7 +79,7 @@ serverURL.setParameter("tabs2", tabs2);
 			</aui:fieldset>
 
 			<aui:button-row>
-				<aui:button cssClass="btn-lg save-server-button" data-cmd="addLogLevel" value="save" />
+				<aui:button cssClass="save-server-button" data-cmd="addLogLevel" value="save" />
 			</aui:button-row>
 		</c:when>
 		<c:otherwise>
@@ -167,7 +167,7 @@ serverURL.setParameter("tabs2", tabs2);
 			</liferay-ui:search-container>
 
 			<aui:button-row>
-				<aui:button cssClass="btn-lg save-server-button" data-cmd="updateLogLevels" value="save" />
+				<aui:button cssClass="save-server-button" data-cmd="updateLogLevels" value="save" />
 			</aui:button-row>
 		</c:otherwise>
 	</c:choose>

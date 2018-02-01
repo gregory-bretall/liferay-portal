@@ -21,17 +21,13 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.search.facet.tag.AssetTagNamesFacetFactory;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
 
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,27 +38,13 @@ import org.junit.runner.RunWith;
  * @author André de Oliveira
  */
 @RunWith(Arquillian.class)
-@Sync
 public class AssetTagNamesFacetedSearcherTest
 	extends BaseFacetedSearcherTestCase {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
-
-	@Before
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-
-		Registry registry = RegistryUtil.getRegistry();
-
-		_assetTagNamesFacetFactory = registry.getService(
-			AssetTagNamesFacetFactory.class);
-	}
+		new LiferayIntegrationTestRule();
 
 	@Test
 	public void testSearchByFacet() throws Exception {
@@ -102,7 +84,7 @@ public class AssetTagNamesFacetedSearcherTest
 	protected User addUser(String... assetTagNames) throws Exception {
 		Group group = userSearchFixture.addGroup();
 
-		return userSearchFixture.addUser(group, assetTagNames);
+		return addUser(group, assetTagNames);
 	}
 
 	protected void assertTags(String keywords, Map<String, String> expected)
@@ -115,6 +97,7 @@ public class AssetTagNamesFacetedSearcherTest
 		assertTags(keywords, hits, expected);
 	}
 
-	private AssetTagNamesFacetFactory _assetTagNamesFacetFactory;
+	@Inject
+	private static AssetTagNamesFacetFactory _assetTagNamesFacetFactory;
 
 }

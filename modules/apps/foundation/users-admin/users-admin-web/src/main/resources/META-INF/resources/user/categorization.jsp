@@ -17,16 +17,16 @@
 <%@ include file="/init.jsp" %>
 
 <%
-User selUser = (User)request.getAttribute("user.selUser");
+User selUser = (User)request.getAttribute(UsersAdminWebKeys.SELECTED_USER);
 %>
 
 <aui:model-context bean="<%= selUser %>" model="<%= User.class %>" />
 
 <liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="categorization" />
 
-<liferay-ui:asset-categories-error />
+<liferay-asset:asset-categories-error />
 
-<liferay-ui:asset-tags-error />
+<liferay-asset:asset-tags-error />
 
 <aui:fieldset>
 	<liferay-asset:asset-categories-selector className="<%= User.class.getName() %>" classPK="<%= (selUser != null) ? selUser.getPrimaryKey() : 0 %>" />

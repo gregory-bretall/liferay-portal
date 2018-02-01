@@ -45,7 +45,7 @@ String parentTitle = BeanParamUtil.getString(wikiPage, request, "parentTitle");
 boolean editable = false;
 
 if (wikiPage != null) {
-	if (WikiPagePermissionChecker.contains(permissionChecker, wikiPage, ActionKeys.UPDATE)) {
+	if (WikiPagePermission.contains(permissionChecker, wikiPage, ActionKeys.UPDATE)) {
 		editable = true;
 	}
 }
@@ -156,9 +156,9 @@ if (portletTitleBasedNavigation) {
 		<liferay-ui:error exception="<%= PageTitleException.class %>" message="please-enter-a-valid-title" />
 		<liferay-ui:error exception="<%= PageVersionException.class %>" message="another-user-has-made-changes-since-you-started-editing-please-copy-your-changes-and-try-again" />
 
-		<liferay-ui:asset-categories-error />
+		<liferay-asset:asset-categories-error />
 
-		<liferay-ui:asset-tags-error />
+		<liferay-asset:asset-tags-error />
 
 		<aui:model-context bean="<%= ((wikiPage != null) && !wikiPage.isNew()) ? wikiPage : templatePage %>" model="<%= WikiPage.class %>" />
 
@@ -240,9 +240,9 @@ if (portletTitleBasedNavigation) {
 						</div>
 					</aui:fieldset>
 
-					<c:if test="<%= ((wikiPage != null) && (wikiPage.getPageId() > 0)) || ((templatePage != null) && WikiNodePermissionChecker.contains(permissionChecker, node.getNodeId(), ActionKeys.ADD_ATTACHMENT)) %>">
+					<c:if test="<%= ((wikiPage != null) && (wikiPage.getPageId() > 0)) || ((templatePage != null) && WikiNodePermission.contains(permissionChecker, node, ActionKeys.ADD_ATTACHMENT)) %>">
 						<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="attachments">
-							<c:if test="<%= !wikiPage.isNew() && WikiNodePermissionChecker.contains(permissionChecker, node.getNodeId(), ActionKeys.ADD_ATTACHMENT) %>">
+							<c:if test="<%= !wikiPage.isNew() && WikiNodePermission.contains(permissionChecker, node, ActionKeys.ADD_ATTACHMENT) %>">
 								<liferay-util:include page="/wiki/edit_page_attachment.jsp" servletContext="<%= application %>" />
 							</c:if>
 
@@ -280,7 +280,7 @@ if (portletTitleBasedNavigation) {
 					</aui:fieldset>
 
 					<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="related-assets">
-						<liferay-ui:input-asset-links
+						<liferay-asset:input-asset-links
 							assetEntryId="<%= assetEntryId %>"
 							className="<%= WikiPage.class.getName() %>"
 							classPK="<%= classPK %>"
@@ -379,11 +379,11 @@ if (portletTitleBasedNavigation) {
 				%>
 
 				<aui:button-row>
-					<aui:button cssClass="btn-lg" disabled="<%= pending %>" name="publishButton" primary="<%= true %>" value="<%= publishButtonLabel %>" />
+					<aui:button disabled="<%= pending %>" name="publishButton" primary="<%= true %>" value="<%= publishButtonLabel %>" />
 
-					<aui:button cssClass="btn-lg" name="saveButton" primary="<%= false %>" type="submit" value="<%= saveButtonLabel %>" />
+					<aui:button name="saveButton" primary="<%= false %>" type="submit" value="<%= saveButtonLabel %>" />
 
-					<aui:button cssClass="btn-lg" href="<%= redirect %>" type="cancel" />
+					<aui:button href="<%= redirect %>" type="cancel" />
 				</aui:button-row>
 			</c:otherwise>
 		</c:choose>
@@ -401,7 +401,7 @@ if (portletTitleBasedNavigation) {
 			currentAction: '<%= (wikiPage == null || wikiPage.isNew()) ? Constants.ADD : Constants.UPDATE %>',
 			namespace: '<portlet:namespace />',
 			renderUrl: '<%= editPageRenderURL %>',
-			rootNode: '#<portlet:namespace/>wikiEditPageContainer'
+			rootNode: '#<portlet:namespace />wikiEditPageContainer'
 		}
 	);
 </aui:script>

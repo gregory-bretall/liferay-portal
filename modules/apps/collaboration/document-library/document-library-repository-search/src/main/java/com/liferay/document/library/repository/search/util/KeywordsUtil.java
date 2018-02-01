@@ -14,7 +14,7 @@
 
 package com.liferay.document.library.repository.search.util;
 
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
 /**
@@ -24,7 +24,7 @@ import com.liferay.portal.kernel.util.StringUtil;
  */
 public class KeywordsUtil {
 
-	public static final String[] SPECIAL = new String[] {
+	public static final String[] SPECIAL = {
 		"+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~",
 		"*", "?", ":", "\\"
 	};

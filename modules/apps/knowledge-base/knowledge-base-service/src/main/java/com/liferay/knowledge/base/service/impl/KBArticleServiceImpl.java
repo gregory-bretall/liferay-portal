@@ -30,6 +30,7 @@ import com.liferay.knowledge.base.service.util.AdminUtil;
 import com.liferay.knowledge.base.util.KnowledgeBaseUtil;
 import com.liferay.knowledge.base.util.comparator.KBArticleModifiedDateComparator;
 import com.liferay.knowledge.base.util.comparator.KBArticlePriorityComparator;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -47,7 +48,6 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -188,11 +188,8 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 		KBArticle kbArticle = kbArticleLocalService.fetchKBArticleByUrlTitle(
 			groupId, kbFolderId, urlTitle);
 
-		if (kbArticle == null) {
-			return null;
-		}
-
-		if (KBArticlePermission.contains(
+		if ((kbArticle != null) &&
+			KBArticlePermission.contains(
 				getPermissionChecker(), kbArticle, ActionKeys.VIEW)) {
 
 			return kbArticle;
@@ -208,14 +205,33 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 		KBArticle kbArticle = kbArticleLocalService.fetchLatestKBArticle(
 			resourcePrimKey, status);
 
-		if (kbArticle == null) {
-			return null;
+		if ((kbArticle != null) &&
+			KBArticlePermission.contains(
+				getPermissionChecker(), kbArticle, ActionKeys.VIEW)) {
+
+			return kbArticle;
 		}
 
-		KBArticlePermission.check(
-			getPermissionChecker(), kbArticle, KBActionKeys.VIEW);
+		return null;
+	}
 
-		return kbArticle;
+	@Override
+	public KBArticle fetchLatestKBArticleByUrlTitle(
+			long groupId, long kbFolderId, String urlTitle, int status)
+		throws PortalException {
+
+		KBArticle kbArticle =
+			kbArticleLocalService.fetchLatestKBArticleByUrlTitle(
+				groupId, kbFolderId, urlTitle, status);
+
+		if ((kbArticle != null) &&
+			KBArticlePermission.contains(
+				getPermissionChecker(), kbArticle, ActionKeys.VIEW)) {
+
+			return kbArticle;
+		}
+
+		return null;
 	}
 
 	/**
@@ -401,7 +417,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 		List<KBArticle> kbArticles = new ArrayList<>();
 
-		Long[][] params = new Long[][] {ArrayUtil.toArray(resourcePrimKeys)};
+		Long[][] params = {ArrayUtil.toArray(resourcePrimKeys)};
 
 		while ((params = KnowledgeBaseUtil.getParams(params[0])) != null) {
 			List<KBArticle> curKBArticles = null;
@@ -465,7 +481,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 		int count = 0;
 
-		Long[][] params = new Long[][] {ArrayUtil.toArray(resourcePrimKeys)};
+		Long[][] params = {ArrayUtil.toArray(resourcePrimKeys)};
 
 		while ((params = KnowledgeBaseUtil.getParams(params[0])) != null) {
 			if (status == WorkflowConstants.STATUS_ANY) {

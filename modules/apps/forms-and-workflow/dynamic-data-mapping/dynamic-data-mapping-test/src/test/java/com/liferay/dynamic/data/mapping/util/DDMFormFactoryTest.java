@@ -14,19 +14,15 @@
 
 package com.liferay.dynamic.data.mapping.util;
 
-import static org.mockito.Mockito.when;
-
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTypeSettings;
 import com.liferay.dynamic.data.mapping.form.field.type.DefaultDDMFormFieldTypeSettings;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMFormRule;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.List;
 import java.util.Locale;
@@ -39,7 +35,9 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -83,7 +81,7 @@ public class DDMFormFactoryTest {
 
 		Assert.assertNotNull(indexTypeDDMFormField);
 		Assert.assertEquals("string", indexTypeDDMFormField.getDataType());
-		Assert.assertEquals("select", indexTypeDDMFormField.getType());
+		Assert.assertEquals("radio", indexTypeDDMFormField.getType());
 
 		DDMFormField labelDDMFormField = ddmFormFieldsMap.get("label");
 
@@ -249,9 +247,9 @@ public class DDMFormFactoryTest {
 	}
 
 	protected void setUpResourceBundleUtil() {
-		mockStatic(ResourceBundleUtil.class);
+		PowerMockito.mockStatic(ResourceBundleUtil.class);
 
-		when(
+		Mockito.when(
 			ResourceBundleUtil.getBundle(
 				Matchers.anyString(), Matchers.any(Locale.class),
 				Matchers.any(ClassLoader.class))

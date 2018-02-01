@@ -260,9 +260,9 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 			</div>
 
 			<aui:button-row>
-				<aui:button cssClass="btn-lg" id="addButton" onClick='<%= renderResponse.getNamespace() + "schedulePublishEvent();" %>' value="add-event" />
+				<aui:button id="addButton" onClick='<%= renderResponse.getNamespace() + "schedulePublishEvent();" %>' value="add-event" />
 
-				<aui:button cssClass="btn-lg" id="publishButton" type="submit" value="<%= LanguageUtil.get(request, publishMessageKey) %>" />
+				<aui:button id="publishButton" type="submit" value="<%= LanguageUtil.get(request, publishMessageKey) %>" />
 
 				<c:if test="<%= configuredPublish %>">
 					<aui:button cssClass="btn btn-link" href="<%= redirectURL.toString() %>" id="cancelButton" value="cancel" />
@@ -281,12 +281,6 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 		if (dateChecker.validRange) {
 			var form = AUI.$(document.<portlet:namespace />publishPagesFm);
 
-			var allContentSelected = AUI.$('#<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_DATA_ALL %>').val();
-
-			if (allContentSelected === 'true') {
-				form.fm('<%= PortletDataHandlerKeys.PORTLET_DATA_CONTROL_DEFAULT %>').val(true);
-			}
-
 			submitForm(form);
 		}
 		else {
@@ -304,7 +298,7 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 	Liferay.Util.toggleRadio('<portlet:namespace />rangeLast', '<portlet:namespace />rangeLastInputs', ['<portlet:namespace />startEndDate']);
 </aui:script>
 
-<aui:script use="liferay-export-import">
+<aui:script use="liferay-export-import-export-import">
 	var exportImport = new Liferay.ExportImport(
 		{
 			commentsNode: '#<%= PortletDataHandlerKeys.COMMENTS %>',

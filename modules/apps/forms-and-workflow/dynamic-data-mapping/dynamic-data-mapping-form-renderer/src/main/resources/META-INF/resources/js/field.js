@@ -78,6 +78,10 @@ AUI.add(
 						value: true
 					},
 
+					startedFilling: {
+						value: false
+					},
+
 					type: {
 						value: ''
 					},
@@ -215,7 +219,11 @@ AUI.add(
 
 						var renderer = instance.getTemplateRenderer();
 
-						return renderer(instance.getTemplateContext());
+						var container = document.createDocumentFragment();
+
+						new renderer(instance.getTemplateContext(), container);
+
+						return container.firstChild.outerHTML;
 					},
 
 					getTemplateContext: function() {
@@ -273,7 +281,7 @@ AUI.add(
 							container.appendTo(target);
 						}
 
-						container.html(instance.getTemplate());
+						container.setContent(instance.getTemplate());
 
 						instance.eachField(
 							function(field) {

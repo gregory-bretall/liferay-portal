@@ -42,11 +42,11 @@ if (Validator.isNull(icon)) {
 %>
 
 <div class="dropdown lfr-icon-menu <%= cssClass %>" <%= AUIUtil.buildData(data) %>>
-	<a class="dropdown-toggle icon-monospaced <%= triggerCssClass %>" href="javascript:;" id="<%= id %>" title="<%= message %>">
+	<a class="direction-<%= direction %> dropdown-toggle icon-monospaced <%= triggerCssClass %>" href="javascript:;" id="<%= id %>" title="<%= message %>">
 		<aui:icon image="<%= icon %>" markupView="lexicon" />
 	</a>
 
-	<aui:script use="liferay-menu">
+	<aui:script position="inline" use="liferay-menu">
 		Liferay.Menu.register('<%= id %>');
 	</aui:script>
 

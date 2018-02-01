@@ -24,9 +24,9 @@ import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalArticleDisplay;
 import com.liferay.journal.service.JournalArticleLocalServiceUtil;
 import com.liferay.journal.service.JournalContentSearchLocalServiceUtil;
-import com.liferay.journal.service.permission.JournalArticlePermission;
 import com.liferay.journal.util.JournalContent;
 import com.liferay.journal.util.JournalConverter;
+import com.liferay.journal.web.internal.security.permission.resource.JournalArticlePermission;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -60,6 +60,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -206,7 +207,7 @@ public class JournalArticleAssetRenderer
 		String summary = _article.getDescription(locale);
 
 		if (Validator.isNotNull(summary)) {
-			return summary;
+			return HtmlUtil.stripHtml(summary);
 		}
 
 		try {
@@ -391,7 +392,7 @@ public class JournalArticleAssetRenderer
 		String hitLayoutURL = getHitLayoutURL(
 			layout.isPrivateLayout(), noSuchEntryRedirect, themeDisplay);
 
-		if (hitLayoutURL.equals(noSuchEntryRedirect)) {
+		if (Objects.equals(hitLayoutURL, noSuchEntryRedirect)) {
 			hitLayoutURL = getHitLayoutURL(
 				!layout.isPrivateLayout(), noSuchEntryRedirect, themeDisplay);
 		}
