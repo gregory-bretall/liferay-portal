@@ -15,6 +15,7 @@
 package com.liferay.mobile.device.rules.internal.exportimport.data.handler.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.mobile.device.rules.model.MDRRule;
 import com.liferay.mobile.device.rules.model.MDRRuleGroup;
 import com.liferay.mobile.device.rules.service.MDRRuleGroupLocalServiceUtil;
@@ -23,9 +24,6 @@ import com.liferay.mobile.device.rules.util.test.MDRTestUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.HashMap;
@@ -41,16 +39,13 @@ import org.junit.runner.RunWith;
  * @author Mate Thurzo
  */
 @RunWith(Arquillian.class)
-@Sync
 public class MDRRuleStagedModelDataHandlerTest
 	extends BaseStagedModelDataHandlerTestCase {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Override
 	protected Map<String, List<StagedModel>> addDependentStagedModelsMap(

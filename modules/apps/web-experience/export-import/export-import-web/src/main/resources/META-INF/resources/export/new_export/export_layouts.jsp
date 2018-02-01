@@ -149,14 +149,14 @@ renderResponse.setTitle(!configuredExport ? LanguageUtil.get(request, "new-custo
 		</div>
 
 		<aui:button-row>
-			<aui:button cssClass="btn-lg" type="submit" value="export" />
+			<aui:button type="submit" value="export" />
 
-			<aui:button cssClass="btn-lg" href="<%= portletURL.toString() %>" type="cancel" />
+			<aui:button href="<%= portletURL.toString() %>" type="cancel" />
 		</aui:button-row>
 	</aui:form>
 </div>
 
-<aui:script use="liferay-export-import">
+<aui:script use="liferay-export-import-export-import">
 	var exportImport = new Liferay.ExportImport(
 		{
 			archivedSetupsNode: '#<%= PortletDataHandlerKeys.PORTLET_ARCHIVED_SETUPS_ALL %>',
@@ -192,14 +192,6 @@ renderResponse.setTitle(!configuredExport ? LanguageUtil.get(request, "new-custo
 			var dateChecker = exportImport.getDateRangeChecker();
 
 			if (dateChecker.validRange) {
-				var allContentSelected = A.one('#<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_DATA_ALL %>').val();
-
-				if (allContentSelected === 'true') {
-					var portletDataControlDefault = A.one('#<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_DATA_CONTROL_DEFAULT %>');
-
-					portletDataControlDefault.val(true);
-				}
-
 				submitForm(form, form.attr('action'), false);
 			}
 			else {

@@ -17,14 +17,12 @@
 <%@ include file="/init.jsp" %>
 
 <%
-User selUser = (User)request.getAttribute("user.selUser");
+User selUser = (User)request.getAttribute(UsersAdminWebKeys.SELECTED_USER);
 
-if (selUser == null) {
-	selUser = PortalUtil.getSelectedUser(request);
-}
+UserDisplayContext userDisplayContext = new UserDisplayContext(request, initDisplayContext);
 
-Contact selContact = (Contact)request.getAttribute("user.selContact");
-PasswordPolicy passwordPolicy = (PasswordPolicy)request.getAttribute("user.passwordPolicy");
+PasswordPolicy passwordPolicy = userDisplayContext.getPasswordPolicy();
+Contact selContact = userDisplayContext.getContact();
 
 Calendar birthday = CalendarFactoryUtil.getCalendar();
 
@@ -35,6 +33,8 @@ birthday.set(Calendar.YEAR, 1970);
 if (selContact != null) {
 	birthday.setTime(selContact.getBirthday());
 }
+
+String organizationIdsString = ParamUtil.getString(request, "organizationsSearchContainerPrimaryKeys");
 %>
 
 <liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="details" />
@@ -44,6 +44,8 @@ if (selContact != null) {
 <div class="row">
 	<aui:fieldset cssClass="col-md-6">
 		<liferay-ui:success key="verificationEmailSent" message="your-email-verification-code-has-been-sent-and-the-new-email-address-will-be-applied-to-your-account-once-it-has-been-verified" />
+
+		<liferay-ui:error exception="<%= CompanyMaxUsersException.class %>" message="unable-to-create-user-account-because-the-maximum-number-of-users-has-been-reached" />
 
 		<liferay-ui:error exception="<%= GroupFriendlyURLException.class %>" focusField="screenName">
 
@@ -159,7 +161,7 @@ if (selContact != null) {
 					<c:when test='<%= UsersAdminUtil.hasUpdateFieldPermission(permissionChecker, user, selUser, "portrait") %>'>
 
 						<%
-						UserFileUploadsConfiguration userFileUploadsConfiguration = (UserFileUploadsConfiguration)request.getAttribute(UserFileUploadsConfiguration.class.getName());
+						UserFileUploadsConfiguration userFileUploadsConfiguration = ConfigurationProviderUtil.getSystemConfiguration(UserFileUploadsConfiguration.class);
 						%>
 
 						<liferay-ui:logo-selector
@@ -186,7 +188,7 @@ if (selContact != null) {
 		</c:if>
 
 		<c:choose>
-			<c:when test="<%= PrefsPropsUtil.getBoolean(company.getCompanyId(), PropsKeys.FIELD_ENABLE_COM_LIFERAY_PORTAL_MODEL_CONTACT_BIRTHDAY) %>">
+			<c:when test="<%= PrefsPropsUtil.getBoolean(company.getCompanyId(), PropsKeys.FIELD_ENABLE_COM_LIFERAY_PORTAL_KERNEL_MODEL_CONTACT_BIRTHDAY) %>">
 				<liferay-ui:error exception="<%= ContactBirthdayException.class %>" message="please-enter-a-valid-date" />
 
 				<aui:input bean="<%= selContact %>" cssClass="modify-link" disabled='<%= !UsersAdminUtil.hasUpdateFieldPermission(permissionChecker, user, selUser, "birthday") %>' model="<%= Contact.class %>" name="birthday" value="<%= birthday %>" />
@@ -198,7 +200,7 @@ if (selContact != null) {
 			</c:otherwise>
 		</c:choose>
 
-		<c:if test="<%= PrefsPropsUtil.getBoolean(company.getCompanyId(), PropsKeys.FIELD_ENABLE_COM_LIFERAY_PORTAL_MODEL_CONTACT_MALE) %>">
+		<c:if test="<%= PrefsPropsUtil.getBoolean(company.getCompanyId(), PropsKeys.FIELD_ENABLE_COM_LIFERAY_PORTAL_KERNEL_MODEL_CONTACT_MALE) %>">
 			<aui:select bean="<%= selContact %>" disabled='<%= !UsersAdminUtil.hasUpdateFieldPermission(permissionChecker, user, selUser, "gender") %>' label="gender" model="<%= Contact.class %>" name="male">
 				<aui:option label="male" value="<%= true %>" />
 				<aui:option label="female" value="<%= false %>" />
@@ -206,6 +208,10 @@ if (selContact != null) {
 		</c:if>
 
 		<aui:input disabled='<%= !UsersAdminUtil.hasUpdateFieldPermission(permissionChecker, user, selUser, "jobTitle") %>' name="jobTitle" />
+
+		<c:if test="<%= (selUser == null) && Validator.isNotNull(organizationIdsString) %>">
+			<aui:input name="addOrganizationIds" type="hidden" value="<%= organizationIdsString %>" />
+		</c:if>
 
 		<%
 		boolean lockedOut = false;
@@ -228,8 +234,16 @@ if (selContact != null) {
 				String taglibOnClick = renderResponse.getNamespace() + "saveUser('unlock');";
 				%>
 
-				<aui:button cssClass="btn-lg" onClick="<%= taglibOnClick %>" value="unlock" />
+				<aui:button onClick="<%= taglibOnClick %>" value="unlock" />
 			</aui:button-row>
 		</c:if>
 	</aui:fieldset>
 </div>
+
+<aui:script>
+	function <portlet:namespace />saveUser(cmd) {
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = cmd;
+
+		submitForm(document.<portlet:namespace />fm);
+	}
+</aui:script>

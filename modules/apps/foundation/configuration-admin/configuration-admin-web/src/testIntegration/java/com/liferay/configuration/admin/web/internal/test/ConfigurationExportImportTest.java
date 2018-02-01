@@ -16,7 +16,7 @@ package com.liferay.configuration.admin.web.internal.test;
 
 import com.liferay.arquillian.deploymentscenario.annotations.BndFile;
 import com.liferay.configuration.admin.web.internal.exporter.ConfigurationExporter;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.petra.string.StringPool;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -108,7 +108,7 @@ public class ConfigurationExportImportTest {
 	@Test
 	public void testExportImportStringArray() throws Exception {
 		String arrayKey = "arrayKey";
-		String[] arrayValues = new String[] {"value1", "value2", "value3"};
+		String[] arrayValues = {"value1", "value2", "value3"};
 
 		_dictionary.put(arrayKey, arrayValues);
 

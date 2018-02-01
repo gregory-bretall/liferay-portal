@@ -25,10 +25,8 @@ import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.search.test.BaseSearchTestCase;
+import com.liferay.portal.search.test.util.BaseSearchTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerTestRule;
 
@@ -46,7 +44,6 @@ import org.junit.runner.RunWith;
  * @author Tibor Lipusz
  */
 @RunWith(Arquillian.class)
-@Sync
 public class AssetCategorySearchTest extends BaseSearchTestCase {
 
 	@ClassRule
@@ -54,8 +51,7 @@ public class AssetCategorySearchTest extends BaseSearchTestCase {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE,
-			SynchronousDestinationTestRule.INSTANCE);
+			PermissionCheckerTestRule.INSTANCE);
 
 	@Ignore
 	@Override

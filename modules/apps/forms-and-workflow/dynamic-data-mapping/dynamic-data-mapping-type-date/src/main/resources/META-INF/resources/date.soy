@@ -1,30 +1,49 @@
-{namespace ddm}
+{namespace DDMDate}
 
 /**
  * Defines the delegated template for the date field.
  */
-{deltemplate ddm.field autoescape="deprecated-contextual" variant="'date'"}
-	{call .date data="all" /}
+{deltemplate ddm.field variant="'date'"}
+	{call .render data="all" /}
 {/deltemplate}
 
 /**
  * Prints the DDM form date field.
- *
- * @param? childElementsHTML
- * @param displayValue
- * @param label
- * @param name
- * @param readOnly
- * @param required
- * @param showLabel
- * @param tip
- * @param value
- * @param visible
  */
-{template .date autoescape="deprecated-contextual"}
-	<div class="form-group{$visible ? '' : ' hide'} liferay-ddm-form-field-date" data-fieldname="{$name}">
+{template .render}
+	{@param label: string}
+	{@param name: string}
+	{@param readOnly: bool}
+	{@param showLabel: bool}
+	{@param value: string}
+	{@param visible: bool}
+	{@param? formattedValue: string}
+	{@param? predefinedValue: string}
+	{@param? required: bool}
+	{@param? tip: string}
+
+	{let $formGroupClass kind="text"}
+		form-group
+		{if not $visible}
+			{sp}hide
+		{/if}
+
+		{sp}liferay-ddm-form-field-date
+	{/let}
+
+	<div class="{$formGroupClass}" data-fieldname="{$name}">
 		{if $showLabel}
-			<label class="control-label" for="{$name}">
+			{let $labelAttributes kind="attributes"}
+				class="
+					{if $readOnly}
+						{sp}disabled
+					{/if}
+				"
+
+				for="{$name}"
+			{/let}
+
+			<label {$labelAttributes}>
 				{$label}
 
 				{if $required}
@@ -32,21 +51,41 @@
 				{/if}
 			</label>
 
-			{if $tip}
-				<p class="liferay-ddm-form-field-tip">{$tip}</p>
-			{/if}
+			<span class="form-text">{$tip ?: ''}</span>
 		{/if}
 
-		<div class="input-group input-group-container">
-			<input aria-label="{$label}" class="form-control trigger{if $readOnly}-readonly{/if}" {if $readOnly}readonly{/if} type="text" value="{$displayValue}" />
+		{let $displayValue: $formattedValue ? $formattedValue : $predefinedValue /}
 
-			<input name="{$name}" type="hidden" value="{$value}" />
+		<div class="input-group input-group-container">
+			{let $inputAttributes kind="attributes"}
+				class="form-control"
+
+				{if $label}
+					aria-label="{$label}"
+				{/if}
+
+				{if $displayValue}
+					value="{$displayValue}"
+				{/if}
+
+				{if $readOnly}
+					disabled
+				{/if}
+
+				maxlength="10"
+
+				type="text"
+			{/let}
+
+			<input {$inputAttributes} />
+
+			<input
+				name="{$name}"
+				type="hidden"
+				value="{$value}"
+			/>
 
 			<span class="input-group-addon"><span class="icon-calendar"></span></span>
 		</div>
-
-		{if $childElementsHTML}
-			{$childElementsHTML|noAutoescape}
-		{/if}
 	</div>
 {/template}

@@ -25,24 +25,28 @@ import com.liferay.dynamic.data.mapping.util.DDMFieldsCounter;
 import com.liferay.dynamic.data.mapping.util.FieldsToDDMFormValuesConverter;
 import com.liferay.journal.exception.ArticleContentException;
 import com.liferay.journal.util.JournalConverter;
+import com.liferay.petra.string.CharPool;
+import com.liferay.petra.string.StringPool;
 import com.liferay.petra.xml.XMLUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Attribute;
@@ -364,9 +368,7 @@ public class JournalConverterImpl implements JournalConverter {
 
 		int repetitions = 0;
 
-		for (int i = 0; i < fieldsDisplayValues.length; i++) {
-			String fieldDisplayName = fieldsDisplayValues[i];
-
+		for (String fieldDisplayName : fieldsDisplayValues) {
 			if (offset > parentOffset) {
 				break;
 			}
@@ -505,7 +507,7 @@ public class JournalConverterImpl implements JournalConverter {
 			}
 
 			Serializable serializable = getFieldValue(
-				dataType, type, dynamicContentElement);
+				dataType, type, dynamicContentElement, defaultLocale);
 
 			ddmField.addValue(locale, serializable);
 		}
@@ -540,7 +542,8 @@ public class JournalConverterImpl implements JournalConverter {
 	}
 
 	protected Serializable getFieldValue(
-		String dataType, String type, Element dynamicContentElement) {
+		String dataType, String type, Element dynamicContentElement,
+		Locale defaultLocale) {
 
 		Serializable serializable = null;
 
@@ -554,18 +557,24 @@ public class JournalConverterImpl implements JournalConverter {
 
 			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
+			long layoutId = GetterUtil.getLong(values[0]);
+			boolean privateLayout = !Objects.equals(values[1], "public");
+
 			if (values.length > 2) {
-				jsonObject.put("groupId", GetterUtil.getLong(values[2]));
+				long groupId = GetterUtil.getLong(values[2]);
+
+				jsonObject.put("groupId", groupId);
+
+				Layout layout = _layoutLocalService.fetchLayout(
+					groupId, privateLayout, layoutId);
+
+				if (layout != null) {
+					jsonObject.put("label", layout.getName(defaultLocale));
+				}
 			}
 
-			jsonObject.put("layoutId", GetterUtil.getLong(values[0]));
-
-			if (values[1].equals("public")) {
-				jsonObject.put("privateLayout", false);
-			}
-			else {
-				jsonObject.put("privateLayout", true);
-			}
+			jsonObject.put("layoutId", layoutId);
+			jsonObject.put("privateLayout", privateLayout);
 
 			serializable = jsonObject.toString();
 		}
@@ -815,7 +824,7 @@ public class JournalConverterImpl implements JournalConverter {
 
 		// Removable attributes
 
-		String[] removableAttributeNames = new String[] {
+		String[] removableAttributeNames = {
 			"dataType", "fieldNamespace", "multiple", "readOnly", "required",
 			"showLabel", "width"
 		};
@@ -897,6 +906,10 @@ public class JournalConverterImpl implements JournalConverter {
 				jsonArray = JSONFactoryUtil.createJSONArray(fieldValue);
 			}
 			catch (JSONException jsone) {
+				if (_log.isDebugEnabled()) {
+					_log.debug("Unable to parse object", jsone);
+				}
+
 				return;
 			}
 
@@ -1078,6 +1091,9 @@ public class JournalConverterImpl implements JournalConverter {
 		}
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		JournalConverterImpl.class);
+
 	private final Map<String, String> _ddmDataTypes;
 	private final Map<String, String> _ddmMetadataAttributes;
 	private final Map<String, String> _ddmTypesToJournalTypes;
@@ -1092,5 +1108,8 @@ public class JournalConverterImpl implements JournalConverter {
 	private Http _http;
 
 	private final Map<String, String> _journalTypesToDDMTypes;
+
+	@Reference(unbind = "-")
+	private LayoutLocalService _layoutLocalService;
 
 }

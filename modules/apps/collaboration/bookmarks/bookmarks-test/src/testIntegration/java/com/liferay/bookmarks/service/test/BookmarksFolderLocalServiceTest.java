@@ -20,22 +20,21 @@ import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
 import com.liferay.bookmarks.service.BookmarksFolderLocalServiceUtil;
-import com.liferay.bookmarks.service.permission.BookmarksFolderPermissionChecker;
 import com.liferay.bookmarks.util.test.BookmarksTestUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
-import com.liferay.portal.kernel.service.ResourceBlockServiceUtil;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -43,6 +42,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.service.test.ServiceTestUtil;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.subscription.model.Subscription;
 import com.liferay.subscription.service.SubscriptionLocalServiceUtil;
@@ -62,15 +62,12 @@ import org.junit.runner.RunWith;
  * @author Sergio González
  */
 @RunWith(Arquillian.class)
-@Sync
 public class BookmarksFolderLocalServiceTest {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Before
 	public void setUp() throws Exception {
@@ -91,9 +88,10 @@ public class BookmarksFolderLocalServiceTest {
 			TestPropsValues.getUserId(), null, 0, StringUtil.randomString(),
 			null, null, RoleConstants.TYPE_SITE, null, serviceContext);
 
-		ResourceBlockServiceUtil.addCompanyScopePermission(
-			_group.getGroupId(), _group.getCompanyId(),
-			BookmarksFolder.class.getName(), role.getRoleId(),
+		ResourcePermissionLocalServiceUtil.addResourcePermission(
+			_group.getCompanyId(), BookmarksFolder.class.getName(),
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(_group.getCompanyId()), role.getRoleId(),
 			ActionKeys.ADD_SUBFOLDER);
 
 		User user = UserTestUtil.addGroupUser(_group, role.getName());
@@ -102,9 +100,8 @@ public class BookmarksFolderLocalServiceTest {
 			PermissionCheckerFactoryUtil.create(user);
 
 		Assert.assertTrue(
-			BookmarksFolderPermissionChecker.contains(
-				permissionChecker, _group.getGroupId(), folder.getFolderId(),
-				ActionKeys.ADD_FOLDER));
+			_bookmarksFolderModelResourcePermission.contains(
+				permissionChecker, folder, ActionKeys.ADD_FOLDER));
 	}
 
 	@Test
@@ -242,6 +239,12 @@ public class BookmarksFolderLocalServiceTest {
 				(subscription.getClassPK() == expectedSubscriptionClassPK));
 		}
 	}
+
+	@Inject(
+		filter = "model.class.name=com.liferay.bookmarks.model.BookmarksFolder"
+	)
+	private static ModelResourcePermission<BookmarksFolder>
+		_bookmarksFolderModelResourcePermission;
 
 	@DeleteAfterTestRun
 	private Group _group;

@@ -104,6 +104,8 @@ if (organization != null) {
 					portletURL="<%= PortletURLUtil.clone(portletURL, renderResponse) %>"
 					selectedDisplayStyle="<%= displayStyle %>"
 				/>
+
+				<%@ include file="/add_menu.jspf" %>
 			</liferay-frontend:management-bar-buttons>
 
 			<liferay-frontend:management-bar-action-buttons>
@@ -180,7 +182,7 @@ if (organization != null) {
 					if (Validator.isNotNull(keywords)) {
 						total = OrganizationLocalServiceUtil.searchOrganizationsAndUsersCount(company.getCompanyId(), organizationId, keywords, status, null);
 
-						Sort[] sorts = new Sort[] {new Sort("name", orderByType.equals("desc")), new Sort("lastName", orderByType.equals("desc"))};
+						Sort[] sorts = {new Sort("name", orderByType.equals("desc")), new Sort("lastName", orderByType.equals("desc"))};
 
 						Hits hits = OrganizationLocalServiceUtil.searchOrganizationsAndUsers(company.getCompanyId(), organizationId, keywords, status, null, searchContainer.getStart(), searchContainer.getEnd(), sorts);
 
@@ -241,8 +243,6 @@ if (organization != null) {
 		</div>
 	</c:otherwise>
 </c:choose>
-
-<%@ include file="/add_menu.jspf" %>
 
 <aui:script>
 	function <portlet:namespace />delete() {

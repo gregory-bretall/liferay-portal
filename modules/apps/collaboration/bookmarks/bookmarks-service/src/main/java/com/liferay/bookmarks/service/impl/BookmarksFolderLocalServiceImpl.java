@@ -22,6 +22,7 @@ import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
 import com.liferay.bookmarks.service.base.BookmarksFolderLocalServiceBaseImpl;
 import com.liferay.bookmarks.util.comparator.FolderIdComparator;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -40,16 +41,17 @@ import com.liferay.portal.kernel.tree.TreeModelTasksAdapter;
 import com.liferay.portal.kernel.tree.TreePathUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.social.kernel.model.SocialActivityConstants;
 import com.liferay.subscription.service.SubscriptionLocalService;
-import com.liferay.trash.kernel.exception.RestoreEntryException;
-import com.liferay.trash.kernel.exception.TrashEntryException;
-import com.liferay.trash.kernel.model.TrashEntry;
-import com.liferay.trash.kernel.model.TrashVersion;
+import com.liferay.trash.exception.RestoreEntryException;
+import com.liferay.trash.exception.TrashEntryException;
+import com.liferay.trash.model.TrashEntry;
+import com.liferay.trash.model.TrashVersion;
+import com.liferay.trash.service.TrashEntryLocalService;
+import com.liferay.trash.service.TrashVersionLocalService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -1017,5 +1019,11 @@ public class BookmarksFolderLocalServiceImpl
 
 	@ServiceReference(type = SubscriptionLocalService.class)
 	protected SubscriptionLocalService subscriptionLocalService;
+
+	@ServiceReference(type = TrashEntryLocalService.class)
+	protected TrashEntryLocalService trashEntryLocalService;
+
+	@ServiceReference(type = TrashVersionLocalService.class)
+	protected TrashVersionLocalService trashVersionLocalService;
 
 }

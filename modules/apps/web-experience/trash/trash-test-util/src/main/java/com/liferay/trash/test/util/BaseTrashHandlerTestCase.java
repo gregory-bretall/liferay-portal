@@ -14,6 +14,7 @@
 
 package com.liferay.trash.test.util;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
@@ -37,7 +38,6 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 import com.liferay.trash.exception.RestoreEntryException;
@@ -1018,19 +1018,24 @@ public abstract class BaseTrashHandlerTestCase {
 		BaseModel<?> parentBaseModel = getParentBaseModel(
 			group, serviceContext);
 
-		baseModel = addBaseModel(parentBaseModel, serviceContext);
-
-		moveBaseModelToTrash((Long)baseModel.getPrimaryKeyObj());
-
-		deleteParentBaseModel(parentBaseModel, false);
-
 		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
 			getBaseModelClassName());
 
-		boolean restorable = trashHandler.isRestorable(
-			getAssetClassPK(baseModel));
+		try {
+			baseModel = addBaseModel(parentBaseModel, serviceContext);
 
-		Assert.assertFalse(restorable);
+			moveBaseModelToTrash((Long)baseModel.getPrimaryKeyObj());
+
+			deleteParentBaseModel(parentBaseModel, false);
+
+			boolean restorable = trashHandler.isRestorable(
+				getAssetClassPK(baseModel));
+
+			Assert.assertFalse(restorable);
+		}
+		finally {
+			trashHandler.deleteTrashEntry(getTrashEntryClassPK(baseModel));
+		}
 	}
 
 	@Test
@@ -1364,27 +1369,32 @@ public abstract class BaseTrashHandlerTestCase {
 		BaseModel<?> parentBaseModel = getParentBaseModel(
 			group, serviceContext);
 
-		baseModel = addBaseModel(parentBaseModel, serviceContext);
-
-		moveBaseModelToTrash((Long)baseModel.getPrimaryKeyObj());
-
-		whenHasParent.moveParentBaseModelToTrash(
-			(Long)parentBaseModel.getPrimaryKeyObj());
-
-		TrashHandler parentTrashHandler =
-			TrashHandlerRegistryUtil.getTrashHandler(
-				whenHasParent.getParentBaseModelClassName());
-
-		parentTrashHandler.deleteTrashEntry(
-			(Long)parentBaseModel.getPrimaryKeyObj());
-
 		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
 			getBaseModelClassName());
 
-		boolean restorable = trashHandler.isRestorable(
-			getAssetClassPK(baseModel));
+		try {
+			baseModel = addBaseModel(parentBaseModel, serviceContext);
 
-		Assert.assertFalse(restorable);
+			moveBaseModelToTrash((Long)baseModel.getPrimaryKeyObj());
+
+			whenHasParent.moveParentBaseModelToTrash(
+				(Long)parentBaseModel.getPrimaryKeyObj());
+
+			TrashHandler parentTrashHandler =
+				TrashHandlerRegistryUtil.getTrashHandler(
+					whenHasParent.getParentBaseModelClassName());
+
+			parentTrashHandler.deleteTrashEntry(
+				(Long)parentBaseModel.getPrimaryKeyObj());
+
+			boolean restorable = trashHandler.isRestorable(
+				getAssetClassPK(baseModel));
+
+			Assert.assertFalse(restorable);
+		}
+		finally {
+			trashHandler.deleteTrashEntry(getTrashEntryClassPK(baseModel));
+		}
 	}
 
 	@Test

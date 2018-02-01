@@ -18,6 +18,7 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.exportimport.kernel.exception.LARTypeException;
 import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
+import com.liferay.exportimport.test.util.lar.BaseExportImportTestCase;
 import com.liferay.portal.kernel.exception.LocaleException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
@@ -28,13 +29,10 @@ import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalServiceUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.lar.test.BaseExportImportTestCase;
 import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
@@ -56,15 +54,12 @@ import org.junit.runner.RunWith;
  * @author Eduardo Garcia
  */
 @RunWith(Arquillian.class)
-@Sync
 public class LayoutExportImportTest extends BaseExportImportTestCase {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Before
 	@Override
@@ -335,8 +330,7 @@ public class LayoutExportImportTest extends BaseExportImportTestCase {
 		layout1 = LayoutLocalServiceUtil.updateLayout(layout1);
 		layout3 = LayoutLocalServiceUtil.updateLayout(layout3);
 
-		long[] layoutIds =
-			new long[] {layout1.getLayoutId(), layout2.getLayoutId()};
+		long[] layoutIds = {layout1.getLayoutId(), layout2.getLayoutId()};
 
 		exportImportLayouts(layoutIds, getImportParameterMap());
 
@@ -395,7 +389,7 @@ public class LayoutExportImportTest extends BaseExportImportTestCase {
 	public void testExportImportSelectedLayouts() throws Exception {
 		Layout layout = LayoutTestUtil.addLayout(group);
 
-		long[] layoutIds = new long[] {layout.getLayoutId()};
+		long[] layoutIds = {layout.getLayoutId()};
 
 		exportImportLayouts(layoutIds, getImportParameterMap());
 

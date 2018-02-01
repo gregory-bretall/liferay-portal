@@ -49,7 +49,7 @@ import javax.portlet.PortletRequest;
  */
 public class AssetEntryQuery {
 
-	public static final String[] ORDER_BY_COLUMNS = new String[] {
+	public static final String[] ORDER_BY_COLUMNS = {
 		"title", "createDate", "modifiedDate", "publishDate", "expirationDate",
 		"priority", "viewCount", "ratings"
 	};
@@ -650,12 +650,8 @@ public class AssetEntryQuery {
 	private long[] _flattenTagIds(long[][] tagIdsArray) {
 		List<Long> tagIdsList = new ArrayList<>();
 
-		for (int i = 0; i < tagIdsArray.length; i++) {
-			long[] tagIds = tagIdsArray[i];
-
-			for (int j = 0; j < tagIds.length; j++) {
-				long tagId = tagIds[j];
-
+		for (long[] tagIds : tagIdsArray) {
+			for (long tagId : tagIds) {
 				tagIdsList.add(tagId);
 			}
 		}

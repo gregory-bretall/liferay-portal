@@ -78,24 +78,28 @@ public class UpgradePortletPreferences
 
 		String rootPortletId = PortletIdCodec.decodePortletName(portletId);
 
-		for (String oldName : preferencesMap.keySet()) {
+		for (Map.Entry<String, String[]> entry : preferencesMap.entrySet()) {
+			String oldName = entry.getKey();
+
 			String newName = getName(rootPortletId, oldName);
-			String[] oldValues = preferencesMap.get(oldName);
 
 			preferences.reset(oldName);
 
 			if (newName != null) {
-				preferences.setValues(newName, oldValues);
+				preferences.setValues(newName, entry.getValue());
 			}
 		}
 
 		Map<String, String> defaultPreferencesMap = getDefaultPreferencesMap(
 			rootPortletId);
 
-		for (String name : defaultPreferencesMap.keySet()) {
+		for (Map.Entry<String, String> entry :
+				defaultPreferencesMap.entrySet()) {
+
+			String name = entry.getKey();
+
 			if (preferences.getValues(name, null) == null) {
-				preferences.setValues(
-					name, StringUtil.split(defaultPreferencesMap.get(name)));
+				preferences.setValues(name, StringUtil.split(entry.getValue()));
 			}
 		}
 
@@ -115,7 +119,7 @@ public class UpgradePortletPreferences
 			companyId, ownerId, ownerType, plid, portletId, preferences);
 	}
 
-	private static final String[] _PORTLET_IDS = new String[] {
+	private static final String[] _PORTLET_IDS = {
 		"1_WAR_knowledgebaseportlet", "2_WAR_knowledgebaseportlet",
 		"3_WAR_knowledgebaseportlet_INSTANCE_%"
 	};

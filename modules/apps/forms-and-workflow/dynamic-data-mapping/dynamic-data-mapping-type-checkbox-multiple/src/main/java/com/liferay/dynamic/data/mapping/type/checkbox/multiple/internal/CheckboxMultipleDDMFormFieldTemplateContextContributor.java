@@ -17,13 +17,16 @@ package com.liferay.dynamic.data.mapping.type.checkbox.multiple.internal;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTemplateContextContributor;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldOptions;
+import com.liferay.dynamic.data.mapping.model.LocalizedValue;
 import com.liferay.dynamic.data.mapping.render.DDMFormFieldRenderingContext;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.ListUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +59,22 @@ public class CheckboxMultipleDDMFormFieldTemplateContextContributor
 			GetterUtil.getBoolean(ddmFormField.getProperty("inline")));
 		parameters.put(
 			"options", getOptions(ddmFormField, ddmFormFieldRenderingContext));
+
+		List<String> predefinedValue = getValue(
+			getPredefinedValue(ddmFormField, ddmFormFieldRenderingContext));
+
+		if (predefinedValue != null) {
+			parameters.put("predefinedValue", predefinedValue);
+		}
+
 		parameters.put(
 			"showAsSwitcher",
 			GetterUtil.getBoolean(ddmFormField.getProperty("showAsSwitcher")));
 		parameters.put(
-			"value", getValue(ddmFormField, ddmFormFieldRenderingContext));
+			"value",
+			getValue(
+				GetterUtil.getString(
+					ddmFormFieldRenderingContext.getValue(), "[]")));
 
 		return parameters;
 	}
@@ -104,23 +118,41 @@ public class CheckboxMultipleDDMFormFieldTemplateContextContributor
 		return checkboxMultipleDDMFormFieldContextHelper.getOptions();
 	}
 
-	protected List<String> getValue(
+	protected String getPredefinedValue(
 		DDMFormField ddmFormField,
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
 
-		CheckboxMultipleDDMFormFieldContextHelper
-			checkboxMultipleDDMFormFieldContextHelper =
-				new CheckboxMultipleDDMFormFieldContextHelper(
-					jsonFactory,
-					getDDMFormFieldOptions(
-						ddmFormField, ddmFormFieldRenderingContext),
-					ddmFormFieldRenderingContext.getLocale());
+		LocalizedValue predefinedValue = ddmFormField.getPredefinedValue();
 
-		String[] valuesStringArray =
-			checkboxMultipleDDMFormFieldContextHelper.toStringArray(
-				ddmFormFieldRenderingContext.getValue());
+		if (predefinedValue == null) {
+			return null;
+		}
 
-		return ListUtil.toList(valuesStringArray);
+		return predefinedValue.getString(
+			ddmFormFieldRenderingContext.getLocale());
+	}
+
+	protected List<String> getValue(String valueString) {
+		JSONArray jsonArray = null;
+
+		try {
+			jsonArray = jsonFactory.createJSONArray(valueString);
+		}
+		catch (JSONException jsone) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsone, jsone);
+			}
+
+			jsonArray = jsonFactory.createJSONArray();
+		}
+
+		List<String> values = new ArrayList<>(jsonArray.length());
+
+		for (int i = 0; i < jsonArray.length(); i++) {
+			values.add(String.valueOf(jsonArray.get(i)));
+		}
+
+		return values;
 	}
 
 	@Reference

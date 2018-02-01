@@ -26,6 +26,8 @@ if (referer.equals(themeDisplay.getPathMain() + "/portal/update_reminder_query")
 }
 %>
 
+<%@ include file="/html/portal/select_language.jspf" %>
+
 <aui:form action='<%= themeDisplay.getPathMain() + "/portal/update_reminder_query" %>' autocomplete='<%= PropsValues.COMPANY_SECURITY_PASSWORD_REMINDER_QUERY_FORM_AUTOCOMPLETE ? "on" : "off" %>' cssClass="update-reminder-query" method="post" name="fm">
 	<aui:input name="p_auth" type="hidden" value="<%= AuthTokenUtil.getToken(request) %>" />
 	<aui:input name="doAsUserId" type="hidden" value="<%= themeDisplay.getDoAsUserId() %>" />
@@ -47,13 +49,13 @@ if (referer.equals(themeDisplay.getPathMain() + "/portal/update_reminder_query")
 			</div>
 		</c:if>
 
-		<aui:input cssClass="reminder-query-answer" label="answer" maxlength="<%= ModelHintsConstants.TEXT_MAX_LENGTH %>" name="reminderQueryAnswer" showRequiredLabel="<%= false %>" size="50" type="text" value="<%= user.getReminderQueryAnswer() %>">
+		<aui:input autocomplete="off" cssClass="reminder-query-answer" label="answer" maxlength="<%= ModelHintsConstants.TEXT_MAX_LENGTH %>" name="reminderQueryAnswer" showRequiredLabel="<%= false %>" size="50" type="text" value="<%= user.getReminderQueryAnswer() %>">
 			<aui:validator name="required" />
 		</aui:input>
 	</aui:fieldset>
 
 	<aui:button-row>
-		<aui:button cssClass="btn-lg" type="submit" />
+		<aui:button type="submit" />
 	</aui:button-row>
 </aui:form>
 

@@ -30,6 +30,7 @@ import com.liferay.dynamic.data.mapping.model.DDMTemplateVersion;
 import com.liferay.dynamic.data.mapping.service.base.DDMTemplateLocalServiceBaseImpl;
 import com.liferay.dynamic.data.mapping.service.permission.DDMTemplatePermission;
 import com.liferay.dynamic.data.mapping.util.DDMXML;
+import com.liferay.petra.string.StringPool;
 import com.liferay.petra.xml.XMLUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -52,7 +53,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -522,7 +523,6 @@ public class DDMTemplateLocalServiceImpl
 	 *         search in the search
 	 * @return the matching template, or <code>null</code> if a matching
 	 *         template could not be found
-	 * @throws PortalException if a portal exception occurred
 	 */
 	@Override
 	public DDMTemplate fetchTemplate(
@@ -896,6 +896,24 @@ public class DDMTemplateLocalServiceImpl
 	public int getTemplatesCount(long groupId, long classNameId, long classPK) {
 		return ddmTemplatePersistence.countByG_C_C(
 			groupId, classNameId, classPK);
+	}
+
+	/**
+	 * Returns the number of templates matching the group IDs, class name ID,
+	 * and class PK.
+	 *
+	 * @param  groupIds the primary keys of the groups
+	 * @param  classNameId the primary key of the class name for the template's
+	 *         related model
+	 * @param  classPK the primary key of the template's related entity
+	 * @return the number of matching templates
+	 */
+	@Override
+	public int getTemplatesCount(
+		long[] groupIds, long classNameId, long classPK) {
+
+		return ddmTemplatePersistence.countByG_C_C(
+			groupIds, classNameId, classPK);
 	}
 
 	@Override
@@ -1609,12 +1627,23 @@ public class DDMTemplateLocalServiceImpl
 	}
 
 	protected void validate(
+			long groupId, Map<Locale, String> nameMap, String script)
+		throws PortalException {
+
+		validateName(groupId, nameMap);
+
+		if (Validator.isNull(script)) {
+			throw new TemplateScriptException("Script is null");
+		}
+	}
+
+	protected void validate(
 			long groupId, Map<Locale, String> nameMap, String script,
 			boolean smallImage, String smallImageURL, File smallImageFile,
 			byte[] smallImageBytes)
 		throws PortalException {
 
-		validate(nameMap, script);
+		validate(groupId, nameMap, script);
 
 		if (!smallImage || Validator.isNotNull(smallImageURL) ||
 			(smallImageFile == null) || (smallImageBytes == null)) {
@@ -1652,26 +1681,22 @@ public class DDMTemplateLocalServiceImpl
 			(smallImageBytes.length > smallImageMaxSize)) {
 
 			throw new TemplateSmallImageSizeException(
-				"Image " + smallImageName + " has " + smallImageBytes.length +
-					" bytes and exceeds the maximum size of " +
-						smallImageMaxSize);
+				StringBundler.concat(
+					"Image ", smallImageName, " has ",
+					String.valueOf(smallImageBytes.length),
+					" bytes and exceeds the maximum size of ",
+					String.valueOf(smallImageMaxSize)));
 		}
 	}
 
-	protected void validate(Map<Locale, String> nameMap, String script)
+	protected void validateName(long groupId, Map<Locale, String> nameMap)
 		throws PortalException {
 
-		validateName(nameMap);
+		String name = nameMap.get(PortalUtil.getSiteDefaultLocale(groupId));
 
-		if (Validator.isNull(script)) {
-			throw new TemplateScriptException("Script is null");
+		if (Validator.isNull(name)) {
+			name = nameMap.get(LocaleUtil.getSiteDefault());
 		}
-	}
-
-	protected void validateName(Map<Locale, String> nameMap)
-		throws PortalException {
-
-		String name = nameMap.get(LocaleUtil.getSiteDefault());
 
 		if (Validator.isNull(name)) {
 			throw new TemplateNameException("Name is null");

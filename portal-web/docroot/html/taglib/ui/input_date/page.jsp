@@ -37,6 +37,7 @@ int monthValue = GetterUtil.getInteger((String)request.getAttribute("liferay-ui:
 String name = GetterUtil.getString((String)request.getAttribute("liferay-ui:input-date:name"));
 boolean nullable = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:input-date:nullable"));
 boolean required = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:input-date:required"));
+boolean showDisableCheckbox = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:input-date:showDisableCheckbox"));
 String yearParam = GetterUtil.getString((String)request.getAttribute("liferay-ui:input-date:yearParam"));
 int yearValue = GetterUtil.getInteger((String)request.getAttribute("liferay-ui:input-date:yearValue"));
 
@@ -118,7 +119,7 @@ else {
 	<input <%= disabled ? "disabled=\"disabled\"" : "" %> id="<%= yearParamId %>" name="<%= namespace + HtmlUtil.escapeAttribute(yearParam) %>" type="hidden" value="<%= yearValue %>" />
 </span>
 
-<c:if test="<%= nullable && !required %>">
+<c:if test="<%= nullable && !required && !showDisableCheckbox %>">
 
 	<%
 	String dateTogglerCheckboxName = TextFormatter.format(dateTogglerCheckboxLabel, TextFormatter.M);
@@ -232,20 +233,17 @@ else {
 							var date = A.DataType.Date.parse(newSelection);
 							var invalidNumber = isNaN(newSelection);
 
-							if (invalidNumber && !nullable) {
+							if ((invalidNumber && !nullable) || (invalidNumber && !date && nullable && newSelection)) {
 								event.newSelection[0] = new Date();
 							}
-							else if (invalidNumber && !date && nullable) {
-								var selection = new Date();
 
-								if (!newSelection) {
-									selection = '';
-								}
+							var updatedVal = '';
 
-								event.newSelection[0] = selection;
+							if (event.newSelection[0]) {
+								updatedVal = event.newSelection[0];
 							}
 
-							datePicker.updateValue(event.newSelection[0]);
+							datePicker.updateValue(updatedVal);
 						}
 					},
 					popover: {

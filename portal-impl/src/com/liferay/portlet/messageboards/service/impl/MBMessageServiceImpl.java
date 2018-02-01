@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -46,7 +47,6 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.messageboards.service.base.MBMessageServiceBaseImpl;
 import com.liferay.portlet.messageboards.service.permission.MBCategoryPermission;
-import com.liferay.portlet.messageboards.service.permission.MBDiscussionPermission;
 import com.liferay.portlet.messageboards.service.permission.MBMessagePermission;
 import com.liferay.portlet.messageboards.util.MBUtil;
 import com.liferay.util.RSSUtil;
@@ -86,11 +86,6 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 		throws PortalException {
 
 		User user = getGuestOrUser();
-
-		MBDiscussionPermission.check(
-			getPermissionChecker(), user.getCompanyId(),
-			serviceContext.getScopeGroupId(), className, classPK,
-			ActionKeys.ADD_DISCUSSION);
 
 		return mbMessageLocalService.addDiscussionMessage(
 			user.getUserId(), null, groupId, className, classPK, threadId,
@@ -262,9 +257,6 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 
 	@Override
 	public void deleteDiscussionMessage(long messageId) throws PortalException {
-		MBDiscussionPermission.check(
-			getPermissionChecker(), messageId, ActionKeys.DELETE_DISCUSSION);
-
 		mbMessageLocalService.deleteDiscussionMessage(messageId);
 	}
 
@@ -369,7 +361,8 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 
 			categoryId = MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID;
 			name = group.getDescriptiveName();
-			description = group.getDescription();
+			description = group.getDescription(
+				LocaleUtil.getMostRelevantLocale());
 		}
 		else {
 			groupId = category.getGroupId();
@@ -474,8 +467,11 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 			ThemeDisplay themeDisplay)
 		throws PortalException {
 
-		String name = StringPool.BLANK;
-		String description = StringPool.BLANK;
+		Group group = groupLocalService.getGroup(groupId);
+
+		String name = group.getDescriptiveName();
+		String description = group.getDescription(
+			LocaleUtil.getMostRelevantLocale());
 
 		List<MBMessage> messages = new ArrayList<>();
 
@@ -506,13 +502,6 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 			}
 		}
 
-		if (!messages.isEmpty()) {
-			MBMessage message = messages.get(messages.size() - 1);
-
-			name = message.getSubject();
-			description = message.getSubject();
-		}
-
 		return exportToRSS(
 			name, description, type, version, displayStyle, feedURL, entryURL,
 			messages, themeDisplay);
@@ -525,8 +514,11 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 			String entryURL, ThemeDisplay themeDisplay)
 		throws PortalException {
 
-		String name = StringPool.BLANK;
-		String description = StringPool.BLANK;
+		Group group = groupLocalService.getGroup(groupId);
+
+		String name = group.getDescriptiveName();
+		String description = group.getDescription(
+			LocaleUtil.getMostRelevantLocale());
 
 		List<MBMessage> messages = new ArrayList<>();
 
@@ -555,13 +547,6 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 					messages.add(message);
 				}
 			}
-		}
-
-		if (!messages.isEmpty()) {
-			MBMessage message = messages.get(messages.size() - 1);
-
-			name = message.getSubject();
-			description = message.getSubject();
 		}
 
 		return exportToRSS(
@@ -743,9 +728,6 @@ public class MBMessageServiceImpl extends MBMessageServiceBaseImpl {
 			String className, long classPK, long messageId, String subject,
 			String body, ServiceContext serviceContext)
 		throws PortalException {
-
-		MBDiscussionPermission.check(
-			getPermissionChecker(), messageId, ActionKeys.UPDATE_DISCUSSION);
 
 		return mbMessageLocalService.updateDiscussionMessage(
 			getUserId(), messageId, className, classPK, subject, body,

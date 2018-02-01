@@ -14,7 +14,7 @@
 
 package com.liferay.source.formatter.checks;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -136,29 +136,13 @@ public abstract class BaseFileCheck
 			File file = new File(bndFileLocation + "bnd.bnd");
 
 			if (file.exists()) {
-				return new BNDSettings(bndFileLocation, FileUtil.read(file));
+				return new BNDSettings(
+					bndFileLocation + "bnd.bnd", FileUtil.read(file));
 			}
 
 			bndFileLocation = StringUtil.replaceLast(
 				bndFileLocation, CharPool.SLASH, StringPool.BLANK);
 		}
-	}
-
-	protected String getLine(String content, int lineCount) {
-		int nextLineStartPos = getLineStartPos(content, lineCount);
-
-		if (nextLineStartPos == -1) {
-			return null;
-		}
-
-		int nextLineEndPos = content.indexOf(
-			CharPool.NEW_LINE, nextLineStartPos);
-
-		if (nextLineEndPos == -1) {
-			return content.substring(nextLineStartPos);
-		}
-
-		return content.substring(nextLineStartPos, nextLineEndPos);
 	}
 
 	protected int getLineLength(String line) {
@@ -188,26 +172,9 @@ public abstract class BaseFileCheck
 		return lineLength;
 	}
 
-	protected int getLineStartPos(String content, int lineCount) {
-		int x = 0;
-
-		for (int i = 1; i < lineCount; i++) {
-			x = content.indexOf(CharPool.NEW_LINE, x + 1);
-
-			if (x == -1) {
-				return x;
-			}
-		}
-
-		return x + 1;
-	}
-
 	protected void putBNDSettings(BNDSettings bndSettings) {
 		_bndSettingsMap.put(bndSettings.getFileLocation(), bndSettings);
 	}
-
-	protected static final String RUN_OUTSIDE_PORTAL_EXCLUDES =
-		"run.outside.portal.excludes";
 
 	private final Map<String, BNDSettings> _bndSettingsMap =
 		new ConcurrentHashMap<>();

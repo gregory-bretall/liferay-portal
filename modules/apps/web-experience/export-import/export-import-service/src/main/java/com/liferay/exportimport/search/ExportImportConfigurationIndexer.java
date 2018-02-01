@@ -16,9 +16,10 @@ package com.liferay.exportimport.search;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportHelper;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -36,7 +37,6 @@ import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Serializable;
 
@@ -216,7 +216,7 @@ public class ExportImportConfigurationIndexer
 				(Map<Long, Boolean>)settingsMap.get("layoutIdMap");
 
 			try {
-				layoutIds = ExportImportHelperUtil.getLayoutIds(layoutIdMap);
+				layoutIds = _exportImportHelper.getLayoutIds(layoutIdMap);
 			}
 			catch (PortalException pe) {
 
@@ -361,6 +361,9 @@ public class ExportImportConfigurationIndexer
 
 	private ExportImportConfigurationLocalService
 		_exportImportConfigurationLocalService;
+
+	@Reference
+	private ExportImportHelper _exportImportHelper;
 
 	@Reference
 	private IndexWriterHelper _indexWriterHelper;

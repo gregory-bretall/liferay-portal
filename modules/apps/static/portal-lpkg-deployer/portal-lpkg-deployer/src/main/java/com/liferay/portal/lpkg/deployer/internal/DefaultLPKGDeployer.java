@@ -23,10 +23,12 @@ import com.liferay.portal.kernel.module.framework.ThrowableCollector;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.lpkg.deployer.LPKGDeployer;
 import com.liferay.portal.lpkg.deployer.LPKGVerifier;
 import com.liferay.portal.lpkg.deployer.LPKGVerifyException;
+import com.liferay.portal.lpkg.deployer.util.BundleStartLevelUtil;
 import com.liferay.portal.util.PropsValues;
 
 import java.io.File;
@@ -107,9 +109,10 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 
 		if (!lpkgFilePath.startsWith(_deploymentDirPath)) {
 			throw new LPKGVerifyException(
-				"Unable to deploy " + lpkgFile +
-					" from outside the deployment directory " +
-						_deploymentDirPath);
+				StringBundler.concat(
+					"Unable to deploy ", String.valueOf(lpkgFile),
+					" from outside the deployment directory ",
+					String.valueOf(_deploymentDirPath)));
 		}
 
 		List<Bundle> oldBundles = _lpkgVerifier.verify(lpkgFile);
@@ -120,8 +123,10 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"Uninstalled older LPKG bundle " + bundle +
-							" in order to install " + lpkgFile);
+						StringBundler.concat(
+							"Uninstalled older LPKG bundle ",
+							String.valueOf(bundle), " in order to install ",
+							String.valueOf(lpkgFile)));
 				}
 
 				String location = bundle.getLocation();
@@ -136,8 +141,9 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 			}
 			catch (BundleException be) {
 				_log.error(
-					"Unable to uninstall " + bundle + " in order to install " +
-						lpkgFile,
+					StringBundler.concat(
+						"Unable to uninstall ", String.valueOf(bundle),
+						" in order to install ", String.valueOf(lpkgFile)),
 					be);
 			}
 		}
@@ -184,7 +190,33 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 			}
 
 			if (!oldBundles.isEmpty()) {
-				_refreshRemovalPendingBundles(bundleContext, lpkgBundle);
+				if (_log.isInfoEnabled()) {
+					_log.info(
+						"Start refreshing references to point to the new " +
+							"bundle " + lpkgBundle);
+				}
+
+				FrameworkEvent frameworkEvent = _refreshRemovalPendingBundles(
+					bundleContext);
+
+				if (frameworkEvent.getType() ==
+						FrameworkEvent.PACKAGES_REFRESHED) {
+
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							"Finished refreshing references to point to the " +
+								"new bundle " + lpkgBundle);
+					}
+				}
+				else {
+					throw new Exception(
+						StringBundler.concat(
+							"Unable to refresh references to the new bundle ",
+							String.valueOf(lpkgBundle),
+							" because of framework event ",
+							String.valueOf(frameworkEvent)),
+						frameworkEvent.getThrowable());
+				}
 			}
 
 			return bundles;
@@ -233,8 +265,10 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 	}
 
 	@Deactivate
-	protected void deactivate() {
+	protected void deactivate(BundleContext bundleContext) {
 		_lpkgBundleTracker.close();
+
+		_wabBundleTracker.close();
 	}
 
 	private void _activate(final BundleContext bundleContext) throws Exception {
@@ -247,6 +281,12 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 			URLStreamHandlerService.class.getName(),
 			new LPKGURLStreamHandlerService(_urls), properties);
 
+		_wabBundleTracker = new BundleTracker<>(
+			bundleContext, ~Bundle.UNINSTALLED,
+			new WABWrapperBundleTrackerCustomizer(bundleContext));
+
+		_wabBundleTracker.open();
+
 		_deploymentDirPath = _getDeploymentDirPath(bundleContext);
 
 		Path overrideDirPath = _deploymentDirPath.resolve("override");
@@ -258,6 +298,25 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 		List<File> warFiles = _scanFiles(overrideDirPath, ".war", true);
 
 		_uninstallOrphanOverridingWars(bundleContext, warFiles);
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Start refreshing uninstalled orphan bundles");
+		}
+
+		FrameworkEvent frameworkEvent = _refreshRemovalPendingBundles(
+			bundleContext);
+
+		if (frameworkEvent.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+			if (_log.isInfoEnabled()) {
+				_log.info("Finished refreshing uninstalled orphan bundles");
+			}
+		}
+		else {
+			throw new Exception(
+				"Unable to refresh uninstalled orphan bundles because of " +
+					"framework event " + frameworkEvent,
+				frameworkEvent.getThrowable());
+		}
 
 		_lpkgBundleTracker = new BundleTracker<>(
 			bundleContext, ~Bundle.UNINSTALLED,
@@ -332,13 +391,10 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 			jarBundle = bundleContext.installBundle(
 				location, new FileInputStream(jarFile));
 
-			BundleStartLevel bundleStartLevel = jarBundle.adapt(
-				BundleStartLevel.class);
-
-			bundleStartLevel.setStartLevel(
-				PropsValues.MODULE_FRAMEWORK_DYNAMIC_INSTALL_START_LEVEL);
-
-			_startBundle(jarBundle);
+			BundleStartLevelUtil.setStartLevelAndStart(
+				jarBundle,
+				PropsValues.MODULE_FRAMEWORK_DYNAMIC_INSTALL_START_LEVEL,
+				bundleContext);
 
 			if (_log.isInfoEnabled()) {
 				_log.info("Installed override JAR bundle " + location);
@@ -401,8 +457,10 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 			try {
 				List<Bundle> bundles = deploy(bundleContext, lpkgFile);
 
-				for (Bundle bundle : bundles) {
-					_startBundle(bundle);
+				if (!bundles.isEmpty()) {
+					Bundle lpkgBundle = bundles.get(0);
+
+					lpkgBundle.start();
 				}
 			}
 			catch (Exception e) {
@@ -437,8 +495,8 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 	/**
 	 * @see FrameworkWiring#getRemovalPendingBundles
 	 */
-	private void _refreshRemovalPendingBundles(
-			BundleContext bundleContext, Bundle bundle)
+	private FrameworkEvent _refreshRemovalPendingBundles(
+			BundleContext bundleContext)
 		throws Exception {
 
 		Bundle systemBundle = bundleContext.getBundle(0);
@@ -448,12 +506,6 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 
 		final DefaultNoticeableFuture<FrameworkEvent> defaultNoticeableFuture =
 			new DefaultNoticeableFuture<>();
-
-		if (_log.isInfoEnabled()) {
-			_log.info(
-				"Start refreshing references to point to the new bundle " +
-					bundle);
-		}
 
 		frameworkWiring.refreshBundles(
 			null,
@@ -466,21 +518,7 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 
 			});
 
-		FrameworkEvent frameworkEvent = defaultNoticeableFuture.get();
-
-		if (frameworkEvent.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
-			if (_log.isInfoEnabled()) {
-				_log.info(
-					"Finished refreshing references to point to the new " +
-						"bundle " + bundle);
-			}
-		}
-		else {
-			throw new Exception(
-				"Unable to refresh references to the new bundle " + bundle +
-					" because of framework event " + frameworkEvent,
-				frameworkEvent.getThrowable());
-		}
+		return defaultNoticeableFuture.get();
 	}
 
 	private void _saveOverrideWarsProperties(
@@ -541,23 +579,6 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 		}
 
 		return files;
-	}
-
-	private void _startBundle(Bundle bundle) {
-		Dictionary<String, String> headers = bundle.getHeaders();
-
-		String fragmentHost = headers.get(Constants.FRAGMENT_HOST);
-
-		if (fragmentHost != null) {
-			return;
-		}
-
-		try {
-			bundle.start();
-		}
-		catch (BundleException be) {
-			_log.error("Unable to start " + bundle, be);
-		}
 	}
 
 	private Set<String> _toFileNames(List<File> jarFiles, List<File> warFiles) {
@@ -686,5 +707,6 @@ public class DefaultLPKGDeployer implements LPKGDeployer {
 	private ThrowableCollector _throwableCollector;
 
 	private final Map<String, URL> _urls = new ConcurrentHashMap<>();
+	private BundleTracker<Bundle> _wabBundleTracker;
 
 }

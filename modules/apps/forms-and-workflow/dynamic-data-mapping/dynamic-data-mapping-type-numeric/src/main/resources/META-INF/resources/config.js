@@ -17,15 +17,6 @@
 								'aui-tooltip',
 								'liferay-ddm-form-renderer-field'
 							]
-						},
-						'liferay-ddm-form-field-numeric-template': {
-							condition: {
-								trigger: 'liferay-ddm-form-renderer'
-							},
-							path: 'numeric.soy.js',
-							requires: [
-								'soyutils'
-							]
 						}
 					},
 					root: MODULE_PATH + '/'

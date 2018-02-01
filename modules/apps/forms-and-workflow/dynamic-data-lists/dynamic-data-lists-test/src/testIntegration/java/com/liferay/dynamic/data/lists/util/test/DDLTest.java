@@ -26,18 +26,16 @@ import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormValuesTestUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,13 +51,6 @@ public class DDLTest {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new LiferayIntegrationTestRule();
-
-	@Before
-	public void setUp() {
-		Registry registry = RegistryUtil.getRegistry();
-
-		_ddl = registry.getService(DDL.class);
-	}
 
 	@Test
 	public void testGetDDLRecordAsJSONObject() throws Exception {
@@ -139,6 +130,7 @@ public class DDLTest {
 		Assert.assertEquals("Text0, Text1", jsonObject.getString("TextField1"));
 	}
 
-	private DDL _ddl;
+	@Inject
+	private static DDL _ddl;
 
 }

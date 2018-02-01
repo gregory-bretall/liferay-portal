@@ -21,6 +21,8 @@ import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMTemplateTestUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.journal.exportimport.data.handler.JournalFeedStagedModelDataHandler;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalFeed;
@@ -36,13 +38,10 @@ import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortalPreferencesLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.log.CaptureAppender;
 import com.liferay.portal.test.log.Log4JLoggerTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -67,16 +66,13 @@ import org.junit.runner.RunWith;
  * @author Daniel Kocsis
  */
 @RunWith(Arquillian.class)
-@Sync
 public class JournalFeedStagedModelDataHandlerTest
 	extends BaseStagedModelDataHandlerTestCase {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Before
 	@Override
@@ -166,6 +162,42 @@ public class JournalFeedStagedModelDataHandlerTest
 				message,
 				message.contains(" already exists. The new generated ID is "));
 		}
+	}
+
+	@Test
+	public void testDoubleExportImport() throws Exception {
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			addDependentStagedModelsMap(stagingGroup);
+
+		StagedModel stagedModel = addStagedModel(
+			stagingGroup, dependentStagedModelsMap);
+
+		ExportImportThreadLocal.setPortletImportInProcess(true);
+
+		try {
+			exportImportStagedModel(stagedModel);
+		}
+		finally {
+			ExportImportThreadLocal.setPortletImportInProcess(false);
+		}
+
+		StagedModel importedStagedModel = getStagedModel(
+			stagedModel.getUuid(), liveGroup);
+
+		Assert.assertNotNull(importedStagedModel);
+
+		ExportImportThreadLocal.setPortletImportInProcess(true);
+
+		try {
+			exportImportStagedModel(stagedModel);
+		}
+		finally {
+			ExportImportThreadLocal.setPortletImportInProcess(false);
+		}
+
+		importedStagedModel = getStagedModel(stagedModel.getUuid(), liveGroup);
+
+		Assert.assertNotNull(importedStagedModel);
 	}
 
 	@Override

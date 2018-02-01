@@ -93,6 +93,17 @@ renderResponse.setTitle(LanguageUtil.get(request, "feeds"));
 			portletURL="<%= PortletURLUtil.clone(portletURL, renderResponse) %>"
 			selectedDisplayStyle="<%= displayStyle %>"
 		/>
+
+		<c:if test="<%= JournalPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_FEED) %>">
+			<portlet:renderURL var="editFeedURL">
+				<portlet:param name="mvcPath" value="/edit_feed.jsp" />
+				<portlet:param name="redirect" value="<%= currentURL %>" />
+			</portlet:renderURL>
+
+			<liferay-frontend:add-menu inline="<%= true %>">
+				<liferay-frontend:add-menu-item title='<%= LanguageUtil.get(request, "add-feed") %>' url="<%= editFeedURL %>" />
+			</liferay-frontend:add-menu>
+		</c:if>
 	</liferay-frontend:management-bar-buttons>
 
 	<liferay-frontend:management-bar-action-buttons>
@@ -115,6 +126,22 @@ renderResponse.setTitle(LanguageUtil.get(request, "feeds"));
 			keyProperty="feedId"
 			modelVar="feed"
 		>
+
+			<%
+			String editURL = StringPool.BLANK;
+
+			if (JournalFeedPermission.contains(permissionChecker, feed, ActionKeys.UPDATE)) {
+				PortletURL editFeedURL = liferayPortletResponse.createRenderURL();
+
+				editFeedURL.setParameter("mvcPath", "/edit_feed.jsp");
+				editFeedURL.setParameter("redirect", currentURL);
+				editFeedURL.setParameter("groupId", String.valueOf(feed.getGroupId()));
+				editFeedURL.setParameter("feedId", feed.getFeedId());
+
+				editURL = editFeedURL.toString();
+			}
+			%>
+
 			<c:choose>
 				<c:when test='<%= displayStyle.equals("descriptive") %>'>
 					<liferay-ui:search-container-column-icon
@@ -126,7 +153,9 @@ renderResponse.setTitle(LanguageUtil.get(request, "feeds"));
 						colspan="<%= 2 %>"
 					>
 						<h5>
-							<%= feed.getName() %>
+							<aui:a href="<%= editURL %>">
+								<%= feed.getName() %>
+							</aui:a>
 						</h5>
 
 						<h6 class="text-default">
@@ -157,6 +186,7 @@ renderResponse.setTitle(LanguageUtil.get(request, "feeds"));
 							rowChecker="<%= searchContainer.getRowChecker() %>"
 							subtitle="<%= feed.getDescription() %>"
 							title="<%= feed.getName() %>"
+							url="<%= editURL %>"
 						/>
 					</liferay-ui:search-container-column-text>
 				</c:when>
@@ -167,6 +197,7 @@ renderResponse.setTitle(LanguageUtil.get(request, "feeds"));
 					/>
 
 					<liferay-ui:search-container-column-text
+						href="<%= editURL %>"
 						name="name"
 						property="name"
 						truncate="<%= true %>"
@@ -196,14 +227,3 @@ renderResponse.setTitle(LanguageUtil.get(request, "feeds"));
 		}
 	}
 </aui:script>
-
-<c:if test="<%= JournalPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_FEED) %>">
-	<portlet:renderURL var="editFeedURL">
-		<portlet:param name="mvcPath" value="/edit_feed.jsp" />
-		<portlet:param name="redirect" value="<%= currentURL %>" />
-	</portlet:renderURL>
-
-	<liferay-frontend:add-menu>
-		<liferay-frontend:add-menu-item title='<%= LanguageUtil.get(request, "add-feed") %>' url="<%= editFeedURL %>" />
-	</liferay-frontend:add-menu>
-</c:if>

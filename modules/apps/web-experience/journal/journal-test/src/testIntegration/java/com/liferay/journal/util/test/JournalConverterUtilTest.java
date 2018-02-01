@@ -40,8 +40,6 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
-import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -69,7 +67,6 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -80,27 +77,21 @@ import org.junit.runner.RunWith;
  * @author Marcellus Tavares
  */
 @RunWith(Arquillian.class)
-@Sync
 public class JournalConverterUtilTest {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(),
-			SynchronousDestinationTestRule.INSTANCE);
-
-	@BeforeClass
-	public static void setUpClass() {
-		_enLocale = LocaleUtil.fromLanguageId("en_US");
-		_ptLocale = LocaleUtil.fromLanguageId("pt_BR");
-	}
+		new LiferayIntegrationTestRule();
 
 	@Before
 	public void setUp() throws Exception {
 		setUpDDMFormJSONDeserializer();
 		setUpDDMFormXSDDeserializer();
 		setUpDDMXML();
+
+		_enLocale = LocaleUtil.fromLanguageId("en_US");
+		_ptLocale = LocaleUtil.fromLanguageId("pt_BR");
 
 		_group = GroupTestUtil.addGroup();
 
@@ -358,7 +349,7 @@ public class JournalConverterUtilTest {
 
 		expectedFields.put(linkToLayoutField);
 
-		StringBundler sb = new StringBundler();
+		StringBundler sb = new StringBundler(8);
 
 		sb.append("link_to_layout_INSTANCE_MiO7vIJu,");
 		sb.append("link_to_layout_INSTANCE_9FLzJNUX,");
@@ -669,13 +660,14 @@ public class JournalConverterUtilTest {
 		Field field = new Field();
 
 		field.setDDMStructureId(ddmStructureId);
+		field.setDefaultLocale(_enLocale);
 		field.setName("link_to_layout");
 
 		List<Serializable> enValues = new ArrayList<>();
 
 		for (Layout layout : layoutsMap.values()) {
-			enValues.add(getLinkToLayoutFieldValue(layout, false));
-			enValues.add(getLinkToLayoutFieldValue(layout, true));
+			enValues.add(getLinkToLayoutFieldValue(layout, _enLocale, false));
+			enValues.add(getLinkToLayoutFieldValue(layout, _enLocale, true));
 		}
 
 		field.addValues(_enLocale, enValues);
@@ -684,12 +676,13 @@ public class JournalConverterUtilTest {
 	}
 
 	protected String getLinkToLayoutFieldValue(
-		Layout layout, boolean includeGroupId) {
+		Layout layout, Locale locale, boolean includeGroupId) {
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		if (includeGroupId) {
 			jsonObject.put("groupId", layout.getGroupId());
+			jsonObject.put("label", layout.getName(locale));
 		}
 
 		jsonObject.put("layoutId", layout.getLayoutId());
@@ -976,19 +969,18 @@ public class JournalConverterUtilTest {
 
 	private static final String _PUBLIC_USER_LAYOUT = "publicUserLayout";
 
-	private static Locale _enLocale;
-	private static Locale _ptLocale;
-
 	private long _classNameId;
 	private DDMFormJSONDeserializer _ddmFormJSONDeserializer;
 	private DDMFormXSDDeserializer _ddmFormXSDDeserializer;
 	private DDMStructure _ddmStructure;
 	private DDMStructureTestHelper _ddmStructureTestHelper;
 	private DDMXML _ddmXML;
+	private Locale _enLocale;
 
 	@DeleteAfterTestRun
 	private Group _group;
 
 	private JournalConverter _journalConverter;
+	private Locale _ptLocale;
 
 }

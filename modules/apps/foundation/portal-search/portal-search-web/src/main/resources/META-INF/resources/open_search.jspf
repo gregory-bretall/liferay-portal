@@ -15,7 +15,7 @@
 --%>
 
 <aui:button-row>
-	<aui:button cssClass="btn-lg" onClick='<%= renderResponse.getNamespace() + "addSearchProvider();" %>' value='<%= LanguageUtil.format(request, "add-x-as-a-search-provider", HtmlUtil.escape(company.getName()), false) %>' />
+	<aui:button onClick='<%= renderResponse.getNamespace() + "addSearchProvider();" %>' value='<%= LanguageUtil.format(request, "add-x-as-a-search-provider", HtmlUtil.escape(company.getName()), false) %>' />
 </aui:button-row>
 
 <%
@@ -145,7 +145,7 @@ for (int i = 0; i < openSearchInstances.size(); i++) {
 
 					<br />
 
-					<liferay-ui:asset-tags-summary
+					<liferay-asset:asset-tags-summary
 						className="<%= entryClassName %>"
 						classPK="<%= entryClassPK %>"
 						paramName="<%= Field.ASSET_TAG_NAMES %>"

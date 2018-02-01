@@ -50,7 +50,8 @@
 					mode: '<%= mode %>',
 					p_l_id: <%= themeDisplay.getPlid() %>,
 					portletNamespace: '<portlet:namespace />',
-					repeatable: <%= repeatable %>
+					repeatable: <%= repeatable %>,
+					requestedLocale: '<%= requestedLocale %>'
 
 					<c:if test="<%= ddmFormValues != null %>">
 						, values: <%= DDMUtil.getDDMFormValuesJSONString(ddmFormValues) %>
@@ -59,7 +60,7 @@
 			);
 
 			var onDestroyPortlet = function(event) {
-				if (event.portletId === '<%= portletDisplay.getRootPortletId() %>') {
+				if (event.portletId === '<%= portletDisplay.getId() %>') {
 					liferayDDMForm.destroy();
 
 					Liferay.detach('destroyPortlet', onDestroyPortlet);

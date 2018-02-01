@@ -21,6 +21,7 @@ import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
@@ -28,15 +29,14 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -260,8 +260,7 @@ public class AssetVocabularyStagedModelDataHandler
 
 		long groupId = portletDataContext.getScopeGroupId();
 
-		long[] groupIds =
-			new long[] {portletDataContext.getCompanyGroupId(), groupId};
+		long[] groupIds = {portletDataContext.getCompanyGroupId(), groupId};
 
 		Locale locale = _portal.getSiteDefaultLocale(groupId);
 
@@ -313,11 +312,13 @@ public class AssetVocabularyStagedModelDataHandler
 
 		Map<Locale, String> titleMap = vocabulary.getTitleMap();
 
-		if (titleMap == null) {
-			titleMap = new HashMap<>();
-		}
+		Locale locale = _portal.getSiteDefaultLocale(groupId);
 
-		titleMap.put(_portal.getSiteDefaultLocale(groupId), name);
+		if (titleMap.isEmpty() || !Objects.equals(vocabulary.getName(), name) ||
+			!titleMap.containsKey(locale)) {
+
+			titleMap.put(locale, name);
+		}
 
 		return titleMap;
 	}

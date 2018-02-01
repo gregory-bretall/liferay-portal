@@ -14,7 +14,7 @@
 
 package com.liferay.wiki.escape;
 
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
 /**
@@ -30,14 +30,14 @@ public class WikiEscapeUtil {
 		return StringUtil.replace(name, _ESCAPED_CHARS, _UNESCAPED_CHARS);
 	}
 
-	private static final String[] _ESCAPED_CHARS = new String[] {
+	private static final String[] _ESCAPED_CHARS = {
 		"<AMPERSAND>", "<APOSTROPHE>", "<AT>", "<CLOSE_BRACKET>",
 		"<CLOSE_PARENTHESIS>", "<COLON>", "<COMMA>", "<DOLLAR>", "<EQUAL>",
 		"<EXCLAMATION>", "<OPEN_BRACKET>", "<OPEN_PARENTHESIS>", "<PLUS>",
 		"<POUND>", "<QUESTION>", "<SEMICOLON>", "<SLASH>", "<STAR>"
 	};
 
-	private static final String[] _UNESCAPED_CHARS = new String[] {
+	private static final String[] _UNESCAPED_CHARS = {
 		StringPool.AMPERSAND, StringPool.APOSTROPHE, StringPool.AT,
 		StringPool.CLOSE_BRACKET, StringPool.CLOSE_PARENTHESIS,
 		StringPool.COLON, StringPool.COMMA, StringPool.DOLLAR, StringPool.EQUAL,

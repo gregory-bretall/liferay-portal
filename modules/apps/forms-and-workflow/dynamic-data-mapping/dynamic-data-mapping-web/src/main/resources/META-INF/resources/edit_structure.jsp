@@ -71,6 +71,7 @@ if (fieldsJSONArray != null) {
 	fieldsJSONArrayString = fieldsJSONArray.toString();
 }
 
+boolean saveAndContinue = ParamUtil.getBoolean(request, "saveAndContinue");
 boolean showBackURL = ParamUtil.getBoolean(request, "showBackURL", true);
 %>
 
@@ -100,7 +101,7 @@ if (Validator.isNotNull(requestUpdateStructureURL)) {
 		<aui:input name="scopeClassNameId" type="hidden" value="<%= scopeClassNameId %>" />
 		<aui:input name="definition" type="hidden" />
 		<aui:input name="status" type="hidden" />
-		<aui:input name="saveAndContinue" type="hidden" value="<%= false %>" />
+		<aui:input name="saveAndContinue" type="hidden" value="<%= saveAndContinue %>" />
 
 		<liferay-ui:error exception="<%= DDMFormLayoutValidationException.class %>" message="please-enter-a-valid-form-layout" />
 
@@ -242,7 +243,7 @@ if (Validator.isNotNull(requestUpdateStructureURL)) {
 						</div>
 					</c:if>
 
-					<c:if test="<%= (classPK > 0) && (DDMTemplateLocalServiceUtil.getTemplatesCount(groupId, classNameId, classPK) > 0) %>">
+					<c:if test="<%= (classPK > 0) && (DDMTemplateLocalServiceUtil.getTemplatesCount(null, classNameId, classPK) > 0) %>">
 						<div class="alert alert-info">
 							<liferay-ui:message key="there-are-template-references-to-this-structure.-please-update-them-if-a-field-name-is-renamed-or-removed" />
 						</div>
@@ -316,13 +317,13 @@ if (Validator.isNotNull(requestUpdateStructureURL)) {
 	</aui:form>
 
 	<aui:button-row>
-		<aui:button cssClass="btn-lg" onClick='<%= renderResponse.getNamespace() + "saveStructure(false);" %>' primary="<%= true %>" value='<%= LanguageUtil.get(request, "save") %>' />
+		<aui:button onClick='<%= renderResponse.getNamespace() + "saveStructure(false);" %>' primary="<%= true %>" value='<%= LanguageUtil.get(request, "save") %>' />
 
 		<c:if test="<%= ddmDisplay.isVersioningEnabled() %>">
-			<aui:button cssClass="btn-lg" onClick='<%= renderResponse.getNamespace() + "saveStructure(true);" %>' value='<%= LanguageUtil.get(request, "save-draft") %>' />
+			<aui:button onClick='<%= renderResponse.getNamespace() + "saveStructure(true);" %>' value='<%= LanguageUtil.get(request, "save-draft") %>' />
 		</c:if>
 
-		<aui:button cssClass="btn-lg" href="<%= ddmDisplay.getViewTemplatesBackURL(liferayPortletRequest, liferayPortletResponse, classPK) %>" type="cancel" />
+		<aui:button href="<%= ddmDisplay.getViewTemplatesBackURL(liferayPortletRequest, liferayPortletResponse, classPK) %>" type="cancel" />
 	</aui:button-row>
 </div>
 

@@ -90,7 +90,8 @@ public @interface OSGiBeanProperties {
 	public static class Convert {
 
 		/**
-		 * Returns a properties map representing the object's OSGi bean properties.
+		 * Returns a properties map representing the object's OSGi bean
+		 * properties.
 		 *
 		 * @param  object the object that is possibly annotated with {@link
 		 *         OSGiBeanProperties}
@@ -183,8 +184,8 @@ public @interface OSGiBeanProperties {
 	public static class Service {
 
 		/**
-		 * Returns the types under which the bean is published as a service.
-		 * If no types are specified, they are calculated through class
+		 * Returns the types under which the bean is published as a service. If
+		 * no types are specified, they are calculated through class
 		 * introspection. If the bean is not assignable to a specified service
 		 * type, a {@link ClassCastException} is thrown.
 		 *
@@ -281,31 +282,31 @@ public @interface OSGiBeanProperties {
 
 		private Class<?> _getTypeClass() {
 			if (this == Type.BOOLEAN) {
-				return java.lang.Boolean.class;
+				return Boolean.class;
 			}
 			else if (this == Type.BYTE) {
-				return java.lang.Byte.class;
+				return Byte.class;
 			}
 			else if (this == Type.CHARACTER) {
-				return java.lang.Character.class;
+				return Character.class;
 			}
 			else if (this == Type.DOUBLE) {
-				return java.lang.Double.class;
+				return Double.class;
 			}
 			else if (this == Type.FLOAT) {
-				return java.lang.Float.class;
+				return Float.class;
 			}
 			else if (this == Type.INTEGER) {
-				return java.lang.Integer.class;
+				return Integer.class;
 			}
 			else if (this == Type.LONG) {
-				return java.lang.Long.class;
+				return Long.class;
 			}
 			else if (this == Type.SHORT) {
-				return java.lang.Short.class;
+				return Short.class;
 			}
 			else if (this == Type.STRING) {
-				return java.lang.String.class;
+				return String.class;
 			}
 
 			return null;
@@ -316,7 +317,9 @@ public @interface OSGiBeanProperties {
 				return GetterUtil.getBoolean(value);
 			}
 			else if (this == Type.BYTE) {
-				return new java.lang.Byte(value).byteValue();
+				Byte byteValue = Byte.valueOf(value);
+
+				return byteValue.byteValue();
 			}
 			else if (this == Type.CHARACTER) {
 				return value.charAt(0);

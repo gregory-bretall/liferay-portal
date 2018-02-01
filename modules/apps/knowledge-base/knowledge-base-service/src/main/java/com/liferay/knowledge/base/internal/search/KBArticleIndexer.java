@@ -22,6 +22,7 @@ import com.liferay.knowledge.base.service.KBArticleLocalService;
 import com.liferay.knowledge.base.service.KBFolderLocalService;
 import com.liferay.knowledge.base.service.permission.KBArticlePermission;
 import com.liferay.knowledge.base.util.KnowledgeBaseUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
@@ -48,7 +49,6 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
@@ -112,12 +112,9 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 	public Hits search(SearchContext searchContext) throws SearchException {
 		Hits hits = super.search(searchContext);
 
-		String[] queryTerms = hits.getQueryTerms();
-
-		String keywords = searchContext.getKeywords();
-
-		queryTerms = ArrayUtil.append(
-			queryTerms, KnowledgeBaseUtil.splitKeywords(keywords));
+		String[] queryTerms = ArrayUtil.append(
+			GetterUtil.getStringValues(hits.getQueryTerms()),
+			KnowledgeBaseUtil.splitKeywords(searchContext.getKeywords()));
 
 		hits.setQueryTerms(queryTerms);
 
@@ -150,19 +147,26 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 		Document document, Locale locale, String snippet,
 		PortletRequest portletRequest, PortletResponse portletResponse) {
 
-		String title = document.get(Field.TITLE);
+		String prefix = Field.SNIPPET + StringPool.UNDERLINE;
+
+		String title = document.get(prefix + Field.TITLE, Field.TITLE);
 
 		String content = snippet;
 
 		if (Validator.isNull(snippet)) {
-			content = document.get(Field.DESCRIPTION);
+			content = document.get(
+				prefix + Field.DESCRIPTION, Field.DESCRIPTION);
 
 			if (Validator.isNull(content)) {
-				content = StringUtil.shorten(document.get(Field.CONTENT), 200);
+				content = document.get(prefix + Field.CONTENT, Field.CONTENT);
 			}
 		}
 
-		return new Summary(title, content);
+		Summary summary = new Summary(title, content);
+
+		summary.setMaxContentLength(200);
+
+		return summary;
 	}
 
 	@Override
