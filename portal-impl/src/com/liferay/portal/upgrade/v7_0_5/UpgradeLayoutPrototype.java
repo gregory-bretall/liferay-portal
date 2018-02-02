@@ -12,14 +12,24 @@
  * details.
  */
 
-package com.liferay.dynamic.data.mapping.web.internal.exportimport.data.handler;
+package com.liferay.portal.upgrade.v7_0_5;
+
+import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.upgrade.v7_0_5.util.LayoutPrototypeTable;
 
 /**
- * @author Marcellus Tavares
- * @author Juan Fernández
+ * @author Mariano Alvaro Saiz
  */
-public abstract class DDMPortletDataHandler {
+public class UpgradeLayoutPrototype extends UpgradeProcess {
 
-	public static final String NAMESPACE = "dynamic_data_mapping";
+	@Override
+	protected void doUpgrade() throws Exception {
+		alter(
+			LayoutPrototypeTable.class,
+			new AlterColumnType("name", "TEXT null"));
+		alter(
+			LayoutPrototypeTable.class,
+			new AlterColumnType("description", "TEXT null"));
+	}
 
 }
