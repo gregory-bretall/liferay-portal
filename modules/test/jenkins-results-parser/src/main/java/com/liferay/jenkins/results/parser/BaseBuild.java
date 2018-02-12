@@ -177,11 +177,18 @@ public abstract class BaseBuild implements Build {
 
 		long totalDelayTime = 0;
 
-		for (Build downstreamBuild : getDownstreamBuilds(null)) {
+		List<Build> allDownstreamBuilds = JenkinsResultsParserUtil.flatten(
+			getDownstreamBuilds(null));
+
+		if (allDownstreamBuilds.isEmpty()) {
+			return 0;
+		}
+
+		for (Build downstreamBuild : allDownstreamBuilds) {
 			totalDelayTime += downstreamBuild.getDelayTime();
 		}
 
-		return totalDelayTime / getDownstreamBuildCount(null);
+		return totalDelayTime / allDownstreamBuilds.size();
 	}
 
 	@Override
@@ -336,8 +343,11 @@ public abstract class BaseBuild implements Build {
 
 	@Override
 	public String getConsoleText() {
-		if (_consoleText != null) {
-			return _consoleText;
+		String consoleText = JenkinsResultsParserUtil.getCachedText(
+			_CONSOLE_TEXT_CACHE_PREFIX + getBuildURL());
+
+		if (consoleText != null) {
+			return consoleText;
 		}
 
 		String buildURL = getBuildURL();
@@ -349,12 +359,11 @@ public abstract class BaseBuild implements Build {
 				new JenkinsConsoleTextLoader(
 					getBuildURL(), status.equals("completed"));
 
-			String consoleText = jenkinsConsoleTextLoader.getConsoleText();
+			consoleText = jenkinsConsoleTextLoader.getConsoleText();
 
-			if (consoleText.contains("\nFinished:") &&
-				(getParentBuild() == null)) {
-
-				_consoleText = consoleText;
+			if (consoleText.contains("\nFinished:")) {
+				JenkinsResultsParserUtil.saveToCacheFile(
+					_CONSOLE_TEXT_CACHE_PREFIX + getBuildURL(), consoleText);
 			}
 
 			return consoleText;
@@ -370,7 +379,21 @@ public abstract class BaseBuild implements Build {
 
 	@Override
 	public Long getDelayTime() {
-		return getStartTime() - getInvokedTime();
+		Long startTime = getStartTime();
+
+		long currentTime = System.currentTimeMillis();
+
+		if (startTime == null) {
+			startTime = currentTime;
+		}
+
+		Long invokedTime = getInvokedTime();
+
+		if (invokedTime == null) {
+			invokedTime = currentTime;
+		}
+
+		return startTime - invokedTime;
 	}
 
 	@Override
@@ -729,6 +752,12 @@ public abstract class BaseBuild implements Build {
 				downstreamBuild.getLongestDelayedDownstreamBuild();
 
 			if (downstreamBuild.getDelayTime() >
+					longestDelayedDownstreamBuild.getDelayTime()) {
+
+				longestDelayedDownstreamBuild = downstreamBuild;
+			}
+
+			if (longestDelayedDownstreamBuild.getDelayTime() >
 					longestDelayedBuild.getDelayTime()) {
 
 				longestDelayedBuild = longestDelayedDownstreamBuild;
@@ -958,6 +987,31 @@ public abstract class BaseBuild implements Build {
 			throw new RuntimeException(
 				"Unable to get test report JSON object", ioe);
 		}
+	}
+
+	public List<TestResult> getTestResults(
+		Build build, JSONArray suitesJSONArray, String testStatus) {
+
+		List<TestResult> testResults = new ArrayList<>();
+
+		for (int i = 0; i < suitesJSONArray.length(); i++) {
+			JSONObject suiteJSONObject = suitesJSONArray.getJSONObject(i);
+
+			JSONArray casesJSONArray = suiteJSONObject.getJSONArray("cases");
+
+			for (int j = 0; j < casesJSONArray.length(); j++) {
+				TestResult testResult = TestResultFactory.newTestResult(
+					build, casesJSONArray.getJSONObject(j));
+
+				if ((testStatus == null) ||
+					testStatus.equals(testResult.getStatus())) {
+
+					testResults.add(testResult);
+				}
+			}
+		}
+
+		return testResults;
 	}
 
 	@Override
@@ -1431,7 +1485,7 @@ public abstract class BaseBuild implements Build {
 			return;
 		}
 
-		TopLevelBuild topLevelBuild = (TopLevelBuild)getTopLevelBuild();
+		TopLevelBuild topLevelBuild = getTopLevelBuild();
 
 		if ((topLevelBuild == null) || topLevelBuild.fromArchive) {
 			return;
@@ -1467,9 +1521,8 @@ public abstract class BaseBuild implements Build {
 				throw new RuntimeException(
 					"Unable to download sample " + urlString, ioe);
 			}
-			else {
-				return;
-			}
+
+			return;
 		}
 
 		try {
@@ -2161,7 +2214,6 @@ public abstract class BaseBuild implements Build {
 			_buildNumber = buildNumber;
 
 			consoleReadCursor = 0;
-			_consoleText = null;
 
 			if (_buildNumber == -1) {
 				setStatus("starting");
@@ -2493,6 +2545,8 @@ public abstract class BaseBuild implements Build {
 		return true;
 	}
 
+	private static final String _CONSOLE_TEXT_CACHE_PREFIX = "console-text-";
+
 	private static final FailureMessageGenerator[] _FAILURE_MESSAGE_GENERATORS =
 		{
 			new GenericFailureMessageGenerator()
@@ -2518,7 +2572,6 @@ public abstract class BaseBuild implements Build {
 	};
 
 	private int _buildNumber = -1;
-	private String _consoleText;
 	private JenkinsMaster _jenkinsMaster;
 	private JenkinsSlave _jenkinsSlave;
 	private Map<String, String> _parameters = new HashMap<>();
