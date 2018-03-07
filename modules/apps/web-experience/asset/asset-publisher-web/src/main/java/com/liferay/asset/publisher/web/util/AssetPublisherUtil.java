@@ -1504,6 +1504,9 @@ public class AssetPublisherUtil {
 
 			assetEntryQuery.setAllCategoryIds(newAllAssetCategoryIds);
 
+			assetEntryQuery.setGroupIds(
+				getGroupIds(portletPreferences, scopeGroupId, layout));
+
 			BaseModelSearchResult<AssetEntry> baseModelSearchResult =
 				getAssetEntries(
 					assetEntryQuery, layout, portletPreferences, portletName,
