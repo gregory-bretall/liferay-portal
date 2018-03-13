@@ -1,3 +1,5 @@
+<%@ page import="com.liferay.social.activities.taglib.servlet.taglib.SocialActivitiesTag" %>
+
 <%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
@@ -97,7 +99,7 @@
 							<%= timeFormatDate.format(activityDescriptor.getCreateDate()) %>
 						</h5>
 
-						<%= activityFeedEntry.getTitle() %>
+						<%= SocialActivitiesTag.replaceUserTags(activityFeedEntry.getTitle(), serviceContext) %>
 
 						<%= activityFeedEntry.getBody() %>
 					</div>
