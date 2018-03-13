@@ -15,6 +15,16 @@
 package com.liferay.social.activities.taglib.servlet.taglib;
 
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.exception.NoSuchUserException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.social.activities.taglib.internal.servlet.ServletContextUtil;
 import com.liferay.social.kernel.model.SocialActivity;
 import com.liferay.social.kernel.model.SocialActivitySet;
@@ -23,6 +33,8 @@ import com.liferay.taglib.util.IncludeTag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.portlet.ResourceURL;
 
@@ -33,6 +45,56 @@ import javax.servlet.jsp.PageContext;
  * @author Raymond Augé
  */
 public class SocialActivitiesTag extends IncludeTag {
+
+	public static String replaceUserTags(
+			String content, ServiceContext serviceContext)
+		throws PortalException {
+
+		Matcher matcher = _userTagPattern.matcher(content);
+
+		while (matcher.find()) {
+			String result = matcher.group();
+
+			try {
+				StringBuilder sb = new StringBuilder(5);
+
+				sb.append("<a href=\"");
+
+				String assetTagScreenName = result.replace(
+					"[@", StringPool.BLANK);
+
+				assetTagScreenName = assetTagScreenName.replace(
+					"]", StringPool.BLANK);
+
+				ThemeDisplay themeDisplay = serviceContext.getThemeDisplay();
+
+				User assetTagUser = UserLocalServiceUtil.getUserByScreenName(
+					themeDisplay.getCompanyId(), assetTagScreenName);
+
+				sb.append(assetTagUser.getDisplayURL(themeDisplay));
+
+				sb.append("\">");
+
+				String assetTagUserName = PortalUtil.getUserName(
+					assetTagUser.getUserId(), assetTagScreenName);
+
+				sb.append(assetTagUserName);
+
+				sb.append("</a>");
+
+				String userLink = sb.toString();
+
+				content = StringUtil.replace(content, result, userLink);
+			}
+			catch (NoSuchUserException nsue) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(nsue, nsue);
+				}
+			}
+		}
+
+		return content;
+	}
 
 	public void setActivities(List<SocialActivity> activities) {
 		List<SocialActivityDescriptor> activityDescriptors = new ArrayList<>(
@@ -169,6 +231,12 @@ public class SocialActivitiesTag extends IncludeTag {
 	}
 
 	private static final String _PAGE = "/social_activities/page.jsp";
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		SocialActivitiesTag.class);
+
+	private static final Pattern _userTagPattern = Pattern.compile(
+		"\\[\\@\\S*\\]");
 
 	private List<SocialActivityDescriptor> _activityDescriptors;
 	private String _className = StringPool.BLANK;
