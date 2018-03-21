@@ -396,6 +396,12 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 								</liferay-ui:search-container-column-text>
 							</c:if>
 
+							<liferay-ui:search-container-column-text
+								cssClass="table-cell-content"
+								name="description"
+								value="<%= StringUtil.shorten(HtmlUtil.stripHtml(fileEntry.getDescription()), 200) %>"
+							/>
+
 							<c:if test='<%= ArrayUtil.contains(entryColumns, "document-type") %>'>
 								<c:choose>
 									<c:when test="<%= latestFileVersion.getModel() instanceof DLFileVersion %>">
@@ -558,6 +564,12 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 									value="<%= curFolder.getName() %>"
 								/>
 							</c:if>
+
+							<liferay-ui:search-container-column-text
+								cssClass="table-cell-content"
+								name="description"
+								value="<%= StringUtil.shorten(HtmlUtil.stripHtml(curFolder.getDescription()), 200) %>"
+							/>
 
 							<c:if test='<%= ArrayUtil.contains(entryColumns, "document-type") %>'>
 								<liferay-ui:search-container-column-text
