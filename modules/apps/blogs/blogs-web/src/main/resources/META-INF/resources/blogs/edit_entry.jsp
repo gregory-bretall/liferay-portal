@@ -206,6 +206,7 @@ if (portletTitleBasedNavigation) {
 						<div class="entry-content form-group">
 							<liferay-ui:input-editor
 								contents="<%= content %>"
+								cssClass="form-control"
 								editorName='<%= PropsUtil.get("editor.wysiwyg.portal-web.docroot.html.portlet.blogs.edit_entry.jsp") %>'
 								name="contentEditor"
 								onChangeMethod="OnChangeEditor"
