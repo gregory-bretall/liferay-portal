@@ -384,9 +384,13 @@
 				var selectedItem = event.newVal;
 
 				if (selectedItem) {
+					var ranges;
 					var eventName = editor.name + 'selectItem';
 					var imageSrc = instance._getItemSrc(editor, selectedItem);
-					var isSelectionEmpty = editor.isSelectionEmpty();
+					var selection = editor.getSelection();
+					
+					var isSelectionEmpty = selection.getType() === CKEDITOR.SELECTION_NONE || 
+						(ranges = selection.getRanges()) && ranges.length === 1 && ranges[0].collapsed;
 
 					Liferay.Util.getWindow(eventName).onceAfter(
 						'destroy',

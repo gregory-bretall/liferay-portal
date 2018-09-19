@@ -106,8 +106,13 @@
 
 			_onSelectedImageChange: function(editor, imageSrc, selectedItem) {
 				var el;
+				var ranges;
 				var instance = this;
-				var isSelectionEmpty = editor.isSelectionEmpty();
+				var selection = editor.getSelection();
+				
+				var isSelectionEmpty = selection.getType() === CKEDITOR.SELECTION_NONE || 
+					(ranges = selection.getRanges()) && ranges.length === 1 && ranges[0].collapsed;
+					
 				var fileEntryAttributeName = editor.config.adaptiveMediaFileEntryAttributeName;
 
 				if (selectedItem.returnType === STR_ADAPTIVE_MEDIA_URL_RETURN_TYPE) {
