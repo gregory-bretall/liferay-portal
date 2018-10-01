@@ -77,6 +77,12 @@ MBBreadcrumbUtil.addPortletBreadcrumbEntries(message, request, renderResponse);
 		window[editorName].focus();
 
 		Liferay.Util.toggleDisabled('#<portlet:namespace />replyMessageButton' + messageId, true);
+
+		if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+			var editor = '<portlet:namespace />addReplyToMessage' + messageId;
+
+			document.getElementById(editor).scrollIntoView(true);
+		}
 	}
 
 	function <portlet:namespace />hideReplyMessage(messageId) {
