@@ -76,7 +76,7 @@ MBBreadcrumbUtil.addPortletBreadcrumbEntries(message, request, renderResponse);
 		window[editorName].setHTML(quote);
 		window[editorName].focus();
 
-		if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+		if (AUI().UA.ios) {
 			document.getElementById(editorName).focus();
 		}
 
