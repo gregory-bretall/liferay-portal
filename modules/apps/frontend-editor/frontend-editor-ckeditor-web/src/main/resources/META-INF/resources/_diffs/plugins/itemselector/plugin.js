@@ -399,7 +399,11 @@
 									editor.insertHtml('<img src="' + imageSrc + '">');
 
 									if (isSelectionEmpty) {
-										editor.execCommand('enter');
+										if(AUI.Env.UA.ie >= 9){
+											editor.insertHtml('<img src="' + imageSrc + '">' + ' <br> ');
+										}else {
+											editor.execCommand('enter');
+										}
 									}
 
 									editor.focus();
