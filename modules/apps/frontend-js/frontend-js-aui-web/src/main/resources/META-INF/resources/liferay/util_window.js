@@ -9,6 +9,7 @@ AUI.add(
 		var Window = Util.Window;
 
 		var IE9 = UA.ie == 9;
+		var IE11 = UA.ie == 11;
 
 		var setWidth = function(modal, width) {
 			if (IE9) {
@@ -156,8 +157,13 @@ AUI.add(
 							if (modal._opener) {
 								var openerInFrame = !!modal._opener.frameElement;
 
-								if (IE9 && openerInFrame) {
-									instance._syncWindowsUI();
+								if (openerInFrame) {
+									if (IE9) {
+										instance._syncWindowsUI();
+									}
+									else if (IE11) {
+										instance._resetFocus();
+									}
 								}
 							}
 
@@ -404,6 +410,18 @@ AUI.add(
 
 					instance._map[id] = modal;
 					instance._map[id + instance.IFRAME_SUFFIX] = modal;
+				},
+
+				_resetFocus: function(modal) {
+					var iframe = $('iframe');
+
+					var inputs = iframe.contents().find('input[type=text][name*="title"]');
+
+					inputs.each(
+						function() {
+							this.select();
+						}
+					);
 				},
 
 				_setWindowDefaultSizeIfNeeded: function(modal) {
