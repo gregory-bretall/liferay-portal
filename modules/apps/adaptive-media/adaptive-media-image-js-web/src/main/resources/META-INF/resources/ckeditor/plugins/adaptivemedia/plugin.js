@@ -120,7 +120,12 @@
 				editor.insertHtml(el.getOuterHtml());
 
 				if (isSelectionEmpty) {
-					editor.execCommand('enter');
+					if (AUI.Env.UA.ie >= 9) {
+						editor.insertHtml(el.getOuterHtml() + ' <br> ');
+					}
+					else {
+						editor.execCommand('enter');
+					}
 				}
 			}
 		}
