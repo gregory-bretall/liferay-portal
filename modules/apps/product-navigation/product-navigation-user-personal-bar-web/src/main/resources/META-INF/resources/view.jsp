@@ -70,7 +70,7 @@
 		%>
 
 		<span class="sign-in text-default" role="presentation">
-			<aui:icon cssClass="sign-in text-default" data="<%= anchorData %>" image="user" label="sign-in" markupView="lexicon" url="<%= themeDisplay.getURLSignIn() %>" />
+			<aui:icon cssClass="sign-in text-default" data="<%= anchorData %>" image="user" label='<%= LanguageUtil.get(request, "sign-in") %>' markupView="lexicon" url="<%= themeDisplay.getURLSignIn() %>" />
 		</span>
 	</c:otherwise>
 </c:choose>
