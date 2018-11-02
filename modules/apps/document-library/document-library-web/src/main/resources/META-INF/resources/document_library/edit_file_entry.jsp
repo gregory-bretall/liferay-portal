@@ -429,9 +429,6 @@ if (portletTitleBasedNavigation) {
 
 				<c:if test="<%= (fileEntry != null) && !checkedOut %>">
 					<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="versioning">
-						<aui:input label="customize-the-version-number-increment-and-describe-my-changes" name="updateVersionDetails" type="toggle-switch" value="<%= updateVersionDetails %>" />
-
-						<div id="<portlet:namespace />versionDetails" style="<%= updateVersionDetails ? StringPool.BLANK : "display: none" %>">
 							<aui:input checked="<%= dlVersionNumberIncrease == DLVersionNumberIncrease.MAJOR %>" label="major-version" name="versionIncrease" type="radio" value="<%= DLVersionNumberIncrease.MAJOR %>" />
 
 							<aui:input checked="<%= dlVersionNumberIncrease == DLVersionNumberIncrease.MINOR %>" label="minor-version" name="versionIncrease" type="radio" value="<%= DLVersionNumberIncrease.MINOR %>" />
@@ -443,7 +440,6 @@ if (portletTitleBasedNavigation) {
 							<aui:input label="version-notes" maxLength="75" name="changeLog" />
 
 							<aui:model-context bean="<%= fileVersion %>" model="<%= DLFileVersion.class %>" />
-						</div>
 					</aui:fieldset>
 				</c:if>
 
@@ -632,17 +628,6 @@ if (portletTitleBasedNavigation) {
 		Liferay.Form.get('<portlet:namespace />fm').formValidator.validateField('<portlet:namespace />title');
 	}
 </aui:script>
-
-<c:if test="<%= (fileEntry != null) && !checkedOut %>">
-	<aui:script use="aui-base">
-		$('#<portlet:namespace />updateVersionDetails').on(
-			'click',
-			function(event) {
-				$('#<portlet:namespace />versionDetails').toggle();
-			}
-		);
-	</aui:script>
-</c:if>
 
 <%
 if (fileEntry != null) {
