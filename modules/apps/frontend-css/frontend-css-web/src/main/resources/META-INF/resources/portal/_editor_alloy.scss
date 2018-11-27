@@ -129,9 +129,7 @@
 		padding-top: 44px;
 
 		.cke_widget_wrapper.cke_widget_focused {
-			> .cke_widget_element,
-			> .cke_widget_wrapper,
-			> .cke_widget_editable.cke_widget_editable_focused {
+			.cke_widget_element, .cke_widget_wrapper, .cke_widget_editable.cke_widget_editable_focused {
 				outline: none;
 			}
 
@@ -139,12 +137,14 @@
 				outline: 2px solid #ace;
 			}
 
-			img[class="cke_widget_element"] {
+			img.cke_widget_element {
 				outline: 2px solid #ace;
 			}
 		}
 
 		.cke_widget_wrapper:hover {
+			outline: 2px solid #ffd25c;
+
 			.cke_widget_element {
 				outline: none;
 			}
