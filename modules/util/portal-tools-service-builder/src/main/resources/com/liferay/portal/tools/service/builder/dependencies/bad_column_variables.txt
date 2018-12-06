@@ -1,0 +1,7 @@
+oValue
+oValues
+q
+query
+qList
+sql
+sqlQuery

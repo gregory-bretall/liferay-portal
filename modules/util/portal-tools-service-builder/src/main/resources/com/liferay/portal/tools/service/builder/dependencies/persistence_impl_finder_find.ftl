@@ -580,17 +580,17 @@ that may or may not be enforced with a unique index at the database level. Case
 			<@finderQPos />
 
 			if (orderByComparator != null) {
-				Object[] values = orderByComparator.getOrderByConditionValues(${entity.varName});
+				Object[] oValues = orderByComparator.getOrderByConditionValues(${entity.varName});
 
-				for (Object value : values) {
-					qPos.add(value);
+				for (Object oValue : oValues) {
+					qPos.add(oValue);
 				}
 			}
 
-			List<${entity.name}> list = q.list();
+			List<${entity.name}> qList = q.list();
 
-			if (list.size() == 2) {
-				return list.get(1);
+			if (qList.size() == 2) {
+				return qList.get(1);
 			}
 			else {
 				return null;
@@ -912,17 +912,17 @@ that may or may not be enforced with a unique index at the database level. Case
 					<@finderQPos />
 
 					if (orderByComparator != null) {
-						Object[] values = orderByComparator.getOrderByConditionValues(${entity.varName});
+						Object[] oValues = orderByComparator.getOrderByConditionValues(${entity.varName});
 
-						for (Object value : values) {
-							qPos.add(value);
+						for (Object oValue : oValues) {
+							qPos.add(oValue);
 						}
 					}
 
-					List<${entity.name}> list = q.list();
+					List<${entity.name}> qList = q.list();
 
-					if (list.size() == 2) {
-						return list.get(1);
+					if (qList.size() == 2) {
+						return qList.get(1);
 					}
 					else {
 						return null;
@@ -1049,17 +1049,17 @@ that may or may not be enforced with a unique index at the database level. Case
 					<@finderQPos />
 
 					if (orderByComparator != null) {
-						Object[] values = orderByComparator.getOrderByConditionValues(${entity.varName});
+						Object[] oValues = orderByComparator.getOrderByConditionValues(${entity.varName});
 
-						for (Object value : values) {
-							qPos.add(value);
+						for (Object oValue : oValues) {
+							qPos.add(oValue);
 						}
 					}
 
-					List<${entity.name}> list = q.list();
+					List<${entity.name}> qList = q.list();
 
-					if (list.size() == 2) {
-						return list.get(1);
+					if (qList.size() == 2) {
+						return qList.get(1);
 					}
 					else {
 						return null;

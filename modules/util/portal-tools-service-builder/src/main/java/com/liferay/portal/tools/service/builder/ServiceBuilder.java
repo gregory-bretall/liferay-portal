@@ -506,6 +506,8 @@ public class ServiceBuilder {
 			"bad_alias_names", _tplBadAliasNames);
 		_tplBadColumnNames = _getTplProperty(
 			"bad_column_names", _tplBadColumnNames);
+		_tplBadColumnVariables = _getTplProperty(
+			"bad_column_variables", _tplBadColumnVariables);
 		_tplBadTableNames = _getTplProperty(
 			"bad_table_names", _tplBadTableNames);
 		_tplBlobModel = _getTplProperty("blob_model", _tplBlobModel);
@@ -589,6 +591,7 @@ public class ServiceBuilder {
 			_badTableNames = _readLines(_tplBadTableNames);
 			_badAliasNames = _readLines(_tplBadAliasNames);
 			_badColumnNames = _readLines(_tplBadColumnNames);
+			_badColumnVariables = _readLines(_tplBadColumnVariables);
 
 			_commercialPlugin = _isCommercialPlugin(Paths.get("."));
 
@@ -5430,6 +5433,11 @@ public class ServiceBuilder {
 			if (Validator.isNull(columnDBName)) {
 				columnDBName = columnName;
 
+				if (_badColumnVariables.contains(columnName)) {
+					throw new IllegalArgumentException(
+						"Unable to use " + columnName + " for a column name");
+				}
+
 				if (_badColumnNames.contains(columnName)) {
 					columnDBName += StringPool.UNDERLINE;
 				}
@@ -6861,6 +6869,7 @@ public class ServiceBuilder {
 	private boolean _autoNamespaceTables;
 	private Set<String> _badAliasNames;
 	private Set<String> _badColumnNames;
+	private Set<String> _badColumnVariables;
 	private Set<String> _badTableNames;
 	private String _beanLocatorUtil;
 	private boolean _build;
@@ -6902,6 +6911,8 @@ public class ServiceBuilder {
 	private String _testOutputPath;
 	private String _tplBadAliasNames = _TPL_ROOT + "bad_alias_names.txt";
 	private String _tplBadColumnNames = _TPL_ROOT + "bad_column_names.txt";
+	private String _tplBadColumnVariables =
+		_TPL_ROOT + "bad_column_variables.txt";
 	private String _tplBadTableNames = _TPL_ROOT + "bad_table_names.txt";
 	private String _tplBaseUADAnonymizer =
 		_TPL_ROOT + "base_uad_anonymizer.ftl";
