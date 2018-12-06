@@ -604,10 +604,8 @@ private static String _getDateFormatPattern(Locale locale) {
 			}
 		}
 
-		dateFormatPattern = StringUtil.toLowerCase(dateFormatPattern);
-
 		int dayOrder = dateFormatPattern.indexOf('d');
-		int monthOrder = dateFormatPattern.indexOf('m');
+		int monthOrder = dateFormatPattern.indexOf('M');
 		int yearOrder = dateFormatPattern.indexOf('y');
 
 		if ((yearOrder < dayOrder) && (yearOrder < monthOrder)) {
