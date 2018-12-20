@@ -1363,9 +1363,13 @@ AUI.add(
 
 						var url = Liferay.PortletURL.createRenderURL(themeDisplay.getURLControlPanel());
 
+						var groupId = themeDisplay.getScopeGroupId();
+
 						var groupIdNode = A.one('#' + this.get('portletNamespace') + 'groupId');
 
-						var groupId = groupIdNode.getAttribute('value') || themeDisplay.getScopeGroupId();
+						if (groupIdNode && groupIdNode.getAttribute('value')) {
+							groupId = groupIdNode.getAttribute('value');
+						}
 
 						url.setParameter('eventName', 'selectContent');
 						url.setParameter('groupId', groupId);
@@ -1515,9 +1519,13 @@ AUI.add(
 
 							var privateLayout = !!(layoutValue && layoutValue.privateLayout);
 
+							var groupId = themeDisplay.getScopeGroupId();
+
 							var groupIdNode = A.one('#' + this.get('portletNamespace') + 'groupId');
 
-							var groupId = groupIdNode.getAttribute('value') || themeDisplay.getScopeGroupId();
+							if (groupIdNode && groupIdNode.getAttribute('value')) {
+								groupId = groupIdNode.getAttribute('value');
+							}
 
 							var layoutsRoot = {
 								groupId: groupId,
@@ -1941,9 +1949,13 @@ AUI.add(
 
 						var delta = instance.get('delta');
 
+						var groupId = themeDisplay.getScopeGroupId();
+
 						var groupIdNode = A.one('#' + this.get('portletNamespace') + 'groupId');
 
-						var groupId = groupIdNode.getAttribute('value') || themeDisplay.getScopeGroupId();
+						if (groupIdNode && groupIdNode.getAttribute('value')) {
+							groupId = groupIdNode.getAttribute('value');
+						}
 
 						var parentLayoutId = instance._currentParentLayoutId;
 
@@ -2182,9 +2194,13 @@ AUI.add(
 
 						var selectedLayout = instance.get('selectedLayout');
 
+						var groupId = themeDisplay.getScopeGroupId();
+
 						var groupIdNode = A.one('#' + this.get('portletNamespace') + 'groupId');
 
-						var groupId = groupIdNode.getAttribute('value') || themeDisplay.getScopeGroupId();
+						if (groupIdNode && groupIdNode.getAttribute('value')) {
+							groupId = groupIdNode.getAttribute('value');
+						}
 
 						if (selectedLayout && selectedLayout.layoutId) {
 							instance._requestSiblingLayouts(
