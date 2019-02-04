@@ -48,7 +48,7 @@ public class FolderFacetBuilder {
 	}
 
 	public void setMaxTerms(int maxTerms) {
-		_maxTerms = maxTerms;
+		_maxTerms = maxTerms + 1;
 	}
 
 	public void setPortletId(String portletId) {
