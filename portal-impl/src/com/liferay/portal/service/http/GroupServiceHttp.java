@@ -221,7 +221,9 @@ public class GroupServiceHttp {
 			}
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
-			_log.error(se, se);
+			if (!(se.getCause() instanceof java.net.ConnectException)) {
+				_log.error(se, se);
+			}
 
 			throw se;
 		}
@@ -425,7 +427,9 @@ public class GroupServiceHttp {
 			return (String)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
-			_log.error(se, se);
+			if (!(se.getCause() instanceof java.net.ConnectException)) {
+				_log.error(se, se);
+			}
 
 			throw se;
 		}
