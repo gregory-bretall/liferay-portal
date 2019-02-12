@@ -94,7 +94,7 @@ PanelCategory panelCategory = siteAdministrationPanelCategoryDisplayContext.getP
 				<%= HtmlUtil.escape(siteAdministrationPanelCategoryDisplayContext.getGroupName()) %>
 
 				<c:if test="<%= siteAdministrationPanelCategoryDisplayContext.isShowStagingInfo() %>">
-					<span class="site-sub-name"> - <liferay-ui:message key="<%= siteAdministrationPanelCategoryDisplayContext.getStagingLabel() %>" /></span>
+					<span class="site-sub-name"></span>
 				</c:if>
 			</span>
 
