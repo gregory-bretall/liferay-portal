@@ -43,13 +43,21 @@
 	int daysBetween = -1;
 
 	for (SocialActivityDescriptor activityDescriptor : activityDescriptors) {
+		boolean diffYear = false;
+
 		SocialActivityFeedEntry activityFeedEntry = activityDescriptor.interpret(selector, serviceContext);
 
 		if (activityFeedEntry == null) {
 			continue;
 		}
 
-		int curDaysBetween = DateUtil.getDaysBetween(new Date(activityDescriptor.getCreateDate()), now, timeZone);
+		Date activityDate = new Date(activityDescriptor.getCreateDate());
+
+		int curDaysBetween = DateUtil.getDaysBetween(activityDate, now, timeZone);
+
+		if (DateUtil.getYear(activityDate) < DateUtil.getYear(now)) {
+			diffYear = true;
+		}
 	%>
 
 		<c:if test="<%= curDaysBetween > daysBetween %>">
@@ -75,7 +83,7 @@
 						<c:when test="<%= curDaysBetween == 1 %>">
 							<liferay-ui:message key="yesterday" />
 						</c:when>
-						<c:when test="<%= curDaysBetween < 365 %>">
+						<c:when test="<%= !diffYear %>">
 							<%= dateFormatDate.format(activityDescriptor.getCreateDate()) %>
 						</c:when>
 						<c:otherwise>

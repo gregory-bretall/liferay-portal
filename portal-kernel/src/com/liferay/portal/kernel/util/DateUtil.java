@@ -148,6 +148,13 @@ public class DateUtil {
 		return daysBetween;
 	}
 
+	public static int getYear(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+
+		return cal.get(Calendar.YEAR);
+	}
+
 	public static DateFormat getISO8601Format() {
 		return DateFormatFactoryUtil.getSimpleDateFormat(ISO_8601_PATTERN);
 	}
