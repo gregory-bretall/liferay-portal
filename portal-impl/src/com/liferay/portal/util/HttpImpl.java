@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -466,6 +467,14 @@ public class HttpImpl implements Http {
 
 		if (sb == null) {
 			sb = new StringBuffer();
+		}
+
+		if (sb.toString().indexOf(CharPool.SEMICOLON) != -1) {
+			int firstPos = sb.toString().indexOf(CharPool.SEMICOLON);
+			int lastPos = sb.length();
+			String replacementString = HtmlUtil.escapeURL(sb.toString().substring(firstPos, lastPos));
+
+			sb.replace(firstPos, lastPos, replacementString);
 		}
 
 		if (request.getQueryString() != null) {
