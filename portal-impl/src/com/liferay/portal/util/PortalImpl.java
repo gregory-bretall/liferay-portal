@@ -1968,7 +1968,8 @@ public class PortalImpl implements Portal {
 			WebKeys.CURRENT_COMPLETE_URL);
 
 		if (currentCompleteURL == null) {
-			currentCompleteURL = HttpUtil.getCompleteURL(request);
+			currentCompleteURL = HtmlUtil.escapeURL(
+				HttpUtil.getCompleteURL(request));
 
 			request.setAttribute(
 				WebKeys.CURRENT_COMPLETE_URL, currentCompleteURL);
@@ -1999,6 +2000,8 @@ public class PortalImpl implements Portal {
 
 				currentURL = currentURL.substring(
 					currentURL.indexOf(CharPool.SLASH));
+
+				currentURL = HtmlUtil.escapeURL(currentURL);
 			}
 		}
 
