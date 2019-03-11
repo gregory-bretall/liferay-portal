@@ -157,5 +157,25 @@ if (Validator.isNotNull(title)) {
 		}
 	};
 
+	var target = document.body;
+
+	var config = {
+		childList: true,
+		subtree: true
+	};
+
+	function subscriber(mutations) {
+		mutations.forEach(
+			function(mutation) {
+				if (mutation.removedNodes[0] && mutation.removedNodes[0].id === "<portlet:namespace />selectAddMenuItem") {
+					window.location.replace(Liferay.currentURL);
+				}
+			});
+	}
+
+	var observer = new MutationObserver(subscriber);
+
+	observer.observe(target, config);
+
 	Liferay.on('destroyPortlet', clearJournalNavigationHandles);
 </aui:script>
