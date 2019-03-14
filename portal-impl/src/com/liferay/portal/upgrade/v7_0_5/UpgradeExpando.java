@@ -23,8 +23,8 @@ public class UpgradeExpando extends UpgradeProcess {
 
 	protected void deleteOrphanExpandoRow() throws Exception {
 		runSQL(
-			"delete from ExpandoRow where rowId_ not in (select rowId_ from " +
-				"ExpandoValue)");
+			"delete from ExpandoRow er where not exists (select null from " +
+				"ExpandoValue ev where ev.rowId_ = er.rowId_)");
 	}
 
 	@Override

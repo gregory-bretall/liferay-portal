@@ -49,9 +49,9 @@ public class UpgradeAsset extends UpgradeProcess {
 
 			sb.append("delete from AssetEntry where classNameId = ");
 			sb.append(classNameId);
-			sb.append(" and classPK not in (select fileVersionId from ");
-			sb.append("DLFileVersion) and classPK not in (select fileEntryId ");
-			sb.append("from DLFileEntry)");
+			sb.append(" and not exists (select null from DLFileVersion where ");
+			sb.append("fileVersionId = classPK) and not exists (select null ");
+			sb.append("from DLFileEntry where fileEntryId = classPK)");
 
 			runSQL(sb.toString());
 		}
