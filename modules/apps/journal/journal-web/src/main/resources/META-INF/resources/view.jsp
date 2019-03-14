@@ -167,7 +167,7 @@ if (Validator.isNotNull(title)) {
 	function subscriber(mutations) {
 		mutations.forEach(
 			function(mutation) {
-				if (mutation.removedNodes[0] && mutation.removedNodes[0].id === "_com_liferay_journal_web_portlet_JournalPortlet_selectAddMenuItem_iframe_") {
+				if (mutation.removedNodes[0] && mutation.removedNodes[0].id === "<portlet:namespace />selectAddMenuItem") {
 					window.location.replace(Liferay.currentURL);
 				}
 			});
