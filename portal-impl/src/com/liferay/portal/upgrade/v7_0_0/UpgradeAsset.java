@@ -16,6 +16,9 @@ package com.liferay.portal.upgrade.v7_0_0;
 
 import com.liferay.asset.kernel.model.AssetCategoryConstants;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBManagerUtil;
+import com.liferay.portal.kernel.dao.db.DBType;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -45,13 +48,26 @@ public class UpgradeAsset extends UpgradeProcess {
 			long classNameId = PortalUtil.getClassNameId(
 				DLFileEntryConstants.getClassName());
 
-			StringBundler sb = new StringBundler(5);
+			DB db = DBManagerUtil.getDB();
+
+			DBType dbType = db.getDBType();
+
+			StringBundler sb = new StringBundler(6);
 
 			sb.append("delete from AssetEntry where classNameId = ");
 			sb.append(classNameId);
-			sb.append(" and classPK not in (select fileVersionId from ");
-			sb.append("DLFileVersion) and classPK not in (select fileEntryId ");
-			sb.append("from DLFileEntry)");
+			sb.append(" and ");
+
+			if (dbType == DBType.POSTGRESQL) {
+				sb.append("not exists (select null from DLFileVersion where ");
+				sb.append("fileVersionId = classPK) and not exists (select ");
+				sb.append("null from DLFileEntry where fileEntryId = classPK)");
+			}
+			else {
+				sb.append("classPK not in (select fileVersionId from ");
+				sb.append("DLFileVersion) and classPK not in (select ");
+				sb.append("fileEntryId from DLFileEntry)");
+			}
 
 			runSQL(sb.toString());
 		}
