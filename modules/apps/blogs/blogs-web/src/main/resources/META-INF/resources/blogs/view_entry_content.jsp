@@ -107,7 +107,7 @@ BlogsEntry entry = (BlogsEntry)request.getAttribute("view_entry_content.jsp-entr
 				</div>
 			</div>
 
-			<div class="widget-content" id="<portlet:namespace /><%= entry.getEntryId() %>">
+			<div class="panel widget-content" id="<portlet:namespace /><%= entry.getEntryId() %>">
 
 				<%
 				String coverImageURL = entry.getCoverImageURL(themeDisplay);
