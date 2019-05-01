@@ -348,8 +348,6 @@ AUI.add(
 
 					var modalMask = false;
 
-					align.points = instance._getAlignPoints(cssClass);
-
 					menu.addClass('lfr-icon-menu-open');
 
 					if (Util.isPhone() || Util.isTablet()) {
