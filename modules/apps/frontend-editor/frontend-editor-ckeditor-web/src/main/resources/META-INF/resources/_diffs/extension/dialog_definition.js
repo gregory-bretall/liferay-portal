@@ -14,12 +14,14 @@ CKEDITOR.on(
 				if (window.top != window.self) {
 					var editorElement = this.getParentEditor().container;
 
-					var documentPosition = editorElement.getDocumentPosition();
+					var documentPosition = editorElement.getLast().getDocumentPosition();
+					documentPosition.width = editorElement.getSize('width', true);
+					documentPosition.height = editorElement.getSize('height', true);
 
 					var dialogSize = this.getSize();
 
-					var x = documentPosition.x + ((editorElement.getSize('width', true) - dialogSize.width) / 2 - window.scrollX);
-					var y = documentPosition.y + ((editorElement.getSize('height', true) - dialogSize.height) / 2 - window.scrollY);
+					var x = documentPosition.x + ((documentPosition.width - dialogSize.width) / 2 - window.scrollX);
+					var y = documentPosition.y + ((documentPosition.height - dialogSize.height) / 2 - window.scrollY);
 
 					this.move(x, y, false);
 				}
