@@ -603,11 +603,9 @@ class Layout extends Component {
 		);
 
 		for (var i = 0; i < nodeList.length; i++) {
-			nodeList[i].classList.remove(
-				'layout-column-item-drag-bottom',
-				'layout-column-item-drag-inside',
-				'layout-column-item-drag-top'
-			);
+			nodeList[i].classList.remove('layout-column-item-drag-bottom');
+			nodeList[i].classList.remove('layout-column-item-drag-inside');
+			nodeList[i].classList.remove('layout-column-item-drag-top');
 		}
 	}
 
