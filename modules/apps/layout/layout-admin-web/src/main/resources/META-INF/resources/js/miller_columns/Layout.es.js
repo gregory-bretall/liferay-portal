@@ -594,21 +594,21 @@ class Layout extends Component {
 	 * @review
 	 */
 	_resetDragDropClasses() {
-		this.element.querySelectorAll(
+		var nodeList = this.element.querySelectorAll(
 			`
 				.layout-column-item-drag-bottom,
 				.layout-column-item-drag-inside,
 				.layout-column-item-drag-top
 			`
-		).forEach(
-			item => {
-				item.classList.remove(
-					'layout-column-item-drag-bottom',
-					'layout-column-item-drag-inside',
-					'layout-column-item-drag-top'
-				);
-			}
 		);
+
+		for (var i = 0; i < nodeList.length; i++) {
+			nodeList[i].classList.remove(
+				'layout-column-item-drag-bottom',
+				'layout-column-item-drag-inside',
+				'layout-column-item-drag-top'
+			);
+		}
 	}
 
 	/**
